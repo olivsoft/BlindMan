@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">BlindMan</string>
+    <string name="text_placeholder" translatable="false">Welcome to BlindMan</string>
+    <string name="ad_unit_id" translatable="false">ca-app-pub-9610917927263970/5517310848</string>
+
+    <string name="menu_level">Level</string>
+    <string name="menu_size">Size</string>
+    <string name="menu_lives">Lives</string>
+    <string name="menu_colors">Colours</string>
+    <string name="menu_background">Background</string>
+    <string name="menu_settings">Vibration &amp; Sound</string>
+    <string name="menu_drag">Drag tolerance</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_about">About BlindMan</string>
+    <string name="menu_quit">Quit</string>
+
+    <string name="mess_start">Tap on the screen to start moving</string>
+    <string name="mess_show">Tap on the screen to show the obstacles</string>
+    <string name="mess_goal">Congratulations!</string>
+    <string name="mess_over">Game Over!</string>
+    <string name="mess_hits">Hits:</string>
+    
+    <string name="text_help">Tap on the screen to create an obstacle
+            pattern. Watch it carefully, remember it!
+        \n\nTap to hide the obstacles, and then move the player towards
+            the goal. Hit as little obstacles as possible. You can use
+            fling gestures to move the player or press and hold on the
+            screen to drag it.
+        \n\nFor showing the obstacles during the game double-tap on the
+            screen. Attention: Turning the device will start a new game.
+        \n\nEnjoy!
+    </string>
+    <string name="text_about">&#169; Oliver Fritz, 1982-2015 (olivsoft.ch)
+        \n\nIcon by signito (signito.ch)
+        \n\nThe Android robot is modified from work created and shared by Google and used 
+            according to terms described in the Creative Commons 3.0 Attribution License.
+    </string>
+    <string name="title_midi">Music Player</string>
+    <string name="text_midi">Sorry, but background music cannot be played on this device.</string>
+
+    <string-array name="items_level">
+        <item>Easy</item>
+        <item>Medium</item>
+        <item>Hard</item>
+    </string-array>
+    <string-array name="items_size">
+        <item>Coarse</item>
+        <item>Medium</item>
+        <item>Fine</item>
+    </string-array>
+    <string-array name="items_colors">
+        <item>Field</item>
+        <item>Player</item>
+        <item>Goal</item>
+        <item>Obstacles</item>
+        <item>Reset</item>
+    </string-array>
+    <string-array name="items_background">
+        <item>Off</item>
+        <item>Medium</item>
+        <item>Bright</item>
+    </string-array>
+    <string-array name="items_settings">
+        <item>Vibrations</item>
+        <item>Sounds</item>
+        <item>Music</item>
+    </string-array>
+    <string-array name="items_lives" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>9</item>
+        <item>12</item>
+        <item>&#8734;</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_level"
+        android:title="@string/menu_level"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_size"
+        android:title="@string/menu_size"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_lives"
+        android:title="@string/menu_lives"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_colors"
+        android:title="@string/menu_colors"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_background"
+        android:title="@string/menu_background"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_drag"
+        android:title="@string/menu_drag"
+        android:showAsAction="never"
+        android:visible="false" />
+    <item
+        android:id="@+id/menu_help"
+        android:title="@string/menu_help"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/menu_about"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_quit"
+        android:title="@string/menu_quit"
+        android:showAsAction="never" />
+
+</menu>

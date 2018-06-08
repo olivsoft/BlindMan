@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="menu_level">Difficulté</string>
+    <string name="menu_size">Grandeur</string>
+    <string name="menu_lives">Vies</string>
+    <string name="menu_colors">Couleurs</string>
+    <string name="menu_background">Arrière-plan</string>
+    <string name="menu_settings">Vibration &amp; Son</string>
+    <string name="menu_drag">Tolérance pour glisser</string>
+    <string name="menu_help">Aide</string>
+    <string name="menu_about">À propos de BlindMan</string>
+    <string name="menu_quit">Quitter</string>
+    
+    <string name="mess_start">Taper pour commencer</string>
+    <string name="mess_show">Taper pour montrer les obstacles</string>
+    <string name="mess_goal">Félicitations!</string>
+    <string name="mess_over">Jeu terminé!</string>
+    <string name="mess_hits">Touches:</string>
+    
+    <string name="text_help">Tapez sur l\'écran pour créer les obstacles.
+            Regardez-les bien, mémorisez-les!
+        \n\nTapez de nouveau pour cacher les obstacles. Puis, bougez le joueur vers le but et 
+            touchez aussi peu d\'obstacles que possible. Pour bouger le joueur vous pouvez utiliser
+            des gestes, ou vous appuyez et maintenez sur l\'écran pour le glisser.
+        \n\nPour montrer les obstacles pendant le jeu, tapez vite deux fois sur l\'écran.
+            Attention: Si vous tournez votre appareil un nouveau jeu va commencer.
+        \n\nRéjouissez-vous!
+    </string>
+    <string name="text_about">&#169; Oliver Fritz, 1982-2015 (olivsoft.ch)
+        \n\nIcon par signito (signito.ch)
+        \n\nLe robot Android (par Google) a été modifié en accord avec les
+            conditions de la Creative Commons 3.0 Attribution Licence.
+    </string>
+    <string name="title_midi">Musique</string>
+    <string name="text_midi">Malheureusement, il n\'est pas possible de jouer de la musique sur cet appareil.</string>
+    
+    <string-array name="items_level">
+        <item >Facile</item>
+        <item >Moyen</item>
+        <item >Difficile</item>
+    </string-array>
+    <string-array name="items_size">
+        <item >Grand</item>
+        <item >Moyen</item>
+        <item >Fin</item>
+    </string-array>
+    <string-array name="items_colors">
+        <item >Champs</item>
+        <item >Joueur</item>
+        <item >But</item>
+        <item >Obstacles</item>
+        <item >Remettre</item>
+    </string-array>
+    <string-array name="items_background">
+        <item >Vide</item>
+        <item >Moyen</item>
+        <item >Lumineux</item>
+    </string-array>
+    <string-array name="items_settings">
+        <item >Vibrations</item>
+        <item >Sons</item>
+        <item >Musique</item>
+    </string-array>
+    
+</resources>

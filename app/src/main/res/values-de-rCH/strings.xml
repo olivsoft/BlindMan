@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="menu_size" tools:ignore="Typos">Grösse</string>
+    <string name="mess_hits">Zusammenstösse:</string>
+    <string name="text_help">Tippen Sie auf den Schirm, um die Hindernisse anzuzeigen.
+            Sehen Sie sich das Spielfeld gut an und merken Sie es sich!
+        \n\nTippen Sie nochmals, um die Hindernisse zu verbergen. Beginnen Sie nun,
+            den Spieler Richtung Ziel zu bewegen. Berühren Sie dabei so wenig Hindernisse wie möglich.
+            Sie können den Spieler mit Gesten bewegen oder lang aufs Spielfeld drücken, um ihn zu ziehen.
+        \n\nUm die Hindernisse während dem Spiel anzuzeigen, tippen Sie zweimal rasch auf den Bildschirm.
+            Hinweis: Wenn Sie Ihr Gerät drehen, beginnt ein neues Spiel.
+        \n\nViel Spass!
+    </string>
+</resources>
