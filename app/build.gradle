@@ -24,4 +24,5 @@ android {
 
 dependencies {
     runtimeOnly 'com.google.android.gms:play-services-ads:15.0.1'
+    compileOnly 'com.android.support:support-annotations:27.1.1'
 }
