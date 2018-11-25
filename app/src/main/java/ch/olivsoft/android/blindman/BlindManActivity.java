@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,8 +8,6 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnErrorListener;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -167,8 +164,6 @@ public class BlindManActivity extends Activity implements OnErrorListener
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        boolean retval = super.onOptionsItemSelected(item);
-
         switch (item.getItemId()) {
             case R.id.menu_level:
                 doDialog(DIALOG_LEVEL);
@@ -211,7 +206,7 @@ public class BlindManActivity extends Activity implements OnErrorListener
                 break;
 
             default:
-                return retval;
+                return super.onOptionsItemSelected(item);
         }
         return true;
     }

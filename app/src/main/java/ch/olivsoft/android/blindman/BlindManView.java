@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -8,8 +7,6 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.shapes.Shape;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -529,10 +526,10 @@ public class BlindManView extends View
         invalidate(goal);
     }
 
-    @SuppressLint("NewApi")
+    //@SuppressLint("NewApi")
     public void onAnimationRepeat(Animation animation)
     {
-        if (gameState != GameState.IDLE && VERSION.SDK_INT >= VERSION_CODES.FROYO) {
+        if (gameState != GameState.IDLE) {
             // Someone was quick in tapping on the screen. According to
             // the documentation, onAnimationEnd is called after cancel,
             // so we don't have to do it. reset, however, must be

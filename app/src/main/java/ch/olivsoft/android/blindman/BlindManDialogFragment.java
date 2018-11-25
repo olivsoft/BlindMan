@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.os.Bundle;
  *
  * @author Oliver Fritz, OlivSoft
  */
-@SuppressLint("NewApi")
 public class BlindManDialogFragment extends DialogFragment
 {
     private static final String ID = "id";
