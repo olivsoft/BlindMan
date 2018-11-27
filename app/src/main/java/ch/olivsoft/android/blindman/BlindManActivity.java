@@ -404,8 +404,6 @@ public class BlindManActivity extends Activity implements OnErrorListener
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event)
     {
-        boolean retval = super.onKeyDown(keyCode, event);
-
         if (event.getAction() != KeyEvent.ACTION_DOWN)
             return false;
 
@@ -439,7 +437,7 @@ public class BlindManActivity extends Activity implements OnErrorListener
                 break;
 
             default:
-                return retval;
+                return super.onKeyDown(keyCode, event);
         }
 
         return true;
