@@ -20,8 +20,7 @@ import android.widget.TextView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
-public class BlindManActivity extends Activity implements OnErrorListener
-{
+public class BlindManActivity extends Activity implements OnErrorListener {
     // Constants
     private static final String PREF_LEVEL = "PREF_LEVEL";
     private static final String PREF_SIZE = "PREF_SIZE";
@@ -58,16 +57,14 @@ public class BlindManActivity extends Activity implements OnErrorListener
     // Music and volume control
     MusicPlayer musicPlayer;
 
-    void setVolumeControlStream()
-    {
+    void setVolumeControlStream() {
         setVolumeControlStream(musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled()
                 ? AudioManager.STREAM_MUSIC : AudioManager.USE_DEFAULT_STREAM_TYPE);
     }
 
     // Life cycle
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Set content view
@@ -79,13 +76,13 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
         // Initialize ad banner
         ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder()
-                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                 .addTestDevice("123C1D971287214B908BEAE01E695885")
-                 .addTestDevice("899B88182C1B0A44F6C9FE826FDDF1FE")
-                 .addTestDevice("475799E0A9494751AE4153C279821A83")
-                 .addTestDevice("B3539F1C6D561C077278F859328F71F6")
-                 .addTestDevice("98DDF74ECDE599B008274ED3B5C5DCA5")
-                 .addTestDevice("54A8240637407DBE6671033FDA2C7FCA").build());
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("123C1D971287214B908BEAE01E695885")
+                .addTestDevice("899B88182C1B0A44F6C9FE826FDDF1FE")
+                .addTestDevice("475799E0A9494751AE4153C279821A83")
+                .addTestDevice("B3539F1C6D561C077278F859328F71F6")
+                .addTestDevice("98DDF74ECDE599B008274ED3B5C5DCA5")
+                .addTestDevice("54A8240637407DBE6671033FDA2C7FCA").build());
 
         // Create the music player
         musicPlayer = new MusicPlayer(this, R.raw.nervous, true, this);
@@ -107,15 +104,13 @@ public class BlindManActivity extends Activity implements OnErrorListener
     }
 
     @Override
-    protected void onStart()
-    {
+    protected void onStart() {
         super.onStart();
         musicPlayer.start();
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         musicPlayer.pause();
 
@@ -136,8 +131,7 @@ public class BlindManActivity extends Activity implements OnErrorListener
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         musicPlayer.resume();
 
@@ -146,24 +140,21 @@ public class BlindManActivity extends Activity implements OnErrorListener
     }
 
     @Override
-    protected void onStop()
-    {
+    protected void onStop() {
         super.onStop();
         musicPlayer.stop();
     }
 
     // Menu
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menus, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_level:
                 doDialog(DIALOG_LEVEL);
@@ -212,14 +203,12 @@ public class BlindManActivity extends Activity implements OnErrorListener
     }
 
     // Call the selected dialog
-    protected void doDialog(int id)
-    {
+    protected void doDialog(int id) {
         BlindManDialogFragment.newInstance(id).show(getFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method.
-    Dialog createDialog(int id)
-    {
+    Dialog createDialog(int id) {
         // First we check for masks
         if (id >= DIALOG_MASK_COLORS) {
             int cid = id - DIALOG_MASK_COLORS;
@@ -227,11 +216,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            Dialog d = ColorPickerView.createDialog(this, cp.color, new OnActionDismissListener()
-            {
+            Dialog d = ColorPickerView.createDialog(this, cp.color, new OnActionDismissListener() {
                 @Override
-                public void onClick(int which)
-                {
+                public void onClick(int which) {
                     cp.color = which;
                     bmView.invalidate();
                 }
@@ -247,11 +234,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
         switch (id) {
             case DIALOG_LEVEL:
                 b.setTitle(R.string.menu_level);
-                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, new OnActionDismissListener()
-                {
+                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         bmView.newGame(which + 1);
                     }
                 });
@@ -259,11 +244,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
             case DIALOG_SIZE:
                 b.setTitle(R.string.menu_size);
-                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, new OnActionDismissListener()
-                {
+                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         bmView.initField(which + 1);
                         bmView.newGame(0);
                     }
@@ -282,11 +265,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
                         ArrayAdapter.createFromResource(this, R.array.items_lives, android.R.layout.select_dialog_singlechoice);
                 int liv = bmView.getLives();
                 int pos = (liv == 0) ? a.getCount() - 1 : a.getPosition(Integer.toString(liv));
-                b.setSingleChoiceItems(R.array.items_lives, pos, new OnActionDismissListener()
-                {
+                b.setSingleChoiceItems(R.array.items_lives, pos, new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         bmView.setLives((which == a.getCount() - 1) ? 0 : Integer.parseInt(a.getItem(which).toString()));
                     }
                 });
@@ -294,11 +275,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
             case DIALOG_COLORS:
                 b.setTitle(R.string.menu_colors);
-                b.setItems(R.array.items_colors, new OnActionDismissListener()
-                {
+                b.setItems(R.array.items_colors, new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         if (which == ColoredPart.values().length) {
                             // Reset colors
                             ColoredPart.resetAll();
@@ -313,11 +292,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
             case DIALOG_BACKGROUND:
                 b.setTitle(R.string.menu_background);
-                b.setSingleChoiceItems(R.array.items_background, bmView.background, new OnActionDismissListener()
-                {
+                b.setSingleChoiceItems(R.array.items_background, bmView.background, new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         bmView.background = which;
                         bmView.invalidate();
                     }
@@ -335,10 +312,8 @@ public class BlindManActivity extends Activity implements OnErrorListener
                 System.arraycopy(
                         new boolean[]{bmView.isHapticFeedbackEnabled(), bmView.isSoundEffectsEnabled(), musicPlayer.isMusicEnabled},
                         0, menuSts, 0, NUM_SETTINGS);
-                b.setMultiChoiceItems(menuIts, menuSts, new DialogInterface.OnMultiChoiceClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked)
-                    {
+                b.setMultiChoiceItems(menuIts, menuSts, new DialogInterface.OnMultiChoiceClickListener() {
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                         switch (which) {
                             case 0:
                                 bmView.setHapticFeedbackEnabled(isChecked);
@@ -364,11 +339,9 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
             case DIALOG_DRAG:
                 b.setTitle(R.string.menu_drag);
-                b.setSingleChoiceItems(DragDelay.getDelays(), bmView.getDragDelay(), new OnActionDismissListener()
-                {
+                b.setSingleChoiceItems(DragDelay.getDelays(), bmView.getDragDelay(), new OnActionDismissListener() {
                     @Override
-                    public void onClick(int which)
-                    {
+                    public void onClick(int which) {
                         bmView.setDragDelay(which);
                     }
                 });
@@ -402,8 +375,7 @@ public class BlindManActivity extends Activity implements OnErrorListener
 
     // Keys are treated here
     @Override
-    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event)
-    {
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         if (event.getAction() != KeyEvent.ACTION_DOWN)
             return false;
 
@@ -444,8 +416,7 @@ public class BlindManActivity extends Activity implements OnErrorListener
     }
 
     // MediaPlayer interface
-    public boolean onError(MediaPlayer mp, int what, int extra)
-    {
+    public boolean onError(MediaPlayer mp, int what, int extra) {
         doDialog(DIALOG_MIDI);
         return true;
     }

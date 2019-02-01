@@ -11,31 +11,26 @@ import android.os.CountDownTimer;
  *
  * @author Oliver Fritz, OlivSoft
  */
-public abstract class SimpleCountDownTimer extends CountDownTimer
-{
+public abstract class SimpleCountDownTimer extends CountDownTimer {
     private boolean timerRunning = false;
 
-    public SimpleCountDownTimer(long millis)
-    {
+    public SimpleCountDownTimer(long millis) {
         super(millis, millis);
     }
 
-    public final boolean isTimerRunning()
-    {
+    public final boolean isTimerRunning() {
         return timerRunning;
     }
 
     // Pseudo overrides
-    public synchronized final void startTimer()
-    {
+    public synchronized final void startTimer() {
         if (timerRunning)
             return;
         timerRunning = true;
         start();
     }
 
-    public synchronized final void cancelTimer()
-    {
+    public synchronized final void cancelTimer() {
         if (!timerRunning)
             return;
         timerRunning = false;
@@ -46,15 +41,13 @@ public abstract class SimpleCountDownTimer extends CountDownTimer
     public abstract void onTimerElapsed();
 
     @Override
-    public final void onFinish()
-    {
+    public final void onFinish() {
         timerRunning = false;
         onTimerElapsed();
     }
 
     // Get rid of this method
     @Override
-    public final void onTick(long millisUntilFinished)
-    {
+    public final void onTick(long millisUntilFinished) {
     }
 }

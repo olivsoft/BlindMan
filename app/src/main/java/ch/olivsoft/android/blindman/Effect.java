@@ -11,12 +11,11 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 
-public enum Effect
-{
-    GRAB (HapticFeedbackConstants.LONG_PRESS, -1,           false, false),
-    HIT  (HapticFeedbackConstants.VIRTUAL_KEY, R.raw.boing, false, false),
-    GOAL (-1,                                  R.raw.tada,  true, true),
-    OVER (HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false);
+public enum Effect {
+    GRAB(HapticFeedbackConstants.LONG_PRESS, -1, false, false),
+    HIT(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.boing, false, false),
+    GOAL(-1, R.raw.tada, true, true),
+    OVER(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false);
 
     private final static String LOG_TAG = Effect.class.getSimpleName();
     private static SoundPool soundPool = null;
@@ -28,16 +27,14 @@ public enum Effect
     private int soundID = -1;
     private Animation animation = null;
 
-    Effect(int hapticFeedback, int rawID, boolean hasAnimation, boolean hasAnimationListener)
-    {
+    Effect(int hapticFeedback, int rawID, boolean hasAnimation, boolean hasAnimationListener) {
         this.hapticFeedback = hapticFeedback;
         this.rawSoundID = rawID;
         this.hasAnimation = hasAnimation;
         this.hasAnimationListener = hasAnimationListener;
     }
 
-    public static void loadDynamicElements(Context context, AnimationListener animationListener)
-    {
+    public static void loadDynamicElements(Context context, AnimationListener animationListener) {
         // Create SoundPool and AlphaAnimation
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
             soundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 0);
@@ -65,8 +62,7 @@ public enum Effect
         }
     }
 
-    public void makeEffect(View view)
-    {
+    public void makeEffect(View view) {
         // These calls all return immediately, the effects are done
         // in parallel asynchronously. So, the order does not matter.
         if (animation != null)

@@ -23,8 +23,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class BlindManView extends View
-        implements AnimationListener, OnGestureListener, OnDoubleTapListener
-{
+        implements AnimationListener, OnGestureListener, OnDoubleTapListener {
     // Constants
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
@@ -32,10 +31,10 @@ public class BlindManView extends View
     private static final int DRAG_STARTER_DELAY = 200;
 
     // Game states
-    private enum GameState
-    {
+    private enum GameState {
         IDLE, SHOW, PLAY, HINT
     }
+
     private GameState gameState = GameState.IDLE;
 
     // Variables visible to main activity
@@ -79,13 +78,11 @@ public class BlindManView extends View
     private boolean swapColors = false;
 
     // Get and set only for non-trivial cases
-    int getLives()
-    {
+    int getLives() {
         return lives;
     }
 
-    void setLives(int newLives)
-    {
+    void setLives(int newLives) {
         lives = newLives;
         if (gameState == GameState.PLAY) {
             if (newLives > 0 && hits >= newLives)
@@ -95,13 +92,11 @@ public class BlindManView extends View
         }
     }
 
-    int getDragDelay()
-    {
+    int getDragDelay() {
         return dragDelay.ordinal();
     }
 
-    void setDragDelay(int newDelay)
-    {
+    void setDragDelay(int newDelay) {
         // Note: Here we (re-)create the instance of the DragHandler
         dragDelay = DragDelay.values()[newDelay];
         dragHandler = new DragHandler(dragDelay.millis);
@@ -109,8 +104,7 @@ public class BlindManView extends View
 
     // This constructor is called by the layout mechanism.
     // We use this to initialize a few long-living members.
-    public BlindManView(Context context, AttributeSet attrs)
-    {
+    public BlindManView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (this.isInEditMode())
             return;
@@ -121,8 +115,7 @@ public class BlindManView extends View
     // This is also called by the layout mechanism.
     // We use it to initialize all the size-dependent members.
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
-    {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (this.isInEditMode())
             return;
@@ -133,8 +126,7 @@ public class BlindManView extends View
         initField(0);
     }
 
-    private void initGlobals(Context context)
-    {
+    private void initGlobals(Context context) {
         // Some objects are completely independent of size and GameState
         random = new Random();
         drawingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -159,8 +151,7 @@ public class BlindManView extends View
         Effect.loadDynamicElements(context, this);
     }
 
-    void initField(int newSize)
-    {
+    void initField(int newSize) {
         // Check who called
         if (newSize > 0)
             size = newSize;
@@ -200,8 +191,7 @@ public class BlindManView extends View
         textView.setText(R.string.mess_show);
     }
 
-    void newGame(int newLevel)
-    {
+    void newGame(int newLevel) {
         // Check who called
         if (newLevel > 0)
             level = newLevel;
@@ -238,11 +228,9 @@ public class BlindManView extends View
             }
             // Now, the real obstacles are created
             for (int i : obsLine) {
-                obstacles.add(new Obstacle(o ? i : iLine, o ? iLine : i, oSize)
-                {
+                obstacles.add(new Obstacle(o ? i : iLine, o ? iLine : i, oSize) {
                     @Override
-                    protected void onDraw(Shape shape, Canvas canvas, Paint paint)
-                    {
+                    protected void onDraw(Shape shape, Canvas canvas, Paint paint) {
                         // This looks like the most concise and
                         // efficient way to set the obstacle color
                         paint.setColor(ColoredPart.OBSTACLE.color);
@@ -260,8 +248,7 @@ public class BlindManView extends View
 
     // Override this for dealing with offset properly
     @Override
-    public void invalidate(@NonNull Rect dirty)
-    {
+    public void invalidate(@NonNull Rect dirty) {
         // We need a copy of the dirty region because we move it
         dirtyRect.set(dirty);
         dirtyRect.offset(offWidth, offHeight);
@@ -270,8 +257,7 @@ public class BlindManView extends View
 
     // This is tuned for efficiency
     @Override
-    protected void onDraw(Canvas canvas)
-    {
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (this.isInEditMode())
             return;
@@ -318,8 +304,7 @@ public class BlindManView extends View
     }
 
     // Move logic
-    void makeMove(float x, float y)
-    {
+    void makeMove(float x, float y) {
         if (gameState != GameState.PLAY)
             return;
 
@@ -388,8 +373,7 @@ public class BlindManView extends View
 
     // Touch event handling
     @Override
-    public boolean onTouchEvent(@NonNull MotionEvent event)
-    {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         int eventAction = event.getAction();
 
         // First we consider the play state
@@ -448,8 +432,7 @@ public class BlindManView extends View
     // DoubleTap and Gesture interfaces. Only four methods
     // are effectively used, the five last ones are empty.
     public boolean onFling(MotionEvent e1, MotionEvent e2,
-                           float velocityX, float velocityY)
-    {
+                           float velocityX, float velocityY) {
         Log.d(LOG_TAG, "onFling called");
         if (gameState != GameState.PLAY)
             return false;
@@ -459,8 +442,7 @@ public class BlindManView extends View
         return true;
     }
 
-    public void onShowPress(MotionEvent e)
-    {
+    public void onShowPress(MotionEvent e) {
         Log.d(LOG_TAG, "onShowPress called");
         if (gameState != GameState.PLAY)
             return;
@@ -472,14 +454,12 @@ public class BlindManView extends View
         Effect.GRAB.makeEffect(this);
     }
 
-    public boolean onDown(MotionEvent e)
-    {
+    public boolean onDown(MotionEvent e) {
         // onDown must always return true in this usage pattern
         return true;
     }
 
-    public boolean onDoubleTap(MotionEvent e)
-    {
+    public boolean onDoubleTap(MotionEvent e) {
         Log.d(LOG_TAG, "onDoubleTap called");
 
         for (Obstacle o : obstacles)
@@ -493,42 +473,35 @@ public class BlindManView extends View
     }
 
     // Empty implementations
-    public boolean onSingleTapConfirmed(MotionEvent e)
-    {
+    public boolean onSingleTapConfirmed(MotionEvent e) {
         return false;
     }
 
-    public boolean onDoubleTapEvent(MotionEvent e)
-    {
+    public boolean onDoubleTapEvent(MotionEvent e) {
         return false;
     }
 
-    public boolean onSingleTapUp(MotionEvent e)
-    {
+    public boolean onSingleTapUp(MotionEvent e) {
         return false;
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                            float distanceX, float distanceY)
-    {
+                            float distanceX, float distanceY) {
         return false;
     }
 
-    public void onLongPress(MotionEvent e)
-    {
+    public void onLongPress(MotionEvent e) {
     }
 
     // Animation interface
-    public void onAnimationStart(Animation animation)
-    {
+    public void onAnimationStart(Animation animation) {
         // Start the cycle with inverted colors
         swapColors = true;
         invalidate(goal);
     }
 
     //@SuppressLint("NewApi")
-    public void onAnimationRepeat(Animation animation)
-    {
+    public void onAnimationRepeat(Animation animation) {
         if (gameState != GameState.IDLE) {
             // Someone was quick in tapping on the screen. According to
             // the documentation, onAnimationEnd is called after cancel,
@@ -542,23 +515,19 @@ public class BlindManView extends View
         invalidate(goal);
     }
 
-    public void onAnimationEnd(Animation animation)
-    {
+    public void onAnimationEnd(Animation animation) {
         // Restore colors and redraw again
         swapColors = false;
         invalidate(goal);
     }
 
     // Drag starting class
-    private class DragStarter extends SimpleCountDownTimer
-    {
-        public DragStarter(long millis)
-        {
+    private class DragStarter extends SimpleCountDownTimer {
+        public DragStarter(long millis) {
             super(millis);
         }
 
-        public boolean startTimer(MotionEvent e)
-        {
+        public boolean startTimer(MotionEvent e) {
             // This is a very well guarded routine: Make sure a motion in
             // non-dragging mode only starts the timer and later dragging
             // if a number of conditions are fulfilled.
@@ -574,8 +543,7 @@ public class BlindManView extends View
         }
 
         @Override
-        public void onTimerElapsed()
-        {
+        public void onTimerElapsed() {
             if (gameState == GameState.PLAY && !dragHandler.isDragModeActive) {
                 dragHandler.startDragMode();
                 Log.d(LOG_TAG, "Dragging started by DragStarter");
@@ -584,8 +552,7 @@ public class BlindManView extends View
     }
 
     // Drag handling class
-    private class DragHandler extends SimpleCountDownTimer
-    {
+    private class DragHandler extends SimpleCountDownTimer {
         // Public access for efficiency
         boolean isDragModeActive = false;
 
@@ -594,40 +561,34 @@ public class BlindManView extends View
         private float oldY;
 
         // Constructor
-        public DragHandler(long millis)
-        {
+        public DragHandler(long millis) {
             super(millis);
         }
 
         @Override
-        public void onTimerElapsed()
-        {
+        public void onTimerElapsed() {
             if (isDragModeActive)
                 stopDragMode();
         }
 
         // Public methods
-        void resetPosition(MotionEvent e)
-        {
+        void resetPosition(MotionEvent e) {
             oldX = e.getX();
             oldY = e.getY();
         }
 
-        void startDragMode()
-        {
+        void startDragMode() {
             isDragModeActive = true;
             invalidate(player);
         }
 
-        void stopDragMode()
-        {
+        void stopDragMode() {
             isDragModeActive = false;
             cancelTimer();
             invalidate(player);
         }
 
-        boolean doDrag(MotionEvent e)
-        {
+        boolean doDrag(MotionEvent e) {
             // Check if we have to cancel the timer and reset the drag position
             if (isTimerRunning()) {
                 cancelTimer();

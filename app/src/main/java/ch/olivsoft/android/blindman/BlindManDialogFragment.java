@@ -10,12 +10,10 @@ import android.os.Bundle;
  *
  * @author Oliver Fritz, OlivSoft
  */
-public class BlindManDialogFragment extends DialogFragment
-{
+public class BlindManDialogFragment extends DialogFragment {
     private static final String ID = "id";
 
-    public static BlindManDialogFragment newInstance(int id)
-    {
+    public static BlindManDialogFragment newInstance(int id) {
         BlindManDialogFragment f = new BlindManDialogFragment();
         Bundle args = new Bundle();
         args.putInt(ID, id);
@@ -24,8 +22,7 @@ public class BlindManDialogFragment extends DialogFragment
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState)
-    {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         BlindManActivity a = (BlindManActivity) getActivity();
         int id = getArguments().getInt(ID);

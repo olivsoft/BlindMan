@@ -57,8 +57,7 @@ import android.view.View;
  * @author Oliver Fritz, OlivSoft
  */
 @SuppressLint("ViewConstructor")
-public class ColorPickerView extends View
-{
+public class ColorPickerView extends View {
     // Constants
     private static final String LOG_TAG = ColorPickerView.class.getSimpleName();
     private static final float TWO_PI = 2 * (float) Math.PI;
@@ -89,8 +88,7 @@ public class ColorPickerView extends View
      * @param initialColor The initial color
      * @param listener     The callback listener
      */
-    public ColorPickerView(Dialog dialog, int initialColor, DialogInterface.OnClickListener listener)
-    {
+    public ColorPickerView(Dialog dialog, int initialColor, DialogInterface.OnClickListener listener) {
         super(dialog.getContext());
         this.dialog = dialog;
         this.listener = listener;
@@ -119,8 +117,7 @@ public class ColorPickerView extends View
      * @param listener     The callback listener
      * @return A dialog containing the color picker view
      */
-    public static Dialog createDialog(Context context, int initialColor, DialogInterface.OnClickListener listener)
-    {
+    public static Dialog createDialog(Context context, int initialColor, DialogInterface.OnClickListener listener) {
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. We see no other way of handling the OnClick(Dialog, int)
         // properly.
@@ -134,8 +131,7 @@ public class ColorPickerView extends View
     // are a bit careful and override a bit too much, i.e.,
     // OnSizeChanged would probably not be necessary.
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // We determine the screen size through a strange
         // and buggy function (see comments in source).
         // For a perfect look the size must be an even number.
@@ -146,8 +142,7 @@ public class ColorPickerView extends View
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
-    {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         int newRadius = Math.min(w, h) / 2;
         if (newRadius != fullRadius) {
@@ -166,8 +161,7 @@ public class ColorPickerView extends View
     }
 
     @Override
-    protected void onDraw(Canvas canvas)
-    {
+    protected void onDraw(Canvas canvas) {
         canvas.translate(fullRadius, fullRadius);
         canvas.drawCircle(0, 0, centerRadius, centerPaint);
         canvas.drawCircle(0, 0, fullRadius - centerRadius / 2, circlePaint);
@@ -195,14 +189,12 @@ public class ColorPickerView extends View
     }
 
     // Method for integer interpolation
-    private int interpolateLinear(int a, int b, float f)
-    {
+    private int interpolateLinear(int a, int b, float f) {
         return a + Math.round(f * (b - a));
     }
 
     // Method for interpolating an array
-    private int interpolateColorArray(int c[], float p)
-    {
+    private int interpolateColorArray(int c[], float p) {
         if (p <= 0)
             return c[0];
         if (p >= 1)
@@ -226,8 +218,7 @@ public class ColorPickerView extends View
     }
 
     @Override
-    public boolean onTouchEvent(@NonNull MotionEvent event)
-    {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         boolean retval = super.onTouchEvent(event);
 
         // Here we use double on purpose. This is not for precision

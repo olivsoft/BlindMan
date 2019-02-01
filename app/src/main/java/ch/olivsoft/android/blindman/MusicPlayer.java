@@ -18,8 +18,7 @@ import android.util.Log;
  *
  * @author Oliver Fritz, OlivSoft
  */
-public class MusicPlayer
-{
+public class MusicPlayer {
     // Constants
     private static final String LOG_TAG = MusicPlayer.class.getSimpleName();
 
@@ -34,8 +33,7 @@ public class MusicPlayer
     private int musicPosition = 0;
 
     // Constructor
-    MusicPlayer(Context context, int resid, boolean looping, OnErrorListener listener)
-    {
+    MusicPlayer(Context context, int resid, boolean looping, OnErrorListener listener) {
         this.context = context;
         this.resid = resid;
         this.looping = looping;
@@ -44,8 +42,7 @@ public class MusicPlayer
     }
 
     // Convenience method for error and exception handling
-    void stopOnError(String message, Exception e)
-    {
+    void stopOnError(String message, Exception e) {
         // Switch music off all together and inform user with the
         // already defined onError callback (with fairly useless arguments).
         // The exception may be null without causing problems.
@@ -57,8 +54,7 @@ public class MusicPlayer
     }
 
     // The magic toggle function
-    public void toggle(boolean enableMusic)
-    {
+    public void toggle(boolean enableMusic) {
         // We only do something if we really change something
         if (enableMusic == isMusicEnabled)
             return;
@@ -71,8 +67,7 @@ public class MusicPlayer
     }
 
     // Quasi-overridden and enriched methods for encapsulated MediaPlayer
-    public void start()
-    {
+    public void start() {
         // Check if we need to do something
         if (!isMusicEnabled)
             return;
@@ -85,10 +80,8 @@ public class MusicPlayer
             if (mp == null)
                 stopOnError("MediaPlayer.create returned null", null);
             mp.setLooping(looping);
-            mp.setOnErrorListener(new OnErrorListener()
-            {
-                public boolean onError(MediaPlayer mp, int what, int extra)
-                {
+            mp.setOnErrorListener(new OnErrorListener() {
+                public boolean onError(MediaPlayer mp, int what, int extra) {
                     stopOnError("MusicPlayer.onError called", null);
                     return true;
                 }
@@ -99,8 +92,7 @@ public class MusicPlayer
         }
     }
 
-    public void pause()
-    {
+    public void pause() {
         if (!isMusicEnabled || mp == null)
             return;
 
@@ -112,8 +104,7 @@ public class MusicPlayer
         }
     }
 
-    public void resume()
-    {
+    public void resume() {
         if (!isMusicEnabled || mp == null)
             return;
 
@@ -125,8 +116,7 @@ public class MusicPlayer
         }
     }
 
-    public void stop()
-    {
+    public void stop() {
         if (mp == null)
             return;
 
