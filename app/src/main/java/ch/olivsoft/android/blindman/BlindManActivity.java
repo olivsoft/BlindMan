@@ -15,7 +15,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -71,8 +70,8 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         setContentView(R.layout.main);
 
         // Store references of layout objects
-        bmView = (BlindManView) findViewById(R.id.blindman_view);
-        bmView.textView = (TextView) findViewById(R.id.text_view);
+        bmView = findViewById(R.id.blindman_view);
+        bmView.textView = findViewById(R.id.text_view);
 
         // Initialize ad banner
         ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder()

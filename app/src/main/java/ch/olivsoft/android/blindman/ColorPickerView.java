@@ -70,7 +70,7 @@ public class ColorPickerView extends View {
     // Variables
     private DialogInterface dialog;
     private DialogInterface.OnClickListener listener;
-    private Rect measureRect = null;
+    private Rect measureRect;
     private int fullRadius;
     private int centerRadius;
     private Paint circlePaint;
