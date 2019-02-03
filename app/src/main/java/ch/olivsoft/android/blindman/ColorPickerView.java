@@ -217,6 +217,7 @@ public class ColorPickerView extends View {
         return Color.argb(FULL_ALPHA, r, g, b);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent event) {
         boolean retval = super.onTouchEvent(event);

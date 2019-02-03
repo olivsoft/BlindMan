@@ -1,5 +1,6 @@
 package ch.olivsoft.android.blindman;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -372,6 +373,7 @@ public class BlindManView extends View
     }
 
     // Touch event handling
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent event) {
         int eventAction = event.getAction();
@@ -523,11 +525,11 @@ public class BlindManView extends View
 
     // Drag starting class
     private class DragStarter extends SimpleCountDownTimer {
-        public DragStarter(long millis) {
+        DragStarter(long millis) {
             super(millis);
         }
 
-        public boolean startTimer(MotionEvent e) {
+        boolean startTimer(MotionEvent e) {
             // This is a very well guarded routine: Make sure a motion in
             // non-dragging mode only starts the timer and later dragging
             // if a number of conditions are fulfilled.
@@ -561,7 +563,7 @@ public class BlindManView extends View
         private float oldY;
 
         // Constructor
-        public DragHandler(long millis) {
+        DragHandler(long millis) {
             super(millis);
         }
 
