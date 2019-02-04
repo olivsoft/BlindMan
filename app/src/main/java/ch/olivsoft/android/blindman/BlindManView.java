@@ -275,7 +275,7 @@ public class BlindManView extends View
         // Field border with reduced thickness
         drawingPaint.setAlpha(FULL_ALPHA);
         drawingPaint.setStyle(Style.STROKE);
-        drawingPaint.setStrokeWidth(oSize / 2);
+        drawingPaint.setStrokeWidth(oSize / 2f);
         canvas.drawRect(border, drawingPaint);
 
         // Goal fully filled
@@ -296,7 +296,7 @@ public class BlindManView extends View
         if (lives == 0)
             canvas.drawOval(drawingRect, drawingPaint);
         else
-            canvas.drawArc(drawingRect, 0, 360 - 360 / lives * hits, true, drawingPaint);
+            canvas.drawArc(drawingRect, 0, 360 - 360f / lives * hits, true, drawingPaint);
 
         // Obstacles have their own draw routine. The color
         // is set in the OnDraw override (see above).

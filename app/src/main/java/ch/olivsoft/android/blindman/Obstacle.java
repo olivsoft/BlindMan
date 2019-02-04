@@ -8,7 +8,7 @@ public class Obstacle extends PaintDrawable {
     private boolean hit = false;
     private boolean hidden = false;
 
-    public Obstacle(int ix, int iy, int size) {
+    Obstacle(int ix, int iy, int size) {
         // The allocated shape in a PaintDrawable is
         // a rectangle defined by its bounds
         this.setBounds(ix * size, iy * size, (ix + 1) * size, (iy + 1) * size);
@@ -22,29 +22,29 @@ public class Obstacle extends PaintDrawable {
     // "hidden" instead of "visible" as property of an obstacle.
     // We implement many simple methods in order to relieve
     // the caller from taking care of the obstacle's state logic.
-    public boolean isHit() {
+    boolean isHit() {
         return hit;
     }
 
-    public void setHit() {
+    void setHit() {
         hit = true;
         hidden = false;
     }
 
-    public void setHidden() {
+    void setHidden() {
         hidden = true;
     }
 
-    public void setVisibleIfHit() {
+    void setVisibleIfHit() {
         hidden = !hit;
     }
 
-    public void setVisible() {
+    void setVisible() {
         hidden = false;
     }
 
     // Convenience method for intersection check
-    public boolean intersects(Rect r) {
+    boolean intersects(Rect r) {
         return Rect.intersects(getBounds(), r);
     }
 

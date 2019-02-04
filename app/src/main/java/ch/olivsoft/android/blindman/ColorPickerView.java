@@ -154,8 +154,8 @@ public class ColorPickerView extends View {
         // This is the moment to set all size dependent properties
         centerRadius = fullRadius / 3;
         circlePaint.setStrokeWidth(centerRadius);
-        centerPaint.setStrokeWidth(fullRadius / 20);
-        textPaint.setTextSize(4 * (centerRadius / 5) - 1); // Odd!
+        centerPaint.setStrokeWidth(fullRadius / 20f);
+        textPaint.setTextSize(4 * (centerRadius / 5f) - 1); // Odd!
         textPaint.getTextBounds(OK, 0, OK.length(), measureRect);
         textHeight = measureRect.height();
     }
@@ -164,7 +164,7 @@ public class ColorPickerView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.translate(fullRadius, fullRadius);
         canvas.drawCircle(0, 0, centerRadius, centerPaint);
-        canvas.drawCircle(0, 0, fullRadius - centerRadius / 2, circlePaint);
+        canvas.drawCircle(0, 0, fullRadius - centerRadius / 2f, circlePaint);
 
         if (trackingCenter) {
             // This is just for adding a little ring around the OK button
@@ -185,7 +185,7 @@ public class ColorPickerView extends View {
         // the same value (not "anti") as the background.
         textPaint.setColor(~centerPaint.getColor());
         textPaint.setAlpha(centerPaint.getAlpha());
-        canvas.drawText(OK, 0, textHeight / 2, textPaint);
+        canvas.drawText(OK, 0, textHeight / 2f, textPaint);
     }
 
     // Method for integer interpolation

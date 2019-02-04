@@ -267,7 +267,12 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 b.setSingleChoiceItems(R.array.items_lives, pos, new OnActionDismissListener() {
                     @Override
                     public void onClick(int which) {
-                        bmView.setLives((which == a.getCount() - 1) ? 0 : Integer.parseInt(a.getItem(which).toString()));
+                        try {
+                            int p = Integer.parseInt(a.getItem(which).toString());
+                            bmView.setLives((which == a.getCount() - 1) ? 0 : p);
+                        } catch (Exception e) {
+                            // Do nothing
+                        }
                     }
                 });
                 break;

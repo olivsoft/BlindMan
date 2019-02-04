@@ -24,16 +24,16 @@ public class MusicPlayer {
 
     // Public variables
     public boolean isMusicEnabled = false;
-    OnErrorListener listener;
     // Private and inner class access variables
     private MediaPlayer mp;
     private Context context;
     private int resid;
+    private OnErrorListener listener;
     private boolean looping;
     private int musicPosition = 0;
 
     // Constructor
-    MusicPlayer(Context context, int resid, boolean looping, OnErrorListener listener) {
+    public MusicPlayer(Context context, int resid, boolean looping, OnErrorListener listener) {
         this.context = context;
         this.resid = resid;
         this.looping = looping;
@@ -42,7 +42,7 @@ public class MusicPlayer {
     }
 
     // Convenience method for error and exception handling
-    void stopOnError(String message, Exception e) {
+    private void stopOnError(String message, Exception e) {
         // Switch music off all together and inform user with the
         // already defined onError callback (with fairly useless arguments).
         // The exception may be null without causing problems.
