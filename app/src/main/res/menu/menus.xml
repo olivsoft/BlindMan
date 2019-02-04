@@ -22,8 +22,8 @@
         android:title="@string/menu_background"
         android:showAsAction="never" />
     <item
-        android:id="@+id/menu_settings"
-        android:title="@string/menu_settings"
+        android:id="@+id/menu_sound"
+        android:title="@string/menu_sound"
         android:showAsAction="never" />
     <item
         android:id="@+id/menu_drag"

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnErrorListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -36,15 +37,17 @@ public class BlindManActivity extends Activity implements OnErrorListener {
     private static final int DIALOG_LIVES = 3;
     private static final int DIALOG_COLORS = 4;
     private static final int DIALOG_BACKGROUND = 5;
-    private static final int DIALOG_SETTINGS = 6;
+    private static final int DIALOG_SOUND = 6;
     private static final int DIALOG_DRAG = 7;
     private static final int DIALOG_MIDI = 11;
     private static final int DIALOG_HELP = 21;
     private static final int DIALOG_ABOUT = 31;
     private static final int DIALOG_MASK_COLORS = 101;
 
-    // Currently, the choice of music is available in debug mode only...
-    private static final int NUM_SETTINGS = BuildConfig.DEBUG ? 3 : 2;
+    // Until now (2019-02), the choice of music was available in debug mode only...
+    // From now on, we offer this choice from a certain Android version on.
+    private static final int NUM_SETTINGS =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 3 : 2;
 
     // Tag for debug messages
     private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
@@ -175,8 +178,8 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 doDialog(DIALOG_BACKGROUND);
                 break;
 
-            case R.id.menu_settings:
-                doDialog(DIALOG_SETTINGS);
+            case R.id.menu_sound:
+                doDialog(DIALOG_SOUND);
                 break;
 
             case R.id.menu_drag:
@@ -308,8 +311,8 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 });
                 break;
 
-            case DIALOG_SETTINGS:
-                b.setTitle(R.string.menu_settings);
+            case DIALOG_SOUND:
+                b.setTitle(R.string.menu_sound);
                 // Special treatment for eventually using only a subset of the menu items
                 String[] menuIts = new String[NUM_SETTINGS];
                 boolean[] menuSts = new boolean[NUM_SETTINGS];
