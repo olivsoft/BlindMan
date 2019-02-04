@@ -267,8 +267,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 b.setSingleChoiceItems(R.array.items_lives, pos, new OnActionDismissListener() {
                     @Override
                     public void onClick(int which) {
-                        // First check for infinity (last choice)
-                        // then for all other possible choices
+                        // First check for infinity choice, then for all other possible choices
                         if (which == a.getCount() - 1)
                             bmView.setLives(0);
                         else
