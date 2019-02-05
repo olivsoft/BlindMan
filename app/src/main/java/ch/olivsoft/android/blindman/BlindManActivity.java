@@ -22,6 +22,7 @@ import com.google.android.gms.ads.AdView;
 
 public class BlindManActivity extends Activity implements OnErrorListener {
     // Constants
+    private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";
     private static final String PREF_SIZE = "PREF_SIZE";
     private static final String PREF_LIVES = "PREF_LIVES";
@@ -45,8 +46,8 @@ public class BlindManActivity extends Activity implements OnErrorListener {
     private static final int DIALOG_MASK_COLORS = 101;
 
     // Until now (2019-02), the choice of music was available in debug mode only...
-    // From now on, we offer this choice from a certain Android version on.
-    private static final int NUM_SETTINGS =
+    // From now on, we offer this choice for Android version on.
+    private static final int NUM_ITEMS_SOUND =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 3 : 2;
 
     // Tag for debug messages
@@ -79,11 +80,6 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         // Initialize ad banner
         ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("123C1D971287214B908BEAE01E695885")
-                .addTestDevice("899B88182C1B0A44F6C9FE826FDDF1FE")
-                .addTestDevice("475799E0A9494751AE4153C279821A83")
-                .addTestDevice("B3539F1C6D561C077278F859328F71F6")
-                .addTestDevice("98DDF74ECDE599B008274ED3B5C5DCA5")
                 .addTestDevice("54A8240637407DBE6671033FDA2C7FCA").build());
 
         // Create the music player
@@ -103,6 +99,10 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         for (ColoredPart c : ColoredPart.values())
             c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
         Log.d(LOG_TAG, "Preferences loaded");
+
+        // Show the help dialog at the very first execution
+        if (p.getBoolean(PREF_FIRST, true))
+            doDialog(DIALOG_HELP);
     }
 
     @Override
@@ -129,6 +129,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
             e.putInt(PREF_COL + c.name(), c.color);
+        e.putBoolean(PREF_FIRST, false);
         e.apply();
     }
 
@@ -275,9 +276,10 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                             bmView.setLives(0);
                         else
                             try {
-                                bmView.setLives(Integer.parseInt(a.getItem(which).toString()));
+                                bmView.setLives(Integer.parseInt(String.valueOf(a.getItem(which))));
                             } catch (Exception e) {
                                 // Do nothing
+                                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
                             }
                     }
                 });
@@ -314,14 +316,14 @@ public class BlindManActivity extends Activity implements OnErrorListener {
             case DIALOG_SOUND:
                 b.setTitle(R.string.menu_sound);
                 // Special treatment for eventually using only a subset of the menu items
-                String[] menuIts = new String[NUM_SETTINGS];
-                boolean[] menuSts = new boolean[NUM_SETTINGS];
+                String[] menuIts = new String[NUM_ITEMS_SOUND];
+                boolean[] menuSts = new boolean[NUM_ITEMS_SOUND];
                 System.arraycopy(
                         getResources().getStringArray(R.array.items_settings),
-                        0, menuIts, 0, NUM_SETTINGS);
+                        0, menuIts, 0, NUM_ITEMS_SOUND);
                 System.arraycopy(
                         new boolean[]{bmView.isHapticFeedbackEnabled(), bmView.isSoundEffectsEnabled(), musicPlayer.isMusicEnabled},
-                        0, menuSts, 0, NUM_SETTINGS);
+                        0, menuSts, 0, NUM_ITEMS_SOUND);
                 b.setMultiChoiceItems(menuIts, menuSts, new DialogInterface.OnMultiChoiceClickListener() {
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                         switch (which) {

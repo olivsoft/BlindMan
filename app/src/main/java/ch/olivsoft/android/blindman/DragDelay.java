@@ -1,5 +1,7 @@
 package ch.olivsoft.android.blindman;
 
+import java.util.Locale;
+
 /**
  * Just an enumeration for delay settings.
  */
@@ -19,9 +21,8 @@ public enum DragDelay {
     public static String[] getDelays() {
         int nv = values().length;
         String[] sd = new String[nv];
-        for (int i = 0; i < nv; i++) {
-            sd[i] = String.format("%.1f %s", 0.001f * values()[i].millis, "s");
-        }
+        for (int i = 0; i < nv; i++)
+            sd[i] = String.format(Locale.getDefault(), "%.1f %s", 0.001f * values()[i].millis, "s");
         return sd;
     }
 }

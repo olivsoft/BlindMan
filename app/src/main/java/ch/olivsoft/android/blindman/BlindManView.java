@@ -340,7 +340,7 @@ public class BlindManView extends View
                     if (lives == 0 || hits < lives) {
                         // Go on
                         textView.setText(R.string.mess_hits);
-                        textView.append(String.format(" %d", hits));
+                        textView.append(" " + String.valueOf(hits));
                         Effect.HIT.makeEffect(this);
                     } else {
                         // Game over
