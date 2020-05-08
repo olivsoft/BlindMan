@@ -11,7 +11,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.MotionEvent;
