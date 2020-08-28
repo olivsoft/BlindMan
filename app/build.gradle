@@ -3,13 +3,13 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
     }
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId "ch.olivsoft.android.blindman"
-        minSdkVersion 14
-        targetSdkVersion 28
-        versionCode 14
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 16
         versionName '1.1'
     }
     buildTypes {
@@ -23,6 +23,6 @@ android {
 }
 
 dependencies {
-    api 'com.google.android.gms:play-services-ads:18.3.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
+    api 'com.google.android.gms:play-services-ads:19.3.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
 }
