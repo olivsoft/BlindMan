@@ -31,3 +31,7 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
+
+# For mapping.txt file (see https://developer.android.com/studio/build/shrink-code#decode-stack-trace)
+-keepattributes LineNumberTable,SourceFile
+-renamesourcefileattribute SourceFile

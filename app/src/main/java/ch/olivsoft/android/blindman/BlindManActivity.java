@@ -1,5 +1,6 @@
 package ch.olivsoft.android.blindman;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,6 +20,11 @@ import android.widget.ArrayAdapter;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class BlindManActivity extends Activity implements OnErrorListener {
     // Constants
@@ -77,10 +83,12 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         bmView = findViewById(R.id.blindman_view);
         bmView.textView = findViewById(R.id.text_view);
 
-        // Initialize ad banner
-        ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("54A8240637407DBE6671033FDA2C7FCA").build());
+        // Initialize ad banner. Test device syntax has changed.
+        List<String> testDeviceIds = Arrays.asList("54A8240637407DBE6671033FDA2C7FCA");
+        RequestConfiguration configuration =
+                new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
+        MobileAds.setRequestConfiguration(configuration);
+        ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder().build());
 
         // Create the music player
         musicPlayer = new MusicPlayer(this, R.raw.nervous, true, this);
@@ -156,6 +164,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         return true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
