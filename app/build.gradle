@@ -6,12 +6,11 @@ android {
             storeFile file('C:\\Users\\cholfr1\\Documents\\Doc\\Privat\\Konten\\id\\olivsoft.jks')
         }
     }
-    compileSdkVersion 30
-    buildToolsVersion '30.0.2'
+    compileSdkVersion 31
     defaultConfig {
         applicationId "ch.olivsoft.android.blindman"
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 17
         versionName '1.2'
     }
@@ -26,6 +25,6 @@ android {
 }
 
 dependencies {
-    api 'com.google.android.gms:play-services-ads:20.4.0'
-    implementation 'androidx.annotation:annotation:1.2.0'
+    api 'com.google.android.gms:play-services-ads:20.5.0'
+    implementation 'androidx.annotation:annotation:1.3.0'
 }

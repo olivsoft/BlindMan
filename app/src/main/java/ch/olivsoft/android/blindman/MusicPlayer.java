@@ -26,10 +26,10 @@ public class MusicPlayer {
     public boolean isMusicEnabled = false;
     // Private and inner class access variables
     private MediaPlayer mp;
-    private Context context;
-    private int resid;
-    private OnErrorListener listener;
-    private boolean looping;
+    private final Context context;
+    private final int resid;
+    private final OnErrorListener listener;
+    private final boolean looping;
     private int musicPosition = 0;
 
     // Constructor
@@ -80,11 +80,9 @@ public class MusicPlayer {
             if (mp == null)
                 stopOnError("MediaPlayer.create returned null", null);
             mp.setLooping(looping);
-            mp.setOnErrorListener(new OnErrorListener() {
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    stopOnError("MusicPlayer.onError called", null);
-                    return true;
-                }
+            mp.setOnErrorListener((mp, what, extra) -> {
+                stopOnError("MusicPlayer.onError called", null);
+                return true;
             });
             mp.start();
         } catch (Exception e) {

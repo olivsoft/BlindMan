@@ -4,14 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -83,8 +84,10 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         bmView = findViewById(R.id.blindman_view);
         bmView.textView = findViewById(R.id.text_view);
 
-        // Initialize ad banner. Test device syntax has changed.
-        List<String> testDeviceIds = Arrays.asList("54A8240637407DBE6671033FDA2C7FCA");
+        // Initialize ad banner. Test device syntax has changed. Just added 2 old phones.
+        List<String> testDeviceIds = Arrays.asList(
+                "98DDF74ECDE599B008274ED3B5C5DCA5",
+                "54A8240637407DBE6671033FDA2C7FCA");
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
@@ -333,26 +336,24 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 System.arraycopy(
                         new boolean[]{bmView.isHapticFeedbackEnabled(), bmView.isSoundEffectsEnabled(), musicPlayer.isMusicEnabled},
                         0, menuSts, 0, NUM_ITEMS_SOUND);
-                b.setMultiChoiceItems(menuIts, menuSts, new DialogInterface.OnMultiChoiceClickListener() {
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        switch (which) {
-                            case 0:
-                                bmView.setHapticFeedbackEnabled(isChecked);
-                                break;
+                b.setMultiChoiceItems(menuIts, menuSts, (dialog, which, isChecked) -> {
+                    switch (which) {
+                        case 0:
+                            bmView.setHapticFeedbackEnabled(isChecked);
+                            break;
 
-                            case 1:
-                                bmView.setSoundEffectsEnabled(isChecked);
-                                setVolumeControlStream();
-                                break;
+                        case 1:
+                            bmView.setSoundEffectsEnabled(isChecked);
+                            setVolumeControlStream();
+                            break;
 
-                            case 2:
-                                musicPlayer.toggle(isChecked);
-                                setVolumeControlStream();
-                                break;
+                        case 2:
+                            musicPlayer.toggle(isChecked);
+                            setVolumeControlStream();
+                            break;
 
-                            default:
-                                dialog.dismiss();
-                        }
+                        default:
+                            dialog.dismiss();
                     }
                 });
                 b.setPositiveButton(android.R.string.ok, new OnActionDismissListener());

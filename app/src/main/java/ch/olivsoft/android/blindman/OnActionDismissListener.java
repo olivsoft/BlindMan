@@ -13,21 +13,20 @@ import android.view.KeyEvent;
  */
 public class OnActionDismissListener
         implements DialogInterface.OnClickListener, DialogInterface.OnKeyListener {
+
     // Override one of the following two methods depending on the required listener interface
     public void onClick(int which) {
     }
 
-    public boolean onKey(int keyCode, KeyEvent event) {
-        return true;
-    }
-
+    @Override
     public final void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
         this.onClick(which);
     }
 
+    @Override
     public final boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
         dialog.dismiss();
-        return this.onKey(keyCode, event);
+        return true;
     }
 }
