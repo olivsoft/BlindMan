@@ -68,14 +68,14 @@ public class ColorPickerView extends View {
             Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED};
 
     // Variables
-    private DialogInterface dialog;
-    private DialogInterface.OnClickListener listener;
-    private Rect measureRect;
+    private final DialogInterface dialog;
+    private final DialogInterface.OnClickListener listener;
+    private final Rect measureRect;
     private int fullRadius;
     private int centerRadius;
-    private Paint circlePaint;
-    private Paint centerPaint;
-    private TextPaint textPaint;
+    private final Paint circlePaint;
+    private final Paint centerPaint;
+    private final TextPaint textPaint;
     private int textHeight;
     private boolean trackingCenter = false;
     private boolean highlightCenter;
@@ -194,7 +194,8 @@ public class ColorPickerView extends View {
     }
 
     // Method for interpolating an array
-    private int interpolateColorArray(int c[], float p) {
+    @SuppressWarnings("SameParameterValue")
+    private int interpolateColorArray(int[] c, float p) {
         if (p <= 0)
             return c[0];
         if (p >= 1)
@@ -260,6 +261,7 @@ public class ColorPickerView extends View {
                 if (trackingCenter) {
                     trackingCenter = false;
                     if (inCenter) {
+                        dialog.dismiss();
                         // Pass selected color to listener
                         listener.onClick(dialog, centerPaint.getColor());
                     } else {

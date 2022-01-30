@@ -20,10 +20,10 @@ public enum Effect {
     private final static String LOG_TAG = Effect.class.getSimpleName();
     private static SoundPool soundPool = null;
 
-    private int hapticFeedback;
-    private int rawSoundID;
-    private boolean hasAnimation;
-    private boolean hasAnimationListener;
+    private final int hapticFeedback;
+    private final int rawSoundID;
+    private final boolean hasAnimation;
+    private final boolean hasAnimationListener;
     private int soundID = -1;
     private Animation animation = null;
 
