@@ -50,8 +50,7 @@ public class Obstacle extends PaintDrawable {
 
     @Override
     public void draw(Canvas canvas) {
-        if (hidden)
-            return;
-        super.draw(canvas);
+        if (!hidden)
+            super.draw(canvas);
     }
 }
