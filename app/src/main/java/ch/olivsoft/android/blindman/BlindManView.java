@@ -8,7 +8,6 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.shapes.Shape;
-import androidx.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -249,7 +248,7 @@ public class BlindManView extends View
 
     // Override this for dealing with offset properly
     @Override
-    public void invalidate(@NonNull Rect dirty) {
+    public void invalidate(Rect dirty) {
         // We need a copy of the dirty region because we move it
         dirtyRect.set(dirty);
         dirtyRect.offset(offWidth, offHeight);
@@ -375,7 +374,7 @@ public class BlindManView extends View
     // Touch event handling
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouchEvent(@NonNull MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         int eventAction = event.getAction();
 
         // First we consider the play state

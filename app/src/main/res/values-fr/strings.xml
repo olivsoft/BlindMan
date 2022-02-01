@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+    <string name="view_desc">Vue du jeu</string>
+
     <string name="menu_level">Difficulté</string>
     <string name="menu_size">Grandeur</string>
     <string name="menu_lives">Vies</string>
@@ -27,7 +28,7 @@
             Attention: Si vous tournez votre appareil un nouveau jeu va commencer.
         \n\nRéjouissez-vous!
     </string>
-    <string name="text_about">&#169; Oliver Fritz, 1982-2015 (olivsoft.ch)
+    <string name="text_about">&#169; Oliver Fritz (olivsoft.ch)
         \n\nIcon par signito (signito.ch)
         \n\nLe robot Android (par Google) a été modifié en accord avec les
             conditions de la Creative Commons 3.0 Attribution Licence.
@@ -55,12 +56,12 @@
     <string-array name="items_background">
         <item >Vide</item>
         <item >Moyen</item>
-        <item >Lumineux</item>
+        <item >Intense</item>
     </string-array>
     <string-array name="items_settings">
         <item >Vibrations</item>
         <item >Sons</item>
         <item >Musique</item>
     </string-array>
-    
+
 </resources>

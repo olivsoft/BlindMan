@@ -11,11 +11,11 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
-import androidx.annotation.NonNull;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 
 /**
  * <p>
@@ -27,7 +27,7 @@ import android.view.View;
  * <p>
  * Create a {@link Dialog} and pass a new instance of this class to the dialog's
  * {@link android.app.Activity#setContentView(View)} method. Alternatively, use the factory method
- * {@link ColorPickerView#createDialog(Context, int, DialogInterface.OnClickListener)}
+ * {@link ColorPickerView#createDialog(Context, String, int, DialogInterface.OnClickListener)}
  * doing all this for you. The picked color is passed back like in other dialogs via
  * a regular {@link DialogInterface.OnClickListener}.
  * </p>
@@ -61,6 +61,8 @@ public class ColorPickerView extends View {
     // Constants
     private static final String LOG_TAG = ColorPickerView.class.getSimpleName();
     private static final float TWO_PI = 2 * (float) Math.PI;
+    private static final int EDGE = 5;
+    private static final int MIN_R = 100;
     private static final String OK = "OK";
     private static final int FULL_ALPHA = 0xFF;
     private static final int[] COLORS = {
@@ -71,10 +73,8 @@ public class ColorPickerView extends View {
     private final DialogInterface dialog;
     private final DialogInterface.OnClickListener listener;
     private final Rect measureRect;
-    private int fullRadius;
-    private int centerRadius;
-    private final Paint circlePaint;
-    private final Paint centerPaint;
+    private int tX, tY, circleRadius, centerRadius;
+    private final Paint circlePaint, centerPaint;
     private final TextPaint textPaint;
     private int textHeight;
     private boolean trackingCenter = false;
@@ -92,6 +92,15 @@ public class ColorPickerView extends View {
         super(dialog.getContext());
         this.dialog = dialog;
         this.listener = listener;
+
+        // This may be helpful
+        this.setMinimumWidth(2 * MIN_R);
+        this.setMinimumHeight(2 * MIN_R);
+        int lp = FrameLayout.LayoutParams.WRAP_CONTENT;
+        this.setLayoutParams(new FrameLayout.LayoutParams(lp, lp));
+
+        // Content description
+        this.setContentDescription(getResources().getText(R.string.menu_colors));
 
         // Initialize all variables that are not size-dependent
         measureRect = new Rect();
@@ -113,48 +122,59 @@ public class ColorPickerView extends View {
      * {@link ColorPickerView} instance.
      *
      * @param context      A valid context
+     * @param dialogTitle  The title of the dialog
      * @param initialColor The initial color
      * @param listener     The callback listener
      * @return A dialog containing the color picker view
      */
-    public static Dialog createDialog(Context context, int initialColor, DialogInterface.OnClickListener listener) {
+    public static Dialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. We see no other way of handling the OnClick(Dialog, int)
         // properly.
         Dialog d = new Dialog(context);
+        d.setTitle(dialogTitle);
         d.setContentView(new ColorPickerView(d, initialColor, listener));
         return d;
     }
 
     // Measure, size and draw. Measure and size events can
     // come in surprising numbers and order. Therefore, we
-    // are a bit careful and override a bit too much, i.e.,
-    // OnSizeChanged would probably not be necessary.
+    // are a bit careful.
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // We determine the screen size through a strange
         // and buggy function (see comments in source).
         // For a perfect look the size must be an even number.
         getWindowVisibleDisplayFrame(measureRect);
-        fullRadius = Math.max(Math.min(measureRect.width(), measureRect.height()) / 4, 100);
-        Log.d(LOG_TAG, String.format("Measured radius: %d", fullRadius));
-        setMeasuredDimension(2 * fullRadius, 2 * fullRadius);
+        if (measureRect.isEmpty()) {
+            setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+        circleRadius = Math.max(Math.min(measureRect.width(), measureRect.height()) / 4, MIN_R);
+        Log.d(LOG_TAG, String.format("Measured radius: %d", circleRadius));
+        // Give a bit of space on the edges
+        int d = 2 * (circleRadius + EDGE);
+        setMeasuredDimension(d, d);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        int newRadius = Math.min(w, h) / 2;
-        if (newRadius != fullRadius) {
-            // This should really not happen
-            Log.w(LOG_TAG, String.format("Received different radius: ri = %d, rn = %d", fullRadius, newRadius));
-            fullRadius = newRadius;
+
+        // One more check if the desired size has been realized. If not
+        // we need to adjust the radius of the circle again. This should
+        // never be the case if the layout mechanism works correctly.
+        tX = w / 2;
+        tY = h / 2;
+        if (w < measureRect.width() || h < measureRect.height()) {
+            circleRadius = Math.min(tX, tY) - EDGE;
+            Log.w(LOG_TAG, String.format("Reduced radius: %d", circleRadius));
         }
 
-        // This is the moment to set all size dependent properties
-        centerRadius = fullRadius / 3;
+        // This is the moment to set all other size dependent properties
+        centerRadius = circleRadius / 3;
         circlePaint.setStrokeWidth(centerRadius);
-        centerPaint.setStrokeWidth(fullRadius / 20f);
+        centerPaint.setStrokeWidth(circleRadius / 20f);
         textPaint.setTextSize(4 * (centerRadius / 5f) - 1); // Odd!
         textPaint.getTextBounds(OK, 0, OK.length(), measureRect);
         textHeight = measureRect.height();
@@ -162,9 +182,9 @@ public class ColorPickerView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.translate(fullRadius, fullRadius);
+        canvas.translate(tX, tY);
         canvas.drawCircle(0, 0, centerRadius, centerPaint);
-        canvas.drawCircle(0, 0, fullRadius - centerRadius / 2f, circlePaint);
+        canvas.drawCircle(0, 0, circleRadius - centerRadius / 2f, circlePaint);
 
         if (trackingCenter) {
             // This is just for adding a little ring around the OK button
@@ -220,13 +240,13 @@ public class ColorPickerView extends View {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouchEvent(@NonNull MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         boolean retval = super.onTouchEvent(event);
 
         // Here we use double on purpose. This is not for precision
         // but because x and y are only used as Math function arguments.
-        double x = event.getX() - fullRadius;
-        double y = event.getY() - fullRadius;
+        double x = event.getX() - tX;
+        double y = event.getY() - tY;
         boolean inCenter = Math.hypot(x, y) <= centerRadius;
 
         switch (event.getAction()) {

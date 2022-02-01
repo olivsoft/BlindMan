@@ -3,6 +3,7 @@
     <string name="app_name" translatable="false">BlindMan</string>
     <string name="text_placeholder" translatable="false">Welcome to BlindMan</string>
     <string name="ad_unit_id" translatable="false">ca-app-pub-9610917927263970/5517310848</string>
+    <string name="view_desc">Game Field View</string>
 
     <string name="menu_level">Level</string>
     <string name="menu_size">Size</string>
@@ -31,7 +32,7 @@
             screen. Attention: Turning the device will start a new game.
         \n\nEnjoy!
     </string>
-    <string name="text_about">&#169; Oliver Fritz, 1982-2015 (olivsoft.ch)
+    <string name="text_about">&#169; Oliver Fritz (olivsoft.ch)
         \n\nIcon by signito (signito.ch)
         \n\nThe Android robot is modified from work created and shared by Google and used 
             according to terms described in the Creative Commons 3.0 Attribution License.
@@ -59,7 +60,7 @@
     <string-array name="items_background">
         <item>Off</item>
         <item>Medium</item>
-        <item>Bright</item>
+        <item>Full</item>
     </string-array>
     <string-array name="items_settings">
         <item>Vibrations</item>

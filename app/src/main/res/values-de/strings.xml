@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="view_desc">Spielfeldansicht</string>
 
     <string name="menu_level">Niveau</string>
     <string name="menu_size">Größe</string>
@@ -27,7 +28,7 @@
             Hinweis: Wenn Sie Ihr Gerät drehen, beginnt ein neues Spiel.
         \n\nViel Spaß!
     </string>
-    <string name="text_about">&#169; Oliver Fritz, 1982-2015 (olivsoft.ch)
+    <string name="text_about">&#169; Oliver Fritz (olivsoft.ch)
         \n\nIcon von signito (signito.ch)
         \n\nDer Android-Roboter (Original von Google) wurde im Einklang
             mit den Bedingungen der Creative Commons 3.0 Attribution Licence modifiziert.
@@ -56,7 +57,7 @@
     <string-array name="items_background">
         <item >Aus</item>
         <item >Mittel</item>
-        <item >Hell</item>
+        <item >Intensiv</item>
     </string-array>
     <string-array name="items_settings">
         <item >Vibrationen</item>

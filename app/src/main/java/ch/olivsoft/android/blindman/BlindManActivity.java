@@ -11,8 +11,6 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -226,20 +224,17 @@ public class BlindManActivity extends Activity implements OnErrorListener {
     Dialog createDialog(int id) {
         // First we check for masks
         if (id >= DIALOG_MASK_COLORS) {
-            int cid = id - DIALOG_MASK_COLORS;
-            final ColoredPart cp = ColoredPart.values()[cid];
+            int icp = id - DIALOG_MASK_COLORS;
+            String title = getResources().getStringArray(R.array.items_colors)[icp];
+            ColoredPart cp = ColoredPart.values()[icp];
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            Dialog d = ColorPickerView.createDialog(this, cp.color, new OnActionDismissListener() {
-                @Override
-                public void onClick(int which) {
-                    cp.color = which;
-                    bmView.invalidate();
-                }
+            return ColorPickerView.createDialog(this, title, cp.color, (dialog, which) -> {
+                cp.color = which;
+                dialog.dismiss();
+                bmView.invalidate();
             });
-            d.setTitle(getResources().getStringArray(R.array.items_colors)[cid]);
-            return d;
         }
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
@@ -249,7 +244,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         switch (id) {
             case DIALOG_LEVEL:
                 b.setTitle(R.string.menu_level);
-                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, new OnActionDismissListener() {
+                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         bmView.newGame(which + 1);
@@ -259,7 +254,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
             case DIALOG_SIZE:
                 b.setTitle(R.string.menu_size);
-                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, new OnActionDismissListener() {
+                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         bmView.initField(which + 1);
@@ -280,7 +275,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                         ArrayAdapter.createFromResource(this, R.array.items_lives, android.R.layout.select_dialog_singlechoice);
                 int liv = bmView.getLives();
                 int pos = (liv == 0) ? a.getCount() - 1 : a.getPosition(Integer.toString(liv));
-                b.setSingleChoiceItems(R.array.items_lives, pos, new OnActionDismissListener() {
+                b.setSingleChoiceItems(R.array.items_lives, pos, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         // First check for infinity choice, then for all other possible choices
@@ -299,7 +294,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
             case DIALOG_COLORS:
                 b.setTitle(R.string.menu_colors);
-                b.setItems(R.array.items_colors, new OnActionDismissListener() {
+                b.setItems(R.array.items_colors, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         if (which == ColoredPart.values().length) {
@@ -316,7 +311,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
             case DIALOG_BACKGROUND:
                 b.setTitle(R.string.menu_background);
-                b.setSingleChoiceItems(R.array.items_background, bmView.background, new OnActionDismissListener() {
+                b.setSingleChoiceItems(R.array.items_background, bmView.background, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         bmView.background = which;
@@ -356,12 +351,12 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                             dialog.dismiss();
                     }
                 });
-                b.setPositiveButton(android.R.string.ok, new OnActionDismissListener());
+                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
                 break;
 
             case DIALOG_DRAG:
                 b.setTitle(R.string.menu_drag);
-                b.setSingleChoiceItems(DragDelay.getDelays(), bmView.getDragDelay(), new OnActionDismissListener() {
+                b.setSingleChoiceItems(DragDelay.getDelays(), bmView.getDragDelay(), new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
                         bmView.setDragDelay(which);
@@ -372,23 +367,23 @@ public class BlindManActivity extends Activity implements OnErrorListener {
             case DIALOG_MIDI:
                 b.setTitle(R.string.title_midi);
                 b.setMessage(R.string.text_midi);
-                b.setOnKeyListener(new OnActionDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnActionDismissListener());
+                b.setOnKeyListener(new OnKeyDismissListener());
+                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
                 break;
 
             case DIALOG_ABOUT:
                 b.setTitle(R.string.menu_about);
                 b.setMessage(R.string.text_about);
-                b.setOnKeyListener(new OnActionDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnActionDismissListener());
+                b.setOnKeyListener(new OnKeyDismissListener());
+                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
                 break;
 
             case DIALOG_HELP:
             default:
                 b.setTitle(R.string.menu_help);
                 b.setMessage(R.string.text_help);
-                b.setOnKeyListener(new OnActionDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnActionDismissListener());
+                b.setOnKeyListener(new OnKeyDismissListener());
+                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
                 break;
         }
 
@@ -397,7 +392,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
     // Keys are treated here
     @Override
-    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (event.getAction() != KeyEvent.ACTION_DOWN)
             return false;
 
