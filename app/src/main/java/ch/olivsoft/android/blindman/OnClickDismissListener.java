@@ -14,11 +14,13 @@ public class OnClickDismissListener implements DialogInterface.OnClickListener {
 
     // Override this method if desired
     public void onClick(int which) {
+        return;
     }
 
     @Override
     public final void onClick(DialogInterface dialog, int which) {
-        dialog.dismiss();
+        if (dialog != null)
+            dialog.dismiss();
         this.onClick(which);
     }
 }

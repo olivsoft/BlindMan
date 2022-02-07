@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,38 +11,32 @@ import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
 import android.text.TextPaint;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.FrameLayout;
 
 /**
- * <p>
  * {@link View} for a color selection dialog.
- * </p>
- * <p/>
- * <h4>Usage:</h4>
- * <p/>
- * <p>
- * Create a {@link Dialog} and pass a new instance of this class to the dialog's
- * {@link android.app.Activity#setContentView(View)} method. Alternatively, use the factory method
+ * <br/>
+ * <br/>
+ * <b>Usage:</b>
+ * <br/>
+ * Use the factory method
  * {@link ColorPickerView#createDialog(Context, String, int, DialogInterface.OnClickListener)}
- * doing all this for you. The picked color is passed back like in other dialogs via
- * a regular {@link DialogInterface.OnClickListener}.
- * </p>
- * <p>
- * This view is not suitable for layout tools. Therefore, the standard
- * constructors are not implemented.
- * </p>
- * <p/>
- * <h4>Notice:</h4>
- * <p/>
- * <p>
+ * doing all the work for you. The picked color (int) is passed back like in other dialogs via
+ * a regular {@link DialogInterface.OnClickListener}. Alternatively, create a
+ * {@link Dialog} and pass this view (e.g., from a layout resource) to the dialog's
+ * {@link android.app.Activity#setContentView(View)} method. You have to call the
+ * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)}
+ * after that to complete the initialization.
+ * <br/>
+ * <br/>
+ * <b>Notice:</b>
+ * <br/>
  * This code has been slightly adapted from an original example according to <a
  * href="http://www.apache.org/licenses/LICENSE-2.0">this license</a>. Apart
  * from reordering, comments and renaming, the major changes are as follows:
- * </p>
- * <p/>
  * <ul>
  * <li>The listener interface has been replaced by an available one from the
  * platform's {@link DialogInterface}.
@@ -56,11 +49,9 @@ import android.widget.FrameLayout;
  *
  * @author Oliver Fritz, OlivSoft
  */
-@SuppressLint("ViewConstructor")
 public class ColorPickerView extends View {
     // Constants
     private static final String LOG_TAG = ColorPickerView.class.getSimpleName();
-    private static final float TWO_PI = 2 * (float) Math.PI;
     private static final int EDGE = 5;
     private static final int MIN_R = 100;
     private static final String OK = "OK";
@@ -70,18 +61,26 @@ public class ColorPickerView extends View {
             Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED};
 
     // Variables
-    private final DialogInterface dialog;
-    private final DialogInterface.OnClickListener listener;
-    private final Rect measureRect;
+    private DialogInterface dialog;
+    private DialogInterface.OnClickListener listener;
+    private Rect measureRect;
     private int tX, tY, circleRadius, centerRadius;
-    private final Paint circlePaint, centerPaint;
-    private final TextPaint textPaint;
+    private Paint circlePaint, centerPaint;
+    private TextPaint textPaint;
     private int textHeight;
     private boolean trackingCenter = false;
     private boolean highlightCenter;
 
     /**
-     * Use this constructor to create a {@link ColorPickerView} that can be
+     * Formal constructor for layout mechanism if used that way. Do not forget to call
+     * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)} afterwards.
+     */
+    public ColorPickerView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    /**
+     * Use this constructor to initialize the {@link ColorPickerView} that can be
      * embedded into a {@link Dialog}.
      *
      * @param dialog       The embedding dialog
@@ -90,17 +89,27 @@ public class ColorPickerView extends View {
      */
     public ColorPickerView(Dialog dialog, int initialColor, DialogInterface.OnClickListener listener) {
         super(dialog.getContext());
+        this.setColorDialogParameters(dialog, initialColor, listener);
+    }
+
+    /**
+     * Use this method to initialize the {@link ColorPickerView} embedded into
+     * a {@link Dialog} if it has been created through a layout mechanism.
+     *
+     * @param dialog       The embedding dialog
+     * @param initialColor The initial color
+     * @param listener     The callback listener
+     */
+    public void setColorDialogParameters(DialogInterface dialog, int initialColor, DialogInterface.OnClickListener listener) {
         this.dialog = dialog;
         this.listener = listener;
 
         // This may be helpful
         this.setMinimumWidth(2 * MIN_R);
         this.setMinimumHeight(2 * MIN_R);
-        int lp = FrameLayout.LayoutParams.WRAP_CONTENT;
-        this.setLayoutParams(new FrameLayout.LayoutParams(lp, lp));
 
         // Content description
-        this.setContentDescription(getResources().getText(R.string.menu_colors));
+        this.setContentDescription(LOG_TAG);
 
         // Initialize all variables that are not size-dependent
         measureRect = new Rect();
@@ -129,12 +138,54 @@ public class ColorPickerView extends View {
      */
     public static Dialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
         // This hides the somewhat confusing double use of the dialog reference
-        // from the caller. We see no other way of handling the OnClick(Dialog, int)
+        // from the caller. It is the best way of handling OnClick(Dialog, int)
         // properly.
         Dialog d = new Dialog(context);
         d.setTitle(dialogTitle);
         d.setContentView(new ColorPickerView(d, initialColor, listener));
         return d;
+    }
+
+    /**
+     * Linear interpolation for integer values
+     *
+     * @param a Lower bound of range to interpolate
+     * @param b Upper bound of range to interpolate
+     * @param f Interpolator (0...1)
+     * @return A linear interpolation between a and b according to f = 0...1
+     */
+    public static int interpolateLinear(int a, int b, float f) {
+        return a + Math.round(f * (b - a));
+    }
+
+    /**
+     * Method for interpolating a color array
+     *
+     * @param c     Color array
+     * @param p     Interpolator
+     * @param alpha Alpha value of resulting color
+     * @return Color, interpolated from c according to p = 0...1
+     */
+    public static int interpolateColorArray(int[] c, float p, int alpha) {
+        if (p <= 0)
+            return c[0];
+        if (p >= 1)
+            return c[c.length - 1];
+
+        // Stretch to array length and extract integer (i) and fractional (f)
+        // part
+        float f = p * (c.length - 1);
+        int i = (int) f;
+        f -= i;
+
+        // Interpolate color. We don't  interpolate alpha.
+        int ca = c[i];
+        int cb = c[i + 1];
+        int r = interpolateLinear(Color.red(ca), Color.red(cb), f);
+        int g = interpolateLinear(Color.green(ca), Color.green(cb), f);
+        int b = interpolateLinear(Color.blue(ca), Color.blue(cb), f);
+
+        return Color.argb(alpha, r, g, b);
     }
 
     // Measure, size and draw. Measure and size events can
@@ -161,12 +212,16 @@ public class ColorPickerView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        // One more check if the desired size has been realized. If not
-        // we need to adjust the radius of the circle again. This should
-        // never be the case if the layout mechanism works correctly.
+        // Determine the translation for onDraw.
+        // No matter how big the view is in the end, we
+        // want to paint in the center of it.
         tX = w / 2;
         tY = h / 2;
-        if (w < measureRect.width() || h < measureRect.height()) {
+
+        // One more check if the size requested in onMeasure has been realized.
+        // If not we need to adjust the radius of the circle again. This should
+        // never be the case if the layout mechanism works correctly.
+        if (circleRadius + EDGE > Math.min(tX, tY)) {
             circleRadius = Math.min(tX, tY) - EDGE;
             Log.w(LOG_TAG, String.format("Reduced radius: %d", circleRadius));
         }
@@ -208,37 +263,6 @@ public class ColorPickerView extends View {
         canvas.drawText(OK, 0, textHeight / 2f, textPaint);
     }
 
-    // Method for integer interpolation
-    private int interpolateLinear(int a, int b, float f) {
-        return a + Math.round(f * (b - a));
-    }
-
-    // Method for interpolating an array
-    @SuppressWarnings("SameParameterValue")
-    private int interpolateColorArray(int[] c, float p) {
-        if (p <= 0)
-            return c[0];
-        if (p >= 1)
-            return c[c.length - 1];
-
-        // Stretch to array length and extract integer (i) and fractional (f)
-        // part
-        float f = p * (c.length - 1);
-        int i = (int) f;
-        f -= i;
-
-        // Interpolate color. We don't need to interpolate alpha,
-        // all elements of the array are at its maximum value.
-        int ca = c[i];
-        int cb = c[i + 1];
-        int r = interpolateLinear(Color.red(ca), Color.red(cb), f);
-        int g = interpolateLinear(Color.green(ca), Color.green(cb), f);
-        int b = interpolateLinear(Color.blue(ca), Color.blue(cb), f);
-
-        return Color.argb(FULL_ALPHA, r, g, b);
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean retval = super.onTouchEvent(event);
@@ -268,11 +292,11 @@ public class ColorPickerView extends View {
                     // The "angle" (x, y) is projected to (-0.5..0.5],
                     // then (-0.5..0) is moved to (0.5..1).
                     // So, "p" interpolates the full circle.
-                    float p = (float) Math.atan2(y, x) / TWO_PI;
+                    float p = (float) (Math.atan2(y, x) / 2 / Math.PI);
                     if (p < 0) {
                         p += 1;
                     }
-                    centerPaint.setColor(interpolateColorArray(COLORS, p));
+                    centerPaint.setColor(interpolateColorArray(COLORS, p, FULL_ALPHA));
                     invalidate();
                 }
                 break;
@@ -281,13 +305,13 @@ public class ColorPickerView extends View {
                 if (trackingCenter) {
                     trackingCenter = false;
                     if (inCenter) {
-                        dialog.dismiss();
                         // Pass selected color to listener
                         listener.onClick(dialog, centerPaint.getColor());
-                    } else {
+                        // For completeness, call the Views click method
+                        performClick();
+                    } else
                         // No selection yet
                         invalidate();
-                    }
                 }
                 break;
 
@@ -296,5 +320,10 @@ public class ColorPickerView extends View {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 }

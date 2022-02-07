@@ -3,7 +3,9 @@
     <string name="app_name" translatable="false">BlindMan</string>
     <string name="text_placeholder" translatable="false">Welcome to BlindMan</string>
     <string name="ad_unit_id" translatable="false">ca-app-pub-9610917927263970/5517310848</string>
-    <string name="view_desc">Game Field View</string>
+    <string name="desc_view">Game Field View</string>
+    <string name="desc_text">Info</string>
+    <string name="desc_ad">Advertisement</string>
 
     <string name="menu_level">Level</string>
     <string name="menu_size">Size</string>
@@ -12,6 +14,7 @@
     <string name="menu_background">Background</string>
     <string name="menu_sound">Vibration &amp; Sound</string>
     <string name="menu_drag">Drag tolerance</string>
+    <string name="menu_center">Dialog position</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About BlindMan</string>
     <string name="menu_quit">Quit</string>
@@ -66,6 +69,10 @@
         <item>Vibrations</item>
         <item>Sounds</item>
         <item>Music</item>
+    </string-array>
+    <string-array name="items_center">
+        <item>Centered</item>
+        <item>Default</item>
     </string-array>
     <string-array name="items_lives" translatable="false">
         <item>1</item>

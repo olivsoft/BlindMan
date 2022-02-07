@@ -3,44 +3,49 @@
 
     <item
         android:id="@+id/menu_level"
-        android:title="@string/menu_level"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_level" />
     <item
         android:id="@+id/menu_size"
-        android:title="@string/menu_size"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_size" />
     <item
         android:id="@+id/menu_lives"
-        android:title="@string/menu_lives"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_lives" />
     <item
         android:id="@+id/menu_colors"
-        android:title="@string/menu_colors"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_colors" />
     <item
         android:id="@+id/menu_background"
-        android:title="@string/menu_background"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/menu_background" />
     <item
         android:id="@+id/menu_sound"
-        android:title="@string/menu_sound"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/menu_sound" />
     <item
         android:id="@+id/menu_drag"
-        android:title="@string/menu_drag"
         android:showAsAction="never"
+        android:title="@string/menu_drag"
         android:visible="false" />
     <item
+        android:id="@+id/menu_center"
+        android:showAsAction="never"
+        android:title="@string/menu_center"
+        android:visible="false"/>
+    <item
         android:id="@+id/menu_help"
-        android:title="@string/menu_help"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/menu_help" />
     <item
         android:id="@+id/menu_about"
-        android:title="@string/menu_about"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/menu_about" />
     <item
         android:id="@+id/menu_quit"
-        android:title="@string/menu_quit"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/menu_quit" />
 
 </menu>

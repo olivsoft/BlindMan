@@ -10,7 +10,6 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Build;
 import android.os.Bundle;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -33,6 +32,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
     private static final String PREF_LIVES = "PREF_LIVES";
     private static final String PREF_HAPTICS = "PREF_HAPTICS";
     private static final String PREF_SOUND = "PREF_SOUND";
+    private static final String PREF_CENTER = "PREF_CENTER";
     private static final String PREF_MUSIC = "PREF_MUSIC";
     private static final String PREF_DRAG = "PREF_DRAG";
     private static final String PREF_COL = "PREF_COL_";
@@ -46,6 +46,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
     private static final int DIALOG_SOUND = 6;
     private static final int DIALOG_DRAG = 7;
     private static final int DIALOG_MIDI = 11;
+    private static final int DIALOG_CENTER = 12;
     private static final int DIALOG_HELP = 21;
     private static final int DIALOG_ABOUT = 31;
     private static final int DIALOG_MASK_COLORS = 101;
@@ -64,6 +65,9 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
     // Music and volume control
     MusicPlayer musicPlayer;
+
+    // Setting for centering dialogs
+    private boolean centerDialogs;
 
     void setVolumeControlStream() {
         setVolumeControlStream(musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled()
@@ -107,6 +111,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
             c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
+        centerDialogs = p.getBoolean(PREF_CENTER, false);
         Log.d(LOG_TAG, "Preferences loaded");
 
         // Show the help dialog at the very first execution
@@ -138,6 +143,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
             e.putInt(PREF_COL + c.name(), c.color);
+        e.putBoolean(PREF_CENTER, centerDialogs);
         e.putBoolean(PREF_FIRST, false);
         e.apply();
     }
@@ -197,6 +203,10 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                 doDialog(DIALOG_DRAG);
                 break;
 
+            case R.id.menu_center:
+                doDialog(DIALOG_CENTER);
+                break;
+
             case R.id.menu_about:
                 doDialog(DIALOG_ABOUT);
                 break;
@@ -217,12 +227,12 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
     // Call the selected dialog
     protected void doDialog(int id) {
-        BlindManDialogFragment.newInstance(id).show(getFragmentManager(), "dialog");
+        BlindManDialogFragment.newInstance(id, centerDialogs).show(getFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method.
     Dialog createDialog(int id) {
-        // First we check for masks
+        // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
             int icp = id - DIALOG_MASK_COLORS;
             String title = getResources().getStringArray(R.array.items_colors)[icp];
@@ -230,10 +240,12 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            return ColorPickerView.createDialog(this, title, cp.color, (dialog, which) -> {
-                cp.color = which;
-                dialog.dismiss();
-                bmView.invalidate();
+            return ColorPickerView.createDialog(this, title, cp.color, new OnClickDismissListener() {
+                @Override
+                public void onClick(int which) {
+                    cp.color = which;
+                    bmView.invalidate();
+                }
             });
         }
 
@@ -360,6 +372,16 @@ public class BlindManActivity extends Activity implements OnErrorListener {
                     @Override
                     public void onClick(int which) {
                         bmView.setDragDelay(which);
+                    }
+                });
+                break;
+
+            case DIALOG_CENTER:
+                b.setTitle(R.string.menu_center);
+                b.setSingleChoiceItems(R.array.items_center, centerDialogs ? 0 : 1, new OnClickDismissListener() {
+                    @Override
+                    public void onClick(int which) {
+                        centerDialogs = (which == 0);
                     }
                 });
                 break;

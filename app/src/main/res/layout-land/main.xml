@@ -9,7 +9,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/ad_view"
-        android:contentDescription="@string/view_desc" />
+        android:background="@android:color/background_dark"
+        android:contentDescription="@string/desc_view" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/ad_view"
@@ -18,6 +19,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:contentDescription="@string/desc_ad"
         ads:adSize="BANNER"
         ads:adUnitId="@string/ad_unit_id" />
 
@@ -33,6 +35,7 @@
         android:layout_marginTop="5dp"
         android:layout_toStartOf="@id/ad_view"
         android:layout_toLeftOf="@id/ad_view"
+        android:contentDescription="@string/desc_text"
         android:text="@string/text_placeholder" />
 
 </RelativeLayout>

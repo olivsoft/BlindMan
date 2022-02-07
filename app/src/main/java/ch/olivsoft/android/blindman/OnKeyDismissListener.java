@@ -20,7 +20,8 @@ public class OnKeyDismissListener implements DialogInterface.OnKeyListener {
 
     @Override
     public final boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-        dialog.dismiss();
+        if (dialog != null)
+            dialog.dismiss();
         return onKey(keyCode, event);
     }
 }

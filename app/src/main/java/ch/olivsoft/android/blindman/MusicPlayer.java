@@ -24,6 +24,7 @@ public class MusicPlayer {
 
     // Public variables
     public boolean isMusicEnabled = false;
+
     // Private and inner class access variables
     private MediaPlayer mp;
     private final Context context;
