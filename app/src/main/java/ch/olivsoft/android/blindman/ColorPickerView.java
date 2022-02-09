@@ -1,5 +1,6 @@
 package ch.olivsoft.android.blindman;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -142,9 +143,18 @@ public class ColorPickerView extends View {
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. It is the best way of handling OnClick(Dialog, int)
         // properly.
-        Dialog d = new Dialog(context);
-        d.setTitle(dialogTitle);
-        d.setContentView(new ColorPickerView(d, initialColor, listener));
+
+        // For the AppCompat theme, the title does not easily show. So, why not build am alert dialog.
+//        Dialog d = new Dialog(context);
+//        d.setTitle(dialogTitle);
+//        d.setContentView(new ColorPickerView(d, initialColor, listener));
+//        return d;
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle(dialogTitle);
+        ColorPickerView cpv = new ColorPickerView(context, null);
+        b.setView(cpv);
+        Dialog d = b.create();
+        cpv.setColorDialogParameters(d, initialColor, listener);
         return d;
     }
 
