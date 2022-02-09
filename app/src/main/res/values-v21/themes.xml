@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="BlindmanTheme" parent="android:Theme.DeviceDefault">
-        <item name="android:dialogTheme">@style/MyDialogTheme</item>
-        <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
+    <style name="BlindmanTheme" parent="Theme.AppCompat">
+        <item name="dialogTheme">@style/MyDialogTheme</item>
+        <item name="alertDialogTheme">@style/MyDialogTheme</item>
 <!--        <item name="android:alertDialogStyle">@style/MyDialogStyle</item>-->
     </style>
 
-    <style name="MyDialogTheme" parent="android:Theme.DeviceDefault.Dialog">
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">false</item>
         <!-- Only centers the elements within the dialogs -->
         <!--        <item name="android:gravity">center</item>-->
         <!-- Simply does not do anything... -->

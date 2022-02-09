@@ -1,10 +1,11 @@
 package ch.olivsoft.android.blindman;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Window;
+
+import androidx.fragment.app.DialogFragment;
 
 /**
  * Handles the dialogs for Honeycomb and up.

@@ -1,8 +1,6 @@
 package ch.olivsoft.android.blindman;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -16,6 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -24,7 +25,7 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlindManActivity extends Activity implements OnErrorListener {
+public class BlindManActivity extends AppCompatActivity implements OnErrorListener {
     // Constants
     private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";
@@ -227,7 +228,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
     // Call the selected dialog
     protected void doDialog(int id) {
-        BlindManDialogFragment.newInstance(id, centerDialogs).show(getFragmentManager(), "dialog");
+        BlindManDialogFragment.newInstance(id, centerDialogs).show(getSupportFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method.

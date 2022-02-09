@@ -1,51 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/menu_level"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/menu_level" />
     <item
         android:id="@+id/menu_size"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/menu_size" />
     <item
         android:id="@+id/menu_lives"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/menu_lives" />
     <item
         android:id="@+id/menu_colors"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/menu_colors" />
     <item
         android:id="@+id/menu_background"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_background" />
     <item
         android:id="@+id/menu_sound"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_sound" />
     <item
         android:id="@+id/menu_drag"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_drag"
         android:visible="false" />
     <item
         android:id="@+id/menu_center"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_center"
         android:visible="false"/>
     <item
         android:id="@+id/menu_help"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_help" />
     <item
         android:id="@+id/menu_about"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_about" />
     <item
         android:id="@+id/menu_quit"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/menu_quit" />
 
 </menu>

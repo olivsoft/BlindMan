@@ -1,16 +1,17 @@
 package ch.olivsoft.android.blindman;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnErrorListener;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 /**
  * Encapsulates a {@link MediaPlayer} for safe
  * playing and looping of a simple music resource.
  * Methods are ideally called from the similarly named
- * event handlers in an {@link Activity}.
+ * event handlers in an {@link AppCompatActivity}.
  * <p/>
  * In the constructor, an {@link OnErrorListener} can be passed
  * that is called back in case of an error. If this is not required
