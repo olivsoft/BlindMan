@@ -230,7 +230,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         BlindManDialogFragment.newInstance(id, centerDialogs).show(getFragmentManager(), "dialog");
     }
 
-    // This is the relevant dialog creation method.
+    // This is the relevant dialog creation method. It is called through the dialog fragment.
     Dialog createDialog(int id) {
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
@@ -454,7 +454,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
         return true;
     }
 
-    // MediaPlayer interface
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         doDialog(DIALOG_MIDI);
         return true;
