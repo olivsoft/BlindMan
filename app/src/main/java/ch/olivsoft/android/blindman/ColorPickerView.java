@@ -145,15 +145,14 @@ public class ColorPickerView extends View {
         // properly.
 
         // For the AppCompat theme, the title does not easily show. So, why not build am alert dialog.
-//        Dialog d = new Dialog(context);
-//        d.setTitle(dialogTitle);
-//        d.setContentView(new ColorPickerView(d, initialColor, listener));
-//        return d;
-        AlertDialog.Builder b = new AlertDialog.Builder(context);
-        b.setTitle(dialogTitle);
+/*
+        Dialog d = new Dialog(context);
+        d.setTitle(dialogTitle);
+        d.setContentView(new ColorPickerView(d, initialColor, listener));
+        return d;
+*/
         ColorPickerView cpv = new ColorPickerView(context, null);
-        b.setView(cpv);
-        Dialog d = b.create();
+        Dialog d = new AlertDialog.Builder(context).setTitle(dialogTitle).setView(cpv).create();
         cpv.setColorDialogParameters(d, initialColor, listener);
         return d;
     }
