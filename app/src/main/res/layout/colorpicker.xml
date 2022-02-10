@@ -6,12 +6,13 @@
 
     <TextView
         android:id="@+id/colorpicker_textview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:text="@string/desc_view" />
 
     <ch.olivsoft.android.blindman.ColorPickerView
         android:id="@+id/colorpicker_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>
