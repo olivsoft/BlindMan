@@ -173,6 +173,7 @@ public class ColorPickerView extends View {
 
     /**
      * Returns the currently selected color
+     *
      * @return Selected color (argb)
      */
     public int getSelectedColor() {
