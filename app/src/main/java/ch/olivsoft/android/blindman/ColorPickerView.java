@@ -10,6 +10,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -134,15 +135,48 @@ public class ColorPickerView extends View {
      * @return A dialog containing the color picker view
      */
     public static Dialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
+
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. It is the best way of handling OnClick(Dialog, int)
-        // properly.
-        Dialog d = new Dialog(context);
-        d.setTitle(dialogTitle);
-        ColorPickerView v = new ColorPickerView(d.getContext());
-        v.setColorDialogParameters(d, initialColor, listener);
-        d.setContentView(v);
-        return d;
+        // properly. We also preserve the color state here!
+        return new Dialog(context) {
+            private static final String INITIAL_COLOR = "INITIAL_COLOR";
+            private int _initialColor = 0;
+            private ColorPickerView view;
+
+            @Override
+            public Bundle onSaveInstanceState() {
+                super.onSaveInstanceState();
+                Bundle bundle = new Bundle();
+                bundle.putInt(INITIAL_COLOR, view.getSelectedColor());
+                return bundle;
+            }
+
+            @Override
+            public void onRestoreInstanceState(Bundle savedInstanceState) {
+                super.onRestoreInstanceState(savedInstanceState);
+                _initialColor = savedInstanceState.getInt(INITIAL_COLOR);
+            }
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setTitle(dialogTitle);
+                if (_initialColor == 0)
+                    _initialColor = initialColor;
+                view = new ColorPickerView(this.getContext());
+                view.setColorDialogParameters(this, _initialColor, listener);
+                setContentView(view);
+            }
+        };
+    }
+
+    /**
+     * Returns the currently selected color
+     * @return Selected color (argb)
+     */
+    public int getSelectedColor() {
+        return centerPaint.getColor();
     }
 
     /**
@@ -305,7 +339,7 @@ public class ColorPickerView extends View {
                     trackingCenter = false;
                     if (inCenter) {
                         // Pass selected color to listener
-                        listener.onClick(dialog, centerPaint.getColor());
+                        listener.onClick(dialog, getSelectedColor());
                         // For completeness, call the Views click method
                         performClick();
                     } else
