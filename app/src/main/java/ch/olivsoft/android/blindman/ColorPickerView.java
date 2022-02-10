@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,12 +10,15 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
@@ -137,16 +139,50 @@ public class ColorPickerView extends View {
      * @return A dialog containing the color picker view
      */
     public static Dialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
+
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. It is the best way of handling OnClick(Dialog, int)
-        // properly.
-        // For the AppCompat theme, the title does not easily show. So, why not build am alert dialog.
-        // And we use THIS context instead of the dialog's getContext for creating the view. This works,
-        // but the contexts are not the same object. Questionable...
-        ColorPickerView v = new ColorPickerView(context);
-        Dialog d = new AlertDialog.Builder(context).setTitle(dialogTitle).setView(v).create();
-        v.setColorDialogParameters(d, initialColor, listener);
-        return d;
+        // properly. We also preserve the color state here!
+        return new Dialog(context) {
+            private static final String INITIAL_COLOR = "INITIAL_COLOR";
+            private int _initialColor = 0;
+            private ColorPickerView view;
+
+            @NonNull
+            @Override
+            public Bundle onSaveInstanceState() {
+                super.onSaveInstanceState();
+                Bundle bundle = new Bundle();
+                bundle.putInt(INITIAL_COLOR, view.getSelectedColor());
+                return bundle;
+            }
+
+            @Override
+            public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+                super.onRestoreInstanceState(savedInstanceState);
+                _initialColor = savedInstanceState.getInt(INITIAL_COLOR);
+            }
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.colorpicker);
+                ((TextView) findViewById(R.id.colorpicker_textview)).setText(dialogTitle);
+                if (_initialColor == 0)
+                    _initialColor = initialColor;
+                view = findViewById(R.id.colorpicker_view);
+                view.setColorDialogParameters(this, _initialColor, listener);
+            }
+        };
+    }
+
+    /**
+     * Returns the currently selected color
+     *
+     * @return Selected color (argb)
+     */
+    public int getSelectedColor() {
+        return centerPaint.getColor();
     }
 
     /**
