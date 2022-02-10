@@ -212,7 +212,7 @@ public class ColorPickerView extends View {
         int i = (int) f;
         f -= i;
 
-        // Interpolate color. We don't  interpolate alpha.
+        // Interpolate color. We don't interpolate alpha.
         int ca = c[i];
         int cb = c[i + 1];
         int r = interpolateLinear(Color.red(ca), Color.red(cb), f);
