@@ -72,6 +72,16 @@ public class ColorPickerView extends View {
     private boolean highlightCenter;
 
     /**
+     * Simple constructor to use when creating the view from code. Do not forget to call
+     * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)} afterwards.
+     *
+     * @param context The Context the view is running in
+     */
+    public ColorPickerView(Context context) {
+        super(context);
+    }
+
+    /**
      * Formal constructor for layout mechanism if used that way. Do not forget to call
      * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)} afterwards.
      */
@@ -80,21 +90,8 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Use this constructor to initialize the {@link ColorPickerView} that can be
-     * embedded into a {@link Dialog}.
-     *
-     * @param dialog       The embedding dialog
-     * @param initialColor The initial color
-     * @param listener     The callback listener
-     */
-    public ColorPickerView(Dialog dialog, int initialColor, DialogInterface.OnClickListener listener) {
-        super(dialog.getContext());
-        this.setColorDialogParameters(dialog, initialColor, listener);
-    }
-
-    /**
      * Use this method to initialize the {@link ColorPickerView} embedded into
-     * a {@link Dialog} if it has been created through a layout mechanism.
+     * a {@link Dialog}.
      *
      * @param dialog       The embedding dialog
      * @param initialColor The initial color
@@ -142,7 +139,9 @@ public class ColorPickerView extends View {
         // properly.
         Dialog d = new Dialog(context);
         d.setTitle(dialogTitle);
-        d.setContentView(new ColorPickerView(d, initialColor, listener));
+        ColorPickerView v = new ColorPickerView(d.getContext());
+        v.setColorDialogParameters(d, initialColor, listener);
+        d.setContentView(v);
         return d;
     }
 
