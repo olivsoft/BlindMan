@@ -140,15 +140,10 @@ public class ColorPickerView extends View {
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. It is the best way of handling OnClick(Dialog, int)
         // properly.
-
-        ColorPickerView v = new ColorPickerView(context);
-
         // For the AppCompat theme, the title does not easily show. So, why not build am alert dialog.
-/*
-        Dialog d = new Dialog(context);
-        d.setTitle(dialogTitle);
-        d.setContentView(v));
-*/
+        // And we use THIS context instead of the dialog's getContext for creating the view. This works,
+        // but the contexts are not the same object. Questionable...
+        ColorPickerView v = new ColorPickerView(context);
         Dialog d = new AlertDialog.Builder(context).setTitle(dialogTitle).setView(v).create();
         v.setColorDialogParameters(d, initialColor, listener);
         return d;
