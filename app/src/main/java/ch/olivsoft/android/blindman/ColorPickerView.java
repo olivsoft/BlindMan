@@ -170,7 +170,7 @@ public class ColorPickerView extends View {
                 ((TextView) findViewById(R.id.colorpicker_textview)).setText(dialogTitle);
                 if (_initialColor == 0)
                     _initialColor = initialColor;
-                view = findViewById(R.id.colorpicker_view);
+                view = findViewById(R.id.colorpicker_mainview);
                 view.setColorDialogParameters(this, _initialColor, listener);
             }
         };

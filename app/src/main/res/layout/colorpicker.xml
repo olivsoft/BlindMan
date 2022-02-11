@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/colorpicker_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:text="@string/desc_view" />
+        android:contentDescription="@string/menu_colors"
+        android:text="@string/menu_colors"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <ch.olivsoft.android.blindman.ColorPickerView
-        android:id="@+id/colorpicker_view"
+        android:id="@+id/colorpicker_mainview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:contentDescription="@string/menu_colors" />
 </LinearLayout>
