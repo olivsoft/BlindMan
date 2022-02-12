@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Window;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 /**
@@ -27,13 +29,16 @@ public class BlindManDialogFragment extends DialogFragment {
         return f;
     }
 
+    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         BlindManActivity a = (BlindManActivity) getActivity();
         Bundle args = getArguments();
+        @SuppressWarnings("all")
         int id = args.getInt(ID);
         boolean center = args.getBoolean(CENTER);
+        @SuppressWarnings("all")
         Dialog d = a.createDialog(id);
         Window w = d.getWindow();
         // Layout hack. We would prefer this could be done via xml resources.

@@ -13,8 +13,8 @@ import android.content.DialogInterface;
 public class OnClickDismissListener implements DialogInterface.OnClickListener {
 
     // Override this method if desired
+    @SuppressWarnings("UnusedParameters")
     public void onClick(int which) {
-        return;
     }
 
     @Override

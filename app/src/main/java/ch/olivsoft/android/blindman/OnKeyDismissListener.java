@@ -14,6 +14,7 @@ import android.view.KeyEvent;
 public class OnKeyDismissListener implements DialogInterface.OnKeyListener {
 
     // Override this method if desired
+    @SuppressWarnings("UnusedParameters")
     public boolean onKey(int keyCode, KeyEvent event) {
         return true;
     }
