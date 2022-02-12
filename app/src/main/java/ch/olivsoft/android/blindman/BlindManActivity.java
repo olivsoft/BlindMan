@@ -455,7 +455,7 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
         return true;
     }
 
-    // MediaPlayer interface
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         doDialog(DIALOG_MIDI);
         return true;
