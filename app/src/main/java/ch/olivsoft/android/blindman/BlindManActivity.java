@@ -223,7 +223,7 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
         BlindManDialogFragment.newInstance(id, centerDialogs).show(getSupportFragmentManager(), "dialog");
     }
 
-    // This is the relevant dialog creation method.
+    // This is the relevant dialog creation method. It is called through the dialog fragment.
     Dialog createDialog(int id) {
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
