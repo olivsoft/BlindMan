@@ -161,12 +161,12 @@ public class ColorPickerView extends View {
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
+                setContentView(R.layout.colorpicker);
                 setTitle(dialogTitle);
                 if (_initialColor == 0)
                     _initialColor = initialColor;
-                view = new ColorPickerView(this.getContext());
+                view = findViewById(R.id.colorpicker_mainview);
                 view.setColorDialogParameters(this, _initialColor, listener);
-                setContentView(view);
             }
         };
     }
