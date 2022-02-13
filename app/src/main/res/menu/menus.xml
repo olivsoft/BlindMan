@@ -26,11 +26,6 @@
         android:showAsAction="never"
         android:title="@string/menu_sound" />
     <item
-        android:id="@+id/menu_drag"
-        android:showAsAction="never"
-        android:title="@string/menu_drag"
-        android:visible="false" />
-    <item
         android:id="@+id/menu_center"
         android:showAsAction="never"
         android:title="@string/menu_center"

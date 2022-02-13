@@ -28,7 +28,7 @@ public class BlindManView extends View
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
     private static final int[] BACKGROUND_ALPHA = new int[]{0, 0x40, 0x80};
-    private static final int DRAG_STARTER_DELAY = 200;
+    private static final int DRAG_DELAY = 200;
 
     // Game states
     private enum GameState {
@@ -45,7 +45,6 @@ public class BlindManView extends View
 
     // Non-private internal variables (for efficient inner class access)
     Rect player;
-    DragHandler dragHandler;
 
     // Private internal variables
     private int lives = 3;
@@ -63,8 +62,8 @@ public class BlindManView extends View
     private Random random;
 
     // Game motion
-    private DragDelay dragDelay = DragDelay.D1;
     private DragStarter dragStarter;
+    private DragHandler dragHandler;
     private GestureDetector gestureDetector;
 
     // For efficiency, objects used in onDraw should be created in advance.
@@ -90,16 +89,6 @@ public class BlindManView extends View
             else
                 invalidate(player);
         }
-    }
-
-    int getDragDelay() {
-        return dragDelay.ordinal();
-    }
-
-    void setDragDelay(int newDelay) {
-        // Note: Here we (re-)create the instance of the DragHandler
-        dragDelay = DragDelay.values()[newDelay];
-        dragHandler = new DragHandler(dragDelay.millis);
     }
 
     // This constructor is called by the layout mechanism.
@@ -134,6 +123,10 @@ public class BlindManView extends View
         dirtyRect = new Rect();
         pp = new Rect();
 
+        // The drag starter and handler instances can be created here
+        dragStarter = new DragStarter(DRAG_DELAY);
+        dragHandler = new DragHandler(DRAG_DELAY);
+
         // Overriding methods of a SimpleGestureListener would be sufficient
         // but we implement the full interfaces because we think it looks cleaner.
         // Strange: DoubleTap listening works also without explicitly setting it.
@@ -143,9 +136,6 @@ public class BlindManView extends View
         gestureDetector.setOnDoubleTapListener(this);
         gestureDetector.setIsLongpressEnabled(false);
         this.setClickable(true);
-
-        // The DragStarter instance can be created here
-        dragStarter = new DragStarter(DRAG_STARTER_DELAY);
 
         // Effects need some additional initialization
         Effect.loadDynamicElements(context, this);

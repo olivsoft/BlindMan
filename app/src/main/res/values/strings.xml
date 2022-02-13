@@ -13,7 +13,6 @@
     <string name="menu_colors">Colors</string>
     <string name="menu_background">Background</string>
     <string name="menu_sound">Vibration &amp; Sound</string>
-    <string name="menu_drag">Drag tolerance</string>
     <string name="menu_center">Dialog position</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About BlindMan</string>

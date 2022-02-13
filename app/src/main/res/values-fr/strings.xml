@@ -9,7 +9,6 @@
     <string name="menu_colors">Couleurs</string>
     <string name="menu_background">Arrière-plan</string>
     <string name="menu_sound">Vibration &amp; Son</string>
-    <string name="menu_drag">Tolérance pour glisser</string>
     <string name="menu_center">Position des dialogues</string>
     <string name="menu_help">Aide</string>
     <string name="menu_about">À propos de BlindMan</string>
