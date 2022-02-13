@@ -236,7 +236,7 @@ public class ColorPickerView extends View {
             return;
         }
         circleRadius = Math.max(Math.min(measureRect.width(), measureRect.height()) / 4, MIN_R);
-        Log.d(LOG_TAG, String.format("Measured radius: %d", circleRadius));
+        Log.i(LOG_TAG, String.format("Measured radius: %d", circleRadius));
         // Give a bit of space on the edges
         int d = 2 * (circleRadius + EDGE);
         setMeasuredDimension(d, d);
