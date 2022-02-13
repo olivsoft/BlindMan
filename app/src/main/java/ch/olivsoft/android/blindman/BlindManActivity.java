@@ -35,7 +35,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
     private static final String PREF_SOUND = "PREF_SOUND";
     private static final String PREF_CENTER = "PREF_CENTER";
     private static final String PREF_MUSIC = "PREF_MUSIC";
-    private static final String PREF_DRAG = "PREF_DRAG";
     private static final String PREF_COL = "PREF_COL_";
     private static final String PREF_BACKGROUND = "PREF_BACKGROUND";
 
@@ -45,7 +44,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
     private static final int DIALOG_COLORS = 4;
     private static final int DIALOG_BACKGROUND = 5;
     private static final int DIALOG_SOUND = 6;
-    private static final int DIALOG_DRAG = 7;
     private static final int DIALOG_MIDI = 11;
     private static final int DIALOG_CENTER = 12;
     private static final int DIALOG_HELP = 21;
@@ -106,7 +104,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
         bmView.size = p.getInt(PREF_SIZE, bmView.size);
         bmView.background = p.getInt(PREF_BACKGROUND, bmView.background);
         bmView.setLives(p.getInt(PREF_LIVES, bmView.getLives()));
-        bmView.setDragDelay(p.getInt(PREF_DRAG, bmView.getDragDelay()));
         bmView.setHapticFeedbackEnabled(p.getBoolean(PREF_HAPTICS, true));
         bmView.setSoundEffectsEnabled(p.getBoolean(PREF_SOUND, true));
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
@@ -138,7 +135,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
         e.putInt(PREF_SIZE, bmView.size);
         e.putInt(PREF_BACKGROUND, bmView.background);
         e.putInt(PREF_LIVES, bmView.getLives());
-        e.putInt(PREF_DRAG, bmView.getDragDelay());
         e.putBoolean(PREF_HAPTICS, bmView.isHapticFeedbackEnabled());
         e.putBoolean(PREF_SOUND, bmView.isSoundEffectsEnabled());
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
@@ -198,10 +194,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
 
             case R.id.menu_sound:
                 doDialog(DIALOG_SOUND);
-                break;
-
-            case R.id.menu_drag:
-                doDialog(DIALOG_DRAG);
                 break;
 
             case R.id.menu_center:
@@ -365,16 +357,6 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
                     }
                 });
                 b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
-                break;
-
-            case DIALOG_DRAG:
-                b.setTitle(R.string.menu_drag);
-                b.setSingleChoiceItems(DragDelay.getDelays(), bmView.getDragDelay(), new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        bmView.setDragDelay(which);
-                    }
-                });
                 break;
 
             case DIALOG_CENTER:
