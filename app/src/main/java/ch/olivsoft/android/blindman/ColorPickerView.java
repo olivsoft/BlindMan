@@ -106,9 +106,10 @@ public class ColorPickerView extends View {
         this.dialog = dialog;
         this.listener = listener;
 
-        // This may be helpful
-        this.setMinimumWidth(2 * MIN_R);
-        this.setMinimumHeight(2 * MIN_R);
+        // This may be helpful. It includes a bit of margin for good looks in case of no layout.
+        int d = 2 * (circleRadius + EDGE);
+        this.setMinimumWidth(d);
+        this.setMinimumHeight(d);
 
         // Content description
         this.setContentDescription(LOG_TAG);
