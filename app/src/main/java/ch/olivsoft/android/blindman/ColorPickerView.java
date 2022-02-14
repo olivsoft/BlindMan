@@ -16,6 +16,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -168,6 +169,7 @@ public class ColorPickerView extends View {
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.colorpicker);
+//                setTitle(dialogTitle);  // Will not work without theme, see layout
                 ((TextView) findViewById(R.id.colorpicker_textview)).setText(dialogTitle);
                 if (_initialColor == 0)
                     _initialColor = initialColor;
