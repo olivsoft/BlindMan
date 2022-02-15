@@ -2,6 +2,7 @@ package ch.olivsoft.android.blindman;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Window;
@@ -13,9 +14,12 @@ import android.view.Window;
  *
  * @author Oliver Fritz, OlivSoft
  */
+@SuppressWarnings("deprecation")
 public class BlindManDialogFragment extends DialogFragment {
     private static final String ID = "id";
     private static final String CENTER = "center";
+
+    private BlindManActivity blindManActivity;
 
     public static BlindManDialogFragment newInstance(int id, boolean center) {
         BlindManDialogFragment f = new BlindManDialogFragment();
@@ -27,13 +31,18 @@ public class BlindManDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        blindManActivity = (BlindManActivity) context;
+    }
+
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
-        BlindManActivity a = (BlindManActivity) getActivity();
         Bundle args = getArguments();
         int id = args.getInt(ID);
         boolean center = args.getBoolean(CENTER);
-        Dialog d = a.createDialog(id);
+        Dialog d = blindManActivity.createDialog(id);
         Window w = d.getWindow();
         // Layout hack. We would prefer this could be done via xml resources.
         if (w != null && center)
