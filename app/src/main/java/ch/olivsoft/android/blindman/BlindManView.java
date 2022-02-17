@@ -28,7 +28,8 @@ public class BlindManView extends View
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
     private static final int[] BACKGROUND_ALPHA = new int[]{0, 0x40, 0x80};
-    private static final int DRAG_DELAY = 200;
+    private static final int DRAG_START_DELAY = 200;
+    private static final int DRAG_END_DELAY = 300;
 
     // Game states
     private enum GameState {
@@ -49,13 +50,13 @@ public class BlindManView extends View
     // Private internal variables
     private int lives = 3;
     private int hits = 0;
-    private int viewWidth = 200;
-    private int viewHeight = 200;
-    private int fieldWidth = 200;
-    private int fieldHeight = 200;
-    private int offWidth = 0;
-    private int offHeight = 0;
-    private int oSize = 10;
+    private int viewWidth;
+    private int viewHeight;
+    private int fieldWidth;
+    private int fieldHeight;
+    private int offWidth;
+    private int offHeight;
+    private int oSize;
     private Rect goal;
     private Rect border;
     private HashSet<Obstacle> obstacles;
@@ -124,8 +125,8 @@ public class BlindManView extends View
         pp = new Rect();
 
         // The drag starter and handler instances can be created here
-        dragStarter = new DragStarter(DRAG_DELAY);
-        dragHandler = new DragHandler(DRAG_DELAY);
+        dragStarter = new DragStarter(DRAG_START_DELAY);
+        dragHandler = new DragHandler(DRAG_END_DELAY);
 
         // Overriding methods of a SimpleGestureListener would be sufficient
         // but we implement the full interfaces because we think it looks cleaner.
