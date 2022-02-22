@@ -4,10 +4,10 @@
     <style name="BlindmanTheme" parent="Theme.AppCompat">
         <!-- In the end, we either have an ugly large dialog according to theme or we
         need to produce our dialog ourselves including an additional title view -->
-<!--        <item name="android:dialogTheme">@style/ColorPickerDialog</item>-->
+        <!--        <item name="android:dialogTheme">@style/ColorPickerDialog</item>-->
     </style>
 
-    <style name="ColorPickerDialog" parent="Theme.AppCompat.DayNight.DialogWhenLarge">
+    <style name="ColorPickerDialog" parent="Theme.AppCompat.DayNight.Dialog">
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowIsFloating">true</item>
     </style>
