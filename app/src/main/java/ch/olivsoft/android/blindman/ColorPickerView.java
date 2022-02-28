@@ -197,19 +197,19 @@ public class ColorPickerView extends View {
      * Method for interpolating a color array
      *
      * @param c     Color array
-     * @param p     Interpolator
+     * @param f     Interpolator
      * @param alpha Alpha value of resulting color
      * @return Color, interpolated from c according to p = 0...1
      */
-    public static int interpolateColorArray(int[] c, float p, int alpha) {
-        if (p <= 0)
+    public static int interpolateColorArray(int[] c, float f, int alpha) {
+        if (f <= 0)
             return c[0];
-        if (p >= 1)
+        if (f >= 1)
             return c[c.length - 1];
 
         // Stretch to array length and extract integer (i) and fractional (f)
         // part
-        float f = p * (c.length - 1);
+        f *= c.length - 1;
         int i = (int) f;
         f -= i;
 
@@ -326,12 +326,11 @@ public class ColorPickerView extends View {
                 } else {
                     // The "angle" (x, y) is projected to (-0.5..0.5],
                     // then (-0.5..0) is moved to (0.5..1).
-                    // So, "p" interpolates the full circle.
-                    float p = (float) (Math.atan2(y, x) / 2 / Math.PI);
-                    if (p < 0) {
-                        p += 1;
-                    }
-                    centerPaint.setColor(interpolateColorArray(COLORS, p, FULL_ALPHA));
+                    // So, "f" interpolates the full circle.
+                    float f = (float) (Math.atan2(y, x) / 2 / Math.PI);
+                    if (f < 0)
+                        f += 1;
+                    centerPaint.setColor(interpolateColorArray(COLORS, f, FULL_ALPHA));
                     invalidate();
                 }
                 break;
