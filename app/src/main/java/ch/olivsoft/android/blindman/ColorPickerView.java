@@ -146,14 +146,12 @@ public class ColorPickerView extends View {
         // properly. We also preserve the color state here!
         return new Dialog(context) {
             private static final String INITIAL_COLOR = "INITIAL_COLOR";
-            private int _initialColor = 0;
             private ColorPickerView view;
 
             @NonNull
             @Override
             public Bundle onSaveInstanceState() {
-                super.onSaveInstanceState();
-                Bundle bundle = new Bundle();
+                Bundle bundle = super.onSaveInstanceState();
                 bundle.putInt(INITIAL_COLOR, view.getSelectedColor());
                 return bundle;
             }
@@ -161,19 +159,19 @@ public class ColorPickerView extends View {
             @Override
             public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
                 super.onRestoreInstanceState(savedInstanceState);
-                _initialColor = savedInstanceState.getInt(INITIAL_COLOR);
+                view = findViewById(R.id.colorpicker_mainview);
+                if (view != null)
+                    view.setColorDialogParameters(this, savedInstanceState.getInt(INITIAL_COLOR), listener);
             }
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.colorpicker);
-//                setTitle(dialogTitle);  // Will not work without theme, see layout
                 ((TextView) findViewById(R.id.colorpicker_textview)).setText(dialogTitle);
-                if (_initialColor == 0)
-                    _initialColor = initialColor;
                 view = findViewById(R.id.colorpicker_mainview);
-                view.setColorDialogParameters(this, _initialColor, listener);
+                if (savedInstanceState == null)
+                    view.setColorDialogParameters(this, initialColor, listener);
             }
         };
     }
