@@ -343,9 +343,7 @@ public class ColorPickerView extends View {
                 if (trackingCenter) {
                     trackingCenter = false;
                     if (inCenter) {
-                        // Pass selected color to listener
-                        listener.onClick(dialog, getSelectedColor());
-                        // For completeness, call the Views click method
+                        // This is a click!
                         performClick();
                     } else
                         // No selection yet
@@ -362,6 +360,9 @@ public class ColorPickerView extends View {
 
     @Override
     public boolean performClick() {
-        return super.performClick();
+        super.performClick();
+        // Pass selected color to listener
+        listener.onClick(dialog, getSelectedColor());
+        return true;
     }
 }
