@@ -95,7 +95,7 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
         ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder().build());
 
         // Create the music player
-        musicPlayer = new MusicPlayer(this, R.raw.nervous, true, this);
+        musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, this);
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
