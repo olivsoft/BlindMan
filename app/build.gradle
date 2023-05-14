@@ -9,10 +9,10 @@ android {
     compileSdkVersion 33
     defaultConfig {
         applicationId "ch.olivsoft.android.blindman"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 33
-        versionCode 22
-        versionName '1.22'
+        versionCode 23
+        versionName '1.23'
     }
     buildTypes {
         release {
