@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\cholfr1\\Documents\\Doc\\Privat\\Konten\\id\\olivsoft.jks')
+            storeFile file('C:\\Users\\olive\\Documents\\Oliver\\Privat\\Konten\\id\\olivsoft.jks')
         }
     }
     compileSdkVersion 33
