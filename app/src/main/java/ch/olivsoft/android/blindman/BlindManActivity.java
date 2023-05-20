@@ -51,6 +51,7 @@ public class BlindManActivity extends Activity implements OnErrorListener {
 
     // Until now (2019-02), the choice of music was available in debug mode only...
     // From now on, we offer this choice for Lollipop and above.
+    @SuppressLint("ObsoleteSdkInt")
     private static final int NUM_ITEMS_SOUND =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 3 : 2;
 
