@@ -1,5 +1,6 @@
 package ch.olivsoft.android.blindman;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -34,9 +35,11 @@ public enum Effect {
         this.hasAnimationListener = hasAnimationListener;
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     public static void loadDynamicElements(Context context, AnimationListener animationListener) {
         // Create SoundPool and AlphaAnimation
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            //noinspection deprecation
             soundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 0);
         else
             soundPool = new SoundPool.Builder().setMaxStreams(3).build();
