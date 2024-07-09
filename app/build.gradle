@@ -5,13 +5,13 @@ android {
         release {
         }
     }
-    compileSdkVersion 33
+    compileSdk 34
     defaultConfig {
         applicationId "ch.olivsoft.android.blindman"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 25
-        versionName '1.25'
+        targetSdkVersion 34
+        versionCode 26
+        versionName '1.26'
     }
     buildTypes {
         release {
@@ -23,5 +23,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-ads:22.4.0'
+    implementation 'com.google.android.gms:play-services-ads:23.2.0'
 }
