@@ -62,10 +62,8 @@ public class MusicPlayer {
     private void stopOnError(String message, Exception e) {
         // Switch music off all together and inform user with the
         // already defined onError callback (with fairly useless arguments).
-        // The exception may be null without causing problems.
         Log.e(LOG_TAG, message, e);
-        isMusicEnabled = false;
-        stop();
+        toggle(false);
         if (listener != null)
             listener.onPlayerError(new PlaybackException(
                     message, e, PlaybackException.ERROR_CODE_UNSPECIFIED));
@@ -98,7 +96,8 @@ public class MusicPlayer {
             ep.setMediaItem(MediaItem.fromUri(musicUri));
             if (looping)
                 ep.setRepeatMode(ep.REPEAT_MODE_ONE);
-            ep.addListener(listener);
+            if (listener != null)
+                ep.addListener(listener);
             ep.prepare();
             ep.play();
         } catch (Exception e) {

@@ -14,9 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
+import androidx.annotation.NonNull;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
-import androidx.media3.common.util.NonNullApi;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -440,8 +440,9 @@ public class BlindManActivity extends Activity implements Player.Listener {
     }
 
     @Override
-    public void onPlayerError(@NonNullApi PlaybackException error) {
+    public void onPlayerError(@NonNull PlaybackException error) {
         Player.Listener.super.onPlayerError(error);
+        musicPlayer.toggle(false);
         doDialog(DIALOG_MIDI);
     }
 }
