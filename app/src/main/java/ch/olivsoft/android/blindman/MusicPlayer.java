@@ -1,21 +1,28 @@
 package ch.olivsoft.android.blindman;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnErrorListener;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.util.Log;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.OptIn;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
 
 /**
- * Encapsulates a {@link MediaPlayer} for safe
- * playing and looping of a simple music resource.
+ * Encapsulates a {@link ExoPlayer} for safe
+ * playing and gap-less looping of a simple music resource.
  * Methods are ideally called from the similarly named
- * event handlers in an {@link AppCompatActivity}.
+ * event handlers in an {@link Activity}.
  * <p/>
- * In the constructor, an {@link OnErrorListener} can be passed
- * that is called back in case of an error. If this is not required
- * set the listener argument to null.
+ * In the constructor, an {@link androidx.media3.common.Player.Listener}
+ * can be passed that is called back in case of an error.
+ * If this is not required set the listener argument to null.
  *
  * @author Oliver Fritz, OlivSoft
  */
@@ -27,23 +34,31 @@ public class MusicPlayer {
     public boolean isMusicEnabled = false;
 
     // Private and inner class access variables
-    private MediaPlayer mp;
+    private ExoPlayer ep;
+    private final Uri musicUri;
     private final Context context;
-    private final int resid;
-    private final OnErrorListener listener;
+    private final Player.Listener listener;
     private final boolean looping;
-    private int musicPosition = 0;
+    private long musicPosition = 0;
 
     // Constructor
-    public MusicPlayer(Context context, int resid, boolean looping, OnErrorListener listener) {
+    public MusicPlayer(Context context, int resId, boolean looping, Player.Listener listener) {
         this.context = context;
-        this.resid = resid;
         this.looping = looping;
         this.listener = listener;
-        this.mp = null;
+        this.ep = null;
+
+        Resources resources = context.getResources();
+        this.musicUri = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(resources.getResourcePackageName(resId))
+                .appendPath(resources.getResourceTypeName(resId))
+                .appendPath(resources.getResourceEntryName(resId))
+                .build();
     }
 
     // Convenience method for error and exception handling
+    @OptIn(markerClass = UnstableApi.class)
     private void stopOnError(String message, Exception e) {
         // Switch music off all together and inform user with the
         // already defined onError callback (with fairly useless arguments).
@@ -52,7 +67,8 @@ public class MusicPlayer {
         isMusicEnabled = false;
         stop();
         if (listener != null)
-            listener.onError(mp, 0, 0);
+            listener.onPlayerError(new PlaybackException(
+                    message, e, PlaybackException.ERROR_CODE_UNSPECIFIED));
     }
 
     // The magic toggle function
@@ -78,46 +94,44 @@ public class MusicPlayer {
             // For starting, we always recreate a player with
             // the convenient factory method. Equally, when stopping
             // we always release the player immediately.
-            mp = MediaPlayer.create(context, resid);
-            if (mp == null)
-                stopOnError("MediaPlayer.create returned null", null);
-            mp.setLooping(looping);
-            mp.setOnErrorListener((mp, what, extra) -> {
-                stopOnError("MusicPlayer.onError called", null);
-                return true;
-            });
-            mp.start();
+            ep = new ExoPlayer.Builder(context).build();
+            ep.setMediaItem(MediaItem.fromUri(musicUri));
+            if (looping)
+                ep.setRepeatMode(ep.REPEAT_MODE_ONE);
+            ep.addListener(listener);
+            ep.prepare();
+            ep.play();
         } catch (Exception e) {
             stopOnError("Exception thrown in start", e);
         }
     }
 
     public void pause() {
-        if (!isMusicEnabled || mp == null)
+        if (!isMusicEnabled || ep == null)
             return;
 
         try {
-            musicPosition = mp.getCurrentPosition();
-            mp.pause();
+            musicPosition = ep.getCurrentPosition();
+            ep.pause();
         } catch (Exception e) {
             stopOnError("Exception thrown in pause", e);
         }
     }
 
     public void resume() {
-        if (!isMusicEnabled || mp == null)
+        if (!isMusicEnabled || ep == null)
             return;
 
         try {
-            mp.seekTo(musicPosition);
-            mp.start();
+            ep.seekTo(musicPosition);
+            ep.play();
         } catch (Exception e) {
             stopOnError("Exception thrown in resume", e);
         }
     }
 
     public void stop() {
-        if (mp == null)
+        if (ep == null)
             return;
 
         // Be very careful here because if stop is called in released state
@@ -126,13 +140,13 @@ public class MusicPlayer {
         // we re-create it with each start. The final statement
         // setting the player to null helps to guard against this situation.
         try {
-            mp.stop();
-            mp.release();
+            ep.stop();
+            ep.release();
         } catch (Exception e) {
             // We conclude that the player was already stopped and/or released
             Log.e(LOG_TAG, "Exception thrown in stop", e);
         } finally {
-            mp = null;
+            ep = null;
         }
     }
 }

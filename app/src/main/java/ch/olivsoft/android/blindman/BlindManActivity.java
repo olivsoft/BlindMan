@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnErrorListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +14,9 @@ import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.NonNullApi;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -25,7 +26,7 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlindManActivity extends AppCompatActivity implements OnErrorListener {
+public class BlindManActivity extends AppCompatActivity implements Player.Listener {
     // Constants
     private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";
@@ -439,8 +440,8 @@ public class BlindManActivity extends AppCompatActivity implements OnErrorListen
     }
 
     @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
+    public void onPlayerError(@NonNullApi PlaybackException error) {
+        Player.Listener.super.onPlayerError(error);
         doDialog(DIALOG_MIDI);
-        return true;
     }
 }
