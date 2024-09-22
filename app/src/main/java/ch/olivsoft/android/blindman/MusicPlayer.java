@@ -7,11 +7,9 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Log;
 
-import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 
 /**
@@ -34,7 +32,7 @@ public class MusicPlayer {
     public boolean isMusicEnabled = false;
 
     // Private and inner class access variables
-    private ExoPlayer ep;
+    private ExoPlayer player;
     private final Uri musicUri;
     private final Context context;
     private final Player.Listener listener;
@@ -46,7 +44,7 @@ public class MusicPlayer {
         this.context = context;
         this.looping = looping;
         this.listener = listener;
-        this.ep = null;
+        this.player = null;
 
         Resources resources = context.getResources();
         this.musicUri = new Uri.Builder()
@@ -58,15 +56,13 @@ public class MusicPlayer {
     }
 
     // Convenience method for error and exception handling
-    @OptIn(markerClass = UnstableApi.class)
     private void stopOnError(String message, Exception e) {
         // Switch music off all together and inform user with the
         // already defined onError callback (with fairly useless arguments).
         Log.e(LOG_TAG, message, e);
         toggle(false);
         if (listener != null)
-            listener.onPlayerError(new PlaybackException(
-                    message, e, PlaybackException.ERROR_CODE_UNSPECIFIED));
+            listener.onPlayerError((PlaybackException) e);
     }
 
     // The magic toggle function
@@ -92,45 +88,45 @@ public class MusicPlayer {
             // For starting, we always recreate a player with
             // the convenient factory method. Equally, when stopping
             // we always release the player immediately.
-            ep = new ExoPlayer.Builder(context).build();
-            ep.setMediaItem(MediaItem.fromUri(musicUri));
+            player = new ExoPlayer.Builder(context).build();
+            player.setMediaItem(MediaItem.fromUri(musicUri));
             if (looping)
-                ep.setRepeatMode(ep.REPEAT_MODE_ONE);
+                player.setRepeatMode(player.REPEAT_MODE_ONE);
             if (listener != null)
-                ep.addListener(listener);
-            ep.prepare();
-            ep.play();
+                player.addListener(listener);
+            player.prepare();
+            player.play();
         } catch (Exception e) {
             stopOnError("Exception thrown in start", e);
         }
     }
 
     public void pause() {
-        if (!isMusicEnabled || ep == null)
+        if (!isMusicEnabled || player == null)
             return;
 
         try {
-            musicPosition = ep.getCurrentPosition();
-            ep.pause();
+            musicPosition = player.getCurrentPosition();
+            player.pause();
         } catch (Exception e) {
             stopOnError("Exception thrown in pause", e);
         }
     }
 
     public void resume() {
-        if (!isMusicEnabled || ep == null)
+        if (!isMusicEnabled || player == null)
             return;
 
         try {
-            ep.seekTo(musicPosition);
-            ep.play();
+            player.seekTo(musicPosition);
+            player.play();
         } catch (Exception e) {
             stopOnError("Exception thrown in resume", e);
         }
     }
 
     public void stop() {
-        if (ep == null)
+        if (player == null)
             return;
 
         // Be very careful here because if stop is called in released state
@@ -139,13 +135,13 @@ public class MusicPlayer {
         // we re-create it with each start. The final statement
         // setting the player to null helps to guard against this situation.
         try {
-            ep.stop();
-            ep.release();
+            player.stop();
+            player.release();
         } catch (Exception e) {
             // We conclude that the player was already stopped and/or released
             Log.e(LOG_TAG, "Exception thrown in stop", e);
         } finally {
-            ep = null;
+            player = null;
         }
     }
 }
