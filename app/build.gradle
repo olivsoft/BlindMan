@@ -10,8 +10,8 @@ android {
         applicationId "ch.olivsoft.android.blindman"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 26
-        versionName '1.26'
+        versionCode 27
+        versionName '1.27'
     }
     buildTypes {
         release {
@@ -20,7 +20,6 @@ android {
         }
     }
     namespace 'ch.olivsoft.android.blindman'
-    buildToolsVersion '33.0.0'
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
     }
