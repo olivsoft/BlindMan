@@ -429,7 +429,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                 break;
 
             case KeyEvent.KEYCODE_BACK:
-                super.onBackPressed();
+                super.getOnBackPressedDispatcher().onBackPressed();
                 break;
 
             default:
