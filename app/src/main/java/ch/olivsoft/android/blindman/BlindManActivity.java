@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 
@@ -246,7 +247,9 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        // A custom style is applied programmatically (does not work via attributes).
+        ContextThemeWrapper c = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
+        AlertDialog.Builder b = new AlertDialog.Builder(c);
 
         switch (id) {
             case DIALOG_LEVEL:

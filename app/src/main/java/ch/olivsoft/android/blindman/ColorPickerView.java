@@ -16,7 +16,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -168,7 +167,7 @@ public class ColorPickerView extends View {
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.colorpicker);
-                ((TextView) findViewById(R.id.colorpicker_textview)).setText(dialogTitle);
+                setTitle(dialogTitle);
                 view = findViewById(R.id.colorpicker_mainview);
                 if (savedInstanceState == null)
                     view.setColorDialogParameters(this, initialColor, listener);

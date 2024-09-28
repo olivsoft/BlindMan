@@ -2,13 +2,17 @@
 <resources>
 
     <style name="BlindmanTheme" parent="Theme.AppCompat">
-        <!-- In the end, we either have an ugly large dialog according to theme or we
-        need to produce our dialog ourselves including an additional title view -->
-        <!--        <item name="android:dialogTheme">@style/ColorPickerDialog</item>-->
+        <item name="android:dialogTheme">@style/ColorPickerDialog</item>
+        <!-- This does not work it seems. Programmatically it does. -->
+        <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
     </style>
 
-    <style name="ColorPickerDialog" parent="Theme.AppCompat.Dialog">
-        <item name="android:windowNoTitle">false</item>
+    <style name="BlindmanAlertDialog" parent="@style/MaterialAlertDialog.Material3.Body.Text.CenterStacked">
         <item name="android:windowIsFloating">true</item>
     </style>
+
+    <style name="ColorPickerDialog" parent="@style/BlindmanAlertDialog">
+        <item name="android:windowNoTitle">false</item>
+    </style>
+
 </resources>
