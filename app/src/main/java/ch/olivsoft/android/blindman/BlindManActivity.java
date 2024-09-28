@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -246,7 +247,9 @@ public class BlindManActivity extends Activity implements Player.Listener {
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        // A custom style is applied programmatically (does not work via attributes).
+        ContextThemeWrapper c = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
+        AlertDialog.Builder b = new AlertDialog.Builder(c);
 
         switch (id) {
             case DIALOG_LEVEL:

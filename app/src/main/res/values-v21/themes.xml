@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- The alertDialog item does not seem to work. Programmatically it does. -->
     <style name="BlindmanTheme" parent="android:Theme.DeviceDefault">
-        <item name="android:dialogTheme">@style/MyDialogTheme</item>
-        <item name="android:alertDialogTheme">@style/MyDialogTheme</item>
-        <!--        <item name="android:alertDialogStyle">@style/MyDialogStyle</item>-->
+        <item name="android:dialogTheme">@style/ColorPickerDialog</item>
+        <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
     </style>
 
-    <style name="MyDialogTheme" parent="android:Theme.DeviceDefault.Dialog">
-        <!-- Only centers the elements within the dialogs -->
-        <!--        <item name="android:gravity">center</item>-->
-        <!-- Simply does not do anything... -->
-        <!--        <item name="android:layout_gravity">center</item>-->
-        <!--        <item name="android:layout_centerInParent">true</item>-->
+    <style name="BlindmanAlertDialog" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textAlignment">gravity</item>
+    </style>
+
+    <style name="ColorPickerDialog" parent="@style/BlindmanAlertDialog">
+        <item name="android:windowNoTitle">false</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 </resources>
