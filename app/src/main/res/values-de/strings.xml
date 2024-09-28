@@ -60,7 +60,7 @@
         <item >Mittel</item>
         <item >Intensiv</item>
     </string-array>
-    <string-array name="items_settings">
+    <string-array name="items_effects">
         <item >Vibrationen</item>
         <item >Töne</item>
         <item >Musik</item>

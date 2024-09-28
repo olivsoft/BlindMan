@@ -27,11 +27,6 @@
         app:showAsAction="never"
         android:title="@string/menu_sound" />
     <item
-        android:id="@+id/menu_center"
-        app:showAsAction="never"
-        android:title="@string/menu_center"
-        android:visible="false"/>
-    <item
         android:id="@+id/menu_help"
         app:showAsAction="never"
         android:title="@string/menu_help" />

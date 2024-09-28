@@ -59,7 +59,7 @@
         <item >Moyen</item>
         <item >Intense</item>
     </string-array>
-    <string-array name="items_settings">
+    <string-array name="items_effects">
         <item >Vibrations</item>
         <item >Sons</item>
         <item >Musique</item>

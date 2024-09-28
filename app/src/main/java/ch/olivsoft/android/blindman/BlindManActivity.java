@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,7 +34,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     private static final String PREF_LIVES = "PREF_LIVES";
     private static final String PREF_HAPTICS = "PREF_HAPTICS";
     private static final String PREF_SOUND = "PREF_SOUND";
-    private static final String PREF_CENTER = "PREF_CENTER";
     private static final String PREF_MUSIC = "PREF_MUSIC";
     private static final String PREF_COL = "PREF_COL_";
     private static final String PREF_BACKGROUND = "PREF_BACKGROUND";
@@ -47,16 +45,9 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     private static final int DIALOG_BACKGROUND = 5;
     private static final int DIALOG_SOUND = 6;
     private static final int DIALOG_MIDI = 11;
-    private static final int DIALOG_CENTER = 12;
     private static final int DIALOG_HELP = 21;
     private static final int DIALOG_ABOUT = 31;
     private static final int DIALOG_MASK_COLORS = 101;
-
-    // Until now (2019-02), the choice of music was available in debug mode only...
-    // From now on, we offer this choice for Lollipop and above.
-    @SuppressLint("ObsoleteSdkInt")
-    private static final int NUM_ITEMS_SOUND =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 3 : 2;
 
     // Tag for debug messages
     private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
@@ -67,9 +58,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
     // Music and volume control
     MusicPlayer musicPlayer;
-
-    // Setting for centering dialogs
-    private boolean centerDialogs;
 
     void setVolumeControlStream() {
         setVolumeControlStream(musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled()
@@ -112,7 +100,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
             c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
-        centerDialogs = p.getBoolean(PREF_CENTER, false);
         Log.d(LOG_TAG, "Preferences loaded");
 
         // Show the help dialog at the very first execution
@@ -143,7 +130,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
             e.putInt(PREF_COL + c.name(), c.color);
-        e.putBoolean(PREF_CENTER, centerDialogs);
         e.putBoolean(PREF_FIRST, false);
         e.apply();
     }
@@ -199,10 +185,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                 doDialog(DIALOG_SOUND);
                 break;
 
-            case R.id.menu_center:
-                doDialog(DIALOG_CENTER);
-                break;
-
             case R.id.menu_about:
                 doDialog(DIALOG_ABOUT);
                 break;
@@ -223,7 +205,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
     // Call the selected dialog
     protected void doDialog(int id) {
-        BlindManDialogFragment.newInstance(id, centerDialogs).show(getSupportFragmentManager(), "dialog");
+        BlindManDialogFragment.newInstance(id).show(getSupportFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
@@ -332,16 +314,11 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
             case DIALOG_SOUND:
                 b.setTitle(R.string.menu_sound);
-                // Special treatment for eventually using only a subset of the menu items
-                String[] menuIts = new String[NUM_ITEMS_SOUND];
-                boolean[] menuSts = new boolean[NUM_ITEMS_SOUND];
-                System.arraycopy(
-                        getResources().getStringArray(R.array.items_settings),
-                        0, menuIts, 0, NUM_ITEMS_SOUND);
-                System.arraycopy(
-                        new boolean[]{bmView.isHapticFeedbackEnabled(), bmView.isSoundEffectsEnabled(), musicPlayer.isMusicEnabled},
-                        0, menuSts, 0, NUM_ITEMS_SOUND);
-                b.setMultiChoiceItems(menuIts, menuSts, (dialog, which, isChecked) -> {
+                boolean[] effEnabled = new boolean[]{
+                        bmView.isHapticFeedbackEnabled(),
+                        bmView.isSoundEffectsEnabled(),
+                        musicPlayer.isMusicEnabled};
+                b.setMultiChoiceItems(R.array.items_effects, effEnabled, (dialog, which, isChecked) -> {
                     switch (which) {
                         case 0:
                             bmView.setHapticFeedbackEnabled(isChecked);
@@ -362,16 +339,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                     }
                 });
                 b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
-                break;
-
-            case DIALOG_CENTER:
-                b.setTitle(R.string.menu_center);
-                b.setSingleChoiceItems(R.array.items_center, centerDialogs ? 0 : 1, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        centerDialogs = (which == 0);
-                    }
-                });
                 break;
 
             case DIALOG_MIDI:
