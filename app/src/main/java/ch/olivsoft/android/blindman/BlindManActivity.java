@@ -1,21 +1,21 @@
 package ch.olivsoft.android.blindman;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 
@@ -27,7 +27,7 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.Arrays;
 import java.util.List;
 
-public class BlindManActivity extends Activity implements Player.Listener {
+public class BlindManActivity extends AppCompatActivity implements Player.Listener {
     // Constants
     private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";
@@ -223,7 +223,7 @@ public class BlindManActivity extends Activity implements Player.Listener {
 
     // Call the selected dialog
     protected void doDialog(int id) {
-        BlindManDialogFragment.newInstance(id, centerDialogs).show(getFragmentManager(), "dialog");
+        BlindManDialogFragment.newInstance(id, centerDialogs).show(getSupportFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
@@ -432,7 +432,7 @@ public class BlindManActivity extends Activity implements Player.Listener {
                 break;
 
             case KeyEvent.KEYCODE_BACK:
-                super.onBackPressed();
+                super.getOnBackPressedDispatcher().onBackPressed();
                 break;
 
             default:

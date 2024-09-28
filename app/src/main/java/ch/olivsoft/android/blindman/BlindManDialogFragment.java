@@ -1,11 +1,14 @@
 package ch.olivsoft.android.blindman;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Window;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 /**
  * Handles the dialogs for Honeycomb and up.
@@ -14,7 +17,6 @@ import android.view.Window;
  *
  * @author Oliver Fritz, OlivSoft
  */
-@SuppressWarnings("deprecation")
 public class BlindManDialogFragment extends DialogFragment {
     private static final String ID = "id";
     private static final String CENTER = "center";
@@ -31,15 +33,17 @@ public class BlindManDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         blindManActivity = (BlindManActivity) context;
     }
 
+    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         Bundle args = getArguments();
+        @SuppressWarnings("all")
         int id = args.getInt(ID);
         boolean center = args.getBoolean(CENTER);
         Dialog d = blindManActivity.createDialog(id);

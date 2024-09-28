@@ -17,6 +17,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 /**
  * {@link View} for a color selection dialog.
  * <br/>
@@ -28,7 +31,7 @@ import android.view.View;
  * doing all the work for you. The picked color (int) is passed back like in other dialogs via
  * a regular {@link DialogInterface.OnClickListener}. Alternatively, create a
  * {@link Dialog} and pass this view (e.g., from a layout resource) to the dialog's
- * {@link android.app.Activity#setContentView(View)} method. You have to call the
+ * {@link AppCompatActivity#setContentView(View)} method. You have to call the
  * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)}
  * after that to complete the initialization.
  * <br/>
@@ -144,6 +147,7 @@ public class ColorPickerView extends View {
             private static final String INITIAL_COLOR = "INITIAL_COLOR";
             private ColorPickerView view;
 
+            @NonNull
             @Override
             public Bundle onSaveInstanceState() {
                 Bundle bundle = super.onSaveInstanceState();
@@ -152,7 +156,7 @@ public class ColorPickerView extends View {
             }
 
             @Override
-            public void onRestoreInstanceState(Bundle savedInstanceState) {
+            public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
                 super.onRestoreInstanceState(savedInstanceState);
                 view = findViewById(R.id.colorpicker_mainview);
                 if (view != null)
