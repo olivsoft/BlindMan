@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- The alertDialog item does not seem to work. Programmatically it does. -->
     <style name="BlindmanTheme" parent="Theme.AppCompat">
         <item name="android:dialogTheme">@style/ColorPickerDialog</item>
-        <!-- This does not work it seems. Programmatically it does. -->
         <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
     </style>
 
-    <style name="BlindmanAlertDialog" parent="">
-        <item name="android:windowIsFloating">true</item>
+    <style name="BlindmanAlertDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth">
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textAlignment">gravity</item>
 
-        <!-- Difficult to get this to work... -->
+        <!-- Difficult to get any of this to work... -->
         <item name="windowFixedWidthMajor">60%</item>
         <item name="windowFixedWidthMinor">60%</item>
         <item name="android:windowMinWidthMajor">60%</item>
@@ -22,5 +21,6 @@
 
     <style name="ColorPickerDialog" parent="@style/BlindmanAlertDialog">
         <item name="android:windowNoTitle">false</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 </resources>
