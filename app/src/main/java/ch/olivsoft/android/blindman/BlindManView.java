@@ -19,6 +19,8 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import java.util.HashSet;
 import java.util.Random;
 
@@ -248,7 +250,7 @@ public class BlindManView extends View
 
     // This is tuned for efficiency
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         if (this.isInEditMode())
             return;
@@ -423,7 +425,7 @@ public class BlindManView extends View
 
     // DoubleTap and Gesture interfaces. Only four methods
     // are effectively used, the five last ones are empty.
-    public boolean onFling(MotionEvent e1, MotionEvent e2,
+    public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2,
                            float velocityX, float velocityY) {
         Log.d(LOG_TAG, "onFling called");
         if (gameState != GameState.PLAY)
@@ -434,7 +436,7 @@ public class BlindManView extends View
         return true;
     }
 
-    public void onShowPress(MotionEvent e) {
+    public void onShowPress(@NonNull MotionEvent e) {
         Log.d(LOG_TAG, "onShowPress called");
         if (gameState != GameState.PLAY)
             return;
@@ -446,12 +448,12 @@ public class BlindManView extends View
         Effect.GRAB.makeEffect(this);
     }
 
-    public boolean onDown(MotionEvent e) {
+    public boolean onDown(@NonNull MotionEvent e) {
         // onDown must always return true in this usage pattern
         return true;
     }
 
-    public boolean onDoubleTap(MotionEvent e) {
+    public boolean onDoubleTap(@NonNull MotionEvent e) {
         Log.d(LOG_TAG, "onDoubleTap called");
 
         for (Obstacle o : obstacles)
@@ -465,24 +467,24 @@ public class BlindManView extends View
     }
 
     // Empty implementations
-    public boolean onSingleTapConfirmed(MotionEvent e) {
+    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
         return false;
     }
 
-    public boolean onDoubleTapEvent(MotionEvent e) {
+    public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
         return false;
     }
 
-    public boolean onSingleTapUp(MotionEvent e) {
+    public boolean onSingleTapUp(@NonNull MotionEvent e) {
         return false;
     }
 
-    public boolean onScroll(MotionEvent e1, MotionEvent e2,
+    public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2,
                             float distanceX, float distanceY) {
         return false;
     }
 
-    public void onLongPress(MotionEvent e) {
+    public void onLongPress(@NonNull MotionEvent e) {
     }
 
     // Animation interface

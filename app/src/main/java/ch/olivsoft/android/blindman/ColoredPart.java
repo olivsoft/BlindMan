@@ -9,7 +9,7 @@ public enum ColoredPart {
     OBSTACLE(Color.argb(0xFF, 0xC0, 0xFF, 0));
 
     public int color;
-    public int defaultColor;
+    public final int defaultColor;
 
     ColoredPart(int defaultColor) {
         // Constructor ONLY sets defaultColor!
