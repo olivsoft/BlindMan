@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BlindManActivity extends AppCompatActivity implements Player.Listener {
+
     // Constants
     private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";

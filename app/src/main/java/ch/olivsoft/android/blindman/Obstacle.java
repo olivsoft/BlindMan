@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.PaintDrawable;
 
 public class Obstacle extends PaintDrawable {
+
     private boolean hit = false;
     private boolean hidden = false;
 

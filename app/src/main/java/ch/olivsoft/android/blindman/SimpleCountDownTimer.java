@@ -12,6 +12,7 @@ import android.os.CountDownTimer;
  * @author Oliver Fritz, OlivSoft
  */
 public abstract class SimpleCountDownTimer extends CountDownTimer {
+
     private boolean timerRunning = false;
 
     public SimpleCountDownTimer(long millis) {

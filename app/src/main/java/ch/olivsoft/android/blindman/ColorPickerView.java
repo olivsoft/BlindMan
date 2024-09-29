@@ -54,6 +54,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * @author Oliver Fritz, OlivSoft
  */
 public class ColorPickerView extends View {
+
     // Constants
     private static final String LOG_TAG = ColorPickerView.class.getSimpleName();
     private static final int EDGE = 5;

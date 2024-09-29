@@ -39,8 +39,7 @@ public class BlindManDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         Bundle args = getArguments();
-        assert args != null;
-        int id = args.getInt(ID);
+        int id = args != null ? args.getInt(ID) : 0;
         return blindManActivity.createDialog(id);
     }
 }

@@ -25,6 +25,7 @@ import androidx.media3.exoplayer.ExoPlayer;
  * @author Oliver Fritz, OlivSoft
  */
 public class MusicPlayer {
+
     // Constants
     private static final String LOG_TAG = MusicPlayer.class.getSimpleName();
 

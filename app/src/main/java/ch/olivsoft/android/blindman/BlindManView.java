@@ -26,6 +26,7 @@ import java.util.Random;
 
 public class BlindManView extends View
         implements AnimationListener, OnGestureListener, OnDoubleTapListener {
+
     // Constants
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
@@ -248,7 +249,7 @@ public class BlindManView extends View
         super.invalidate(dirtyRect);
     }
 
-    // This is tuned for efficiency
+    // This is well prepared
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
@@ -364,6 +365,7 @@ public class BlindManView extends View
         }
     }
 
+
     // Touch event handling
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -422,6 +424,7 @@ public class BlindManView extends View
                 return false;
         }
     }
+
 
     // DoubleTap and Gesture interfaces. Only four methods
     // are effectively used, the five last ones are empty.
@@ -487,6 +490,7 @@ public class BlindManView extends View
     public void onLongPress(@NonNull MotionEvent e) {
     }
 
+
     // Animation interface
     public void onAnimationStart(Animation animation) {
         // Start the cycle with inverted colors
@@ -494,7 +498,6 @@ public class BlindManView extends View
         invalidate(goal);
     }
 
-    //@SuppressLint("NewApi")
     public void onAnimationRepeat(Animation animation) {
         if (gameState != GameState.IDLE) {
             // Someone was quick in tapping on the screen. According to
@@ -515,8 +518,10 @@ public class BlindManView extends View
         invalidate(goal);
     }
 
+
     // Drag starting class
     private class DragStarter extends SimpleCountDownTimer {
+
         DragStarter(long millis) {
             super(millis);
         }
@@ -547,6 +552,7 @@ public class BlindManView extends View
 
     // Drag handling class
     private class DragHandler extends SimpleCountDownTimer {
+
         // Public access for efficiency
         boolean isDragModeActive = false;
 
