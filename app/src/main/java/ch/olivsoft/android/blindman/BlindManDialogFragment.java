@@ -11,7 +11,6 @@ import androidx.fragment.app.DialogFragment;
 /**
  * Handles the dialogs for Honeycomb and up.
  * Implemented exactly according to documentation.
- * Added layout hack for centering later.
  *
  * @author Oliver Fritz, OlivSoft
  */
