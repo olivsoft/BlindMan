@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +22,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,6 +52,9 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
     // Tag for debug messages
     private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
+
+    // Menu items for choice of number of lives
+    private List<String> itemsLives;
 
     // Variables and methods are only declared private if they are not accessed
     // by inner classes. This is done for efficiency (see Android documentation).
@@ -88,6 +91,13 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
         // Create the music player
         musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, this);
+
+        // Construct the lives choice menu. 0 stands for infinity.
+        itemsLives = new ArrayList<>();
+        for (int i : BlindManView.allowedLives)
+            itemsLives.add(String.valueOf(i));
+        if (BlindManView.allowedLives.contains(0))
+            itemsLives.set(BlindManView.allowedLives.indexOf(0), "∞");
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
@@ -258,29 +268,13 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
             case DIALOG_LIVES:
                 b.setTitle(R.string.menu_lives);
-                // We use an array adapter in order to be able to relate the selected
-                // value to its list position. NOTE: For unclear reasons, passing this
-                // adapter even with an additional text view layout id to the builder
-                // does not give the same layout as passing the resource id directly.
-                // So, we do use the resource id again for that purpose in the call
-                // to setSingleChoiceItems.
-                final ArrayAdapter<CharSequence> a =
-                        ArrayAdapter.createFromResource(this, R.array.items_lives, android.R.layout.select_dialog_singlechoice);
-                int liv = bmView.getLives();
-                int pos = (liv == 0) ? a.getCount() - 1 : a.getPosition(Integer.toString(liv));
-                b.setSingleChoiceItems(R.array.items_lives, pos, new OnClickDismissListener() {
+                // The ArrayAdapter does not produce the same layout as a direct call with R... or a bare array.
+                // Therefore, a more general approach is used to create the list of choices.
+                int currSel = BlindManView.allowedLives.indexOf(bmView.getLives());
+                b.setSingleChoiceItems(itemsLives.toArray(new String[0]), currSel, new OnClickDismissListener() {
                     @Override
                     public void onClick(int which) {
-                        // First check for infinity choice, then for all other possible choices
-                        if (which == a.getCount() - 1)
-                            bmView.setLives(0);
-                        else
-                            try {
-                                bmView.setLives(Integer.parseInt(String.valueOf(a.getItem(which))));
-                            } catch (Exception e) {
-                                // Do nothing
-                                Log.e(LOG_TAG, e.getLocalizedMessage(), e);
-                            }
+                        bmView.setLives(BlindManView.allowedLives.get(which));
                     }
                 });
                 break;
