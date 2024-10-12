@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <!-- The alertDialog item does not seem to work. Programmatically it does. -->
+
+    <!-- The item styles do not seem to work. Programmatically, they do. -->
     <style name="BlindmanTheme" parent="Theme.AppCompat">
         <item name="android:dialogTheme">@style/ColorPickerDialog</item>
         <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
@@ -20,7 +20,6 @@
     </style>
 
     <style name="ColorPickerDialog" parent="@style/BlindmanAlertDialog">
-        <item name="android:windowNoTitle">false</item>
         <item name="android:windowIsFloating">true</item>
     </style>
 </resources>

@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -19,6 +18,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDialog;
 
 /**
  * {@link View} for a color selection dialog.
@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * {@link ColorPickerView#createDialog(Context, String, int, DialogInterface.OnClickListener)}
  * doing all the work for you. The picked color (int) is passed back like in other dialogs via
  * a regular {@link DialogInterface.OnClickListener}. Alternatively, create a
- * {@link Dialog} and pass this view (e.g., from a layout resource) to the dialog's
+ * {@link AppCompatDialog} and pass this view (e.g., from a layout resource) to the dialog's
  * {@link AppCompatActivity#setContentView(View)} method. You have to call the
  * {@link ColorPickerView#setColorDialogParameters(DialogInterface, int, DialogInterface.OnClickListener)}
  * after that to complete the initialization.
@@ -96,7 +96,7 @@ public class ColorPickerView extends View {
 
     /**
      * Use this method to initialize the {@link ColorPickerView} embedded into
-     * a {@link Dialog}.
+     * a {@link AppCompatDialog}.
      *
      * @param dialog       The embedding dialog
      * @param initialColor The initial color
@@ -130,7 +130,7 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Use this factory method to create a {@link Dialog} that contains a new
+     * Use this factory method to create a {@link AppCompatDialog} that contains a new
      * {@link ColorPickerView} instance.
      *
      * @param context      A valid context
@@ -139,12 +139,12 @@ public class ColorPickerView extends View {
      * @param listener     The callback listener
      * @return A dialog containing the color picker view
      */
-    public static Dialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
+    public static AppCompatDialog createDialog(Context context, String dialogTitle, int initialColor, DialogInterface.OnClickListener listener) {
 
         // This hides the somewhat confusing double use of the dialog reference
         // from the caller. It is the best way of handling OnClick(Dialog, int)
         // properly. We also preserve the color state here!
-        return new Dialog(context) {
+        return new AppCompatDialog(context) {
             private static final String INITIAL_COLOR = "INITIAL_COLOR";
             private ColorPickerView view;
 
@@ -170,7 +170,7 @@ public class ColorPickerView extends View {
                 setContentView(R.layout.colorpicker);
                 setTitle(dialogTitle);
                 view = findViewById(R.id.colorpicker_mainview);
-                if (savedInstanceState == null)
+                if (savedInstanceState == null && view != null)
                     view.setColorDialogParameters(this, initialColor, listener);
             }
         };

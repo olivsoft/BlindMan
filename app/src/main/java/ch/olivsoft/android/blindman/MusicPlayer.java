@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -15,8 +14,6 @@ import androidx.media3.exoplayer.ExoPlayer;
 /**
  * Encapsulates a {@link ExoPlayer} for safe
  * playing and gap-less looping of a simple music resource.
- * Methods are ideally called from the similarly named
- * event handlers in an {@link Activity}.
  * <p/>
  * In the constructor, an {@link androidx.media3.common.Player.Listener}
  * can be passed that is called back in case of an error.

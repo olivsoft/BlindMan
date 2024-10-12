@@ -1,12 +1,12 @@
 package ch.olivsoft.android.blindman;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AppCompatDialog;
+import androidx.appcompat.app.AppCompatDialogFragment;
 
 /**
  * Handles the dialogs for Honeycomb and up.
@@ -14,7 +14,7 @@ import androidx.fragment.app.DialogFragment;
  *
  * @author Oliver Fritz, OlivSoft
  */
-public class BlindManDialogFragment extends DialogFragment {
+public class BlindManDialogFragment extends AppCompatDialogFragment {
     private static final String ID = "id";
 
     private BlindManActivity blindManActivity;
@@ -35,7 +35,7 @@ public class BlindManDialogFragment extends DialogFragment {
 
     @NonNull
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+    public AppCompatDialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         Bundle args = getArguments();
         int id = args != null ? args.getInt(ID) : 0;

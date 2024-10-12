@@ -1,7 +1,6 @@
 package ch.olivsoft.android.blindman;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -76,10 +76,11 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         bmView = findViewById(R.id.blindman_view);
         bmView.textView = findViewById(R.id.text_view);
 
-        // Initialize ad banner. Test device syntax has changed. Just added 2 old phones.
+        // Initialize ad banner. Test device are older and current phones.
         List<String> testDeviceIds = List.of(
                 "98DDF74ECDE599B008274ED3B5C5DCA5",
-                "54A8240637407DBE6671033FDA2C7FCA");
+                "54A8240637407DBE6671033FDA2C7FCA",
+                "B6B9CB212805EAF05227298CC384418C");
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
@@ -209,7 +210,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     }
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
-    Dialog createDialog(int id) {
+    AppCompatDialog createDialog(int id) {
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
             int icp = id - DIALOG_MASK_COLORS;
@@ -218,7 +219,9 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            return ColorPickerView.createDialog(this, title, cp.color, (dialog, which) -> {
+            // A custom style is applied, as long as other ways do not work.
+            ContextThemeWrapper cCPD = new ContextThemeWrapper(this, R.style.ColorPickerDialog);
+            return ColorPickerView.createDialog(cCPD, title, cp.color, (dialog, which) -> {
                 dialog.dismiss();
                 cp.color = which;
                 bmView.invalidate();
@@ -228,8 +231,8 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
         // A custom style is applied programmatically (does not work via attributes).
-        ContextThemeWrapper c = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
-        AlertDialog.Builder b = new AlertDialog.Builder(c);
+        ContextThemeWrapper cAD = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
+        AlertDialog.Builder b = new AlertDialog.Builder(cAD);
 
         switch (id) {
             case DIALOG_LEVEL:
