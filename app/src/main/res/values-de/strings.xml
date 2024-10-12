@@ -9,7 +9,6 @@
     <string name="menu_colors">Farben</string>
     <string name="menu_background">Hintergrund</string>
     <string name="menu_sound">Vibration &amp; Ton</string>
-    <string name="menu_center">Position der Dialoge</string>
     <string name="menu_help">Hilfe</string>
     <string name="menu_about">Über BlindMan</string>
     <string name="menu_quit">Beenden</string>
@@ -64,10 +63,6 @@
         <item >Vibrationen</item>
         <item >Töne</item>
         <item >Musik</item>
-    </string-array>
-    <string-array name="items_center">
-        <item>Zentriert</item>
-        <item>Standard</item>
     </string-array>
 
 </resources>

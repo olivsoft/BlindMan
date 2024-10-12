@@ -43,7 +43,7 @@ public class BlindManView extends View
     private GameState gameState = GameState.IDLE;
 
     // Variables visible to main activity
-    static List<Integer> allowedLives = List.of(1, 2, 3, 4, 6, 9, 12, 0);
+    static final List<Integer> allowedLives = List.of(1, 2, 3, 4, 6, 9, 12, 0);
     TextView textView;
     int level = 1;
     int size = 1;
@@ -73,10 +73,9 @@ public class BlindManView extends View
     private GestureDetector gestureDetector;
 
     // For efficiency, objects used in onDraw should be created in advance.
-    // We add further such objects from invalidate and makeMove.
+    // We add further such objects from makeMove.
     private Paint drawingPaint;
     private RectF drawingRect;
-    private Rect dirtyRect;
     private Rect pp;
 
     // Animation
@@ -94,7 +93,7 @@ public class BlindManView extends View
             if (newLives > 0 && hits >= newLives)
                 newGame(0);
             else
-                invalidate(player);
+                invalidate();
         }
     }
 
@@ -127,12 +126,11 @@ public class BlindManView extends View
         random = new Random();
         drawingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         drawingRect = new RectF();
-        dirtyRect = new Rect();
         pp = new Rect();
 
         // The drag starter and handler instances can be created here
-        dragStarter = new DragStarter(DRAG_START_DELAY);
-        dragHandler = new DragHandler(DRAG_END_DELAY);
+        dragStarter = new DragStarter();
+        dragHandler = new DragHandler();
 
         // Overriding methods of a SimpleGestureListener would be sufficient
         // but we implement the full interfaces because we think it looks cleaner.
@@ -172,7 +170,7 @@ public class BlindManView extends View
         fieldWidth = viewWidth - viewWidth % oSize;
         fieldHeight = viewHeight - viewHeight % oSize;
 
-        // The offsets are stored here and applied in onDraw and invalidate
+        // The offsets are stored here and applied in onDraw
         offWidth = (viewWidth - fieldWidth) / 2;
         offHeight = (viewHeight - fieldHeight) / 2;
 
@@ -242,15 +240,6 @@ public class BlindManView extends View
         gameState = GameState.SHOW;
         textView.setText(R.string.mess_start);
         invalidate();
-    }
-
-    // Override this for dealing with offset properly
-    @Override
-    public void invalidate(Rect dirty) {
-        // We need a copy of the dirty region because we move it
-        dirtyRect.set(dirty);
-        dirtyRect.offset(offWidth, offHeight);
-        super.invalidate(dirtyRect);
     }
 
     // This is well prepared
@@ -332,8 +321,7 @@ public class BlindManView extends View
                     // obstacle and the player that lost one life.
                     o.setHit();
                     hits++;
-                    pp.union(player);
-                    invalidate(pp);
+                    invalidate();
                     if (lives == 0 || hits < lives) {
                         // Go on
                         textView.setText(R.string.mess_hits);
@@ -353,12 +341,8 @@ public class BlindManView extends View
         }
 
         // All is fine, the move can be performed.
-        // First, the affected area is stored, then
-        // the move is made, then the area is invalidated.
-        dirtyRect.set(player);
-        dirtyRect.union(pp);
         player.set(pp);
-        invalidate(dirtyRect);
+        invalidate();
 
         // GOAL reached?
         if (Rect.intersects(player, goal)) {
@@ -499,7 +483,7 @@ public class BlindManView extends View
     public void onAnimationStart(Animation animation) {
         // Start the cycle with inverted colors
         swapColors = true;
-        invalidate(goal);
+        invalidate();
     }
 
     public void onAnimationRepeat(Animation animation) {
@@ -513,21 +497,21 @@ public class BlindManView extends View
             return;
         }
         swapColors = !swapColors;
-        invalidate(goal);
+        invalidate();
     }
 
     public void onAnimationEnd(Animation animation) {
         // Restore colors and redraw again
         swapColors = false;
-        invalidate(goal);
+        invalidate();
     }
 
 
     // Drag starting class
     private class DragStarter extends SimpleCountDownTimer {
 
-        DragStarter(long millis) {
-            super(millis);
+        DragStarter() {
+            super(DRAG_START_DELAY);
         }
 
         boolean startTimer(MotionEvent e) {
@@ -565,8 +549,8 @@ public class BlindManView extends View
         private float oldY;
 
         // Constructor
-        DragHandler(long millis) {
-            super(millis);
+        DragHandler() {
+            super(DRAG_END_DELAY);
         }
 
         @Override
@@ -583,13 +567,13 @@ public class BlindManView extends View
 
         void startDragMode() {
             isDragModeActive = true;
-            invalidate(player);
+            invalidate();
         }
 
         void stopDragMode() {
             isDragModeActive = false;
             cancelTimer();
-            invalidate(player);
+            invalidate();
         }
 
         boolean doDrag(MotionEvent e) {

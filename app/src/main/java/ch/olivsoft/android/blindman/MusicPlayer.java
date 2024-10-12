@@ -89,7 +89,7 @@ public class MusicPlayer {
             player = new ExoPlayer.Builder(context).build();
             player.setMediaItem(MediaItem.fromUri(musicUri));
             if (looping)
-                player.setRepeatMode(player.REPEAT_MODE_ONE);
+                player.setRepeatMode(ExoPlayer.REPEAT_MODE_ONE);
             if (listener != null)
                 player.addListener(listener);
             player.prepare();

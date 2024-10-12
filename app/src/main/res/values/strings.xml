@@ -13,7 +13,6 @@
     <string name="menu_colors">Colors</string>
     <string name="menu_background" tools:ignore="MissingTranslation">Background</string>
     <string name="menu_sound" tools:ignore="MissingTranslation">Vibration &amp; Sound</string>
-    <string name="menu_center" tools:ignore="MissingTranslation">Dialog position</string>
     <string name="menu_help" tools:ignore="MissingTranslation">Help</string>
     <string name="menu_about" tools:ignore="MissingTranslation">About BlindMan</string>
     <string name="menu_quit" tools:ignore="MissingTranslation">Quit</string>
@@ -68,10 +67,6 @@
         <item>Vibrations</item>
         <item>Sounds</item>
         <item>Music</item>
-    </string-array>
-    <string-array name="items_center">
-        <item>Centered</item>
-        <item>Default</item>
     </string-array>
 
 </resources>

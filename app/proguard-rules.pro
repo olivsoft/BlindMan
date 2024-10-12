@@ -15,7 +15,3 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
-# For mapping.txt file (see https://developer.android.com/studio/build/shrink-code#decode-stack-trace)
--keepattributes LineNumberTable,SourceFile
--renamesourcefileattribute SourceFile
