@@ -23,7 +23,6 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BlindManActivity extends AppCompatActivity implements Player.Listener {
@@ -53,9 +52,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     // Tag for debug messages
     private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
 
-    // Menu items for choice of number of lives
-    private List<String> itemsLives;
-
     // Variables and methods are only declared private if they are not accessed
     // by inner classes. This is done for efficiency (see Android documentation).
     BlindManView bmView;
@@ -81,7 +77,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         bmView.textView = findViewById(R.id.text_view);
 
         // Initialize ad banner. Test device syntax has changed. Just added 2 old phones.
-        List<String> testDeviceIds = Arrays.asList(
+        List<String> testDeviceIds = List.of(
                 "98DDF74ECDE599B008274ED3B5C5DCA5",
                 "54A8240637407DBE6671033FDA2C7FCA");
         RequestConfiguration configuration =
@@ -91,13 +87,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
         // Create the music player
         musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, this);
-
-        // Construct the lives choice menu. 0 stands for infinity.
-        itemsLives = new ArrayList<>();
-        for (int i : BlindManView.allowedLives)
-            itemsLives.add(String.valueOf(i));
-        if (BlindManView.allowedLives.contains(0))
-            itemsLives.set(BlindManView.allowedLives.indexOf(0), "∞");
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
@@ -229,12 +218,10 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            return ColorPickerView.createDialog(this, title, cp.color, new OnClickDismissListener() {
-                @Override
-                public void onClick(int which) {
-                    cp.color = which;
-                    bmView.invalidate();
-                }
+            return ColorPickerView.createDialog(this, title, cp.color, (dialog, which) -> {
+                dialog.dismiss();
+                cp.color = which;
+                bmView.invalidate();
             });
         }
 
@@ -247,22 +234,18 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         switch (id) {
             case DIALOG_LEVEL:
                 b.setTitle(R.string.menu_level);
-                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        bmView.newGame(which + 1);
-                    }
+                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, (dialog, which) -> {
+                    dialog.dismiss();
+                    bmView.newGame(which + 1);
                 });
                 break;
 
             case DIALOG_SIZE:
                 b.setTitle(R.string.menu_size);
-                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        bmView.initField(which + 1);
-                        bmView.newGame(0);
-                    }
+                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, (dialog, which) -> {
+                    dialog.dismiss();
+                    bmView.initField(which + 1);
+                    bmView.newGame(0);
                 });
                 break;
 
@@ -270,40 +253,37 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                 b.setTitle(R.string.menu_lives);
                 // The ArrayAdapter does not produce the same layout as a direct call with R... or a bare array.
                 // Therefore, a more general approach is used to create the list of choices.
+                List<String> items = new ArrayList<>(BlindManView.allowedLives.size());
+                for (int i : BlindManView.allowedLives)
+                    items.add(i != 0 ? String.valueOf(i) : "∞");
                 int currSel = BlindManView.allowedLives.indexOf(bmView.getLives());
-                b.setSingleChoiceItems(itemsLives.toArray(new String[0]), currSel, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        bmView.setLives(BlindManView.allowedLives.get(which));
-                    }
+                b.setSingleChoiceItems(items.toArray(new String[0]), currSel, (dialog, which) -> {
+                    dialog.dismiss();
+                    bmView.setLives(BlindManView.allowedLives.get(which));
                 });
                 break;
 
             case DIALOG_COLORS:
                 b.setTitle(R.string.menu_colors);
-                b.setItems(R.array.items_colors, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        if (which == ColoredPart.values().length) {
-                            // Reset colors
-                            ColoredPart.resetAll();
-                            bmView.invalidate();
-                        } else {
-                            // Call color picker dialog
-                            doDialog(which + DIALOG_MASK_COLORS);
-                        }
+                b.setItems(R.array.items_colors, (d, which) -> {
+                    d.dismiss();
+                    if (which == ColoredPart.values().length) {
+                        // Reset colors
+                        ColoredPart.resetAll();
+                        bmView.invalidate();
+                    } else {
+                        // Call color picker dialog
+                        doDialog(which + DIALOG_MASK_COLORS);
                     }
                 });
                 break;
 
             case DIALOG_BACKGROUND:
                 b.setTitle(R.string.menu_background);
-                b.setSingleChoiceItems(R.array.items_background, bmView.background, new OnClickDismissListener() {
-                    @Override
-                    public void onClick(int which) {
-                        bmView.background = which;
-                        bmView.invalidate();
-                    }
+                b.setSingleChoiceItems(R.array.items_background, bmView.background, (dialog, which) -> {
+                    dialog.dismiss();
+                    bmView.background = which;
+                    bmView.invalidate();
                 });
                 break;
 
@@ -333,29 +313,27 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                             dialog.dismiss();
                     }
                 });
-                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
+                // A button press in an AlertDialog includes dismiss (!)
+                b.setPositiveButton(android.R.string.ok, null);
                 break;
 
             case DIALOG_MIDI:
                 b.setTitle(R.string.title_midi);
                 b.setMessage(R.string.text_midi);
-                b.setOnKeyListener(new OnKeyDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
+                b.setPositiveButton(android.R.string.ok, null);
                 break;
 
             case DIALOG_ABOUT:
                 b.setTitle(R.string.menu_about);
                 b.setMessage(R.string.text_about);
-                b.setOnKeyListener(new OnKeyDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
+                b.setPositiveButton(android.R.string.ok, null);
                 break;
 
             case DIALOG_HELP:
             default:
                 b.setTitle(R.string.menu_help);
                 b.setMessage(R.string.text_help);
-                b.setOnKeyListener(new OnKeyDismissListener());
-                b.setPositiveButton(android.R.string.ok, new OnClickDismissListener());
+                b.setPositiveButton(android.R.string.ok, null);
                 break;
         }
 

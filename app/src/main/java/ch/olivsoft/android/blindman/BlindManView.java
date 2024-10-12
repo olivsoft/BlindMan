@@ -21,8 +21,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -44,7 +43,7 @@ public class BlindManView extends View
     private GameState gameState = GameState.IDLE;
 
     // Variables visible to main activity
-    static List<Integer> allowedLives = Arrays.asList(1, 2, 3, 4, 6, 9, 12, 0);
+    static List<Integer> allowedLives = List.of(1, 2, 3, 4, 6, 9, 12, 0);
     TextView textView;
     int level = 1;
     int size = 1;
@@ -65,7 +64,7 @@ public class BlindManView extends View
     private int oSize;
     private Rect goal;
     private Rect border;
-    private List<Obstacle> obstacles;
+    private HashSet<Obstacle> obstacles;
     private Random random;
 
     // Game motion
@@ -182,7 +181,7 @@ public class BlindManView extends View
         border.inset(oSize / 2, oSize / 2);
         goal = new Rect(fieldWidth - 3 * oSize, fieldHeight - 3 * oSize, fieldWidth - oSize, fieldHeight - oSize);
         player = new Rect(oSize, oSize, 2 * oSize, 2 * oSize);
-        obstacles = new ArrayList<>(fieldWidth * fieldHeight / (oSize * oSize) / 2);
+        obstacles = new HashSet<>(fieldWidth * fieldHeight / (oSize * oSize) / 2);
 
         // Set the game state to idle and put a message onto the text view
         gameState = GameState.IDLE;
@@ -209,7 +208,8 @@ public class BlindManView extends View
         int numObs = (int) (0.3 * widthAcross * level);
 
         obstacles.clear();
-        List<Integer> obsLine = new ArrayList<>(numObs);
+        // A HashSet eliminates duplicates
+        HashSet<Integer> obsLine = new HashSet<>(numObs);
         // Every second line across contains obstacles
         for (int iLine = 3; iLine <= lastAcross; iLine += 2) {
             obsLine.clear();

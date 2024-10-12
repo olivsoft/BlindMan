@@ -1,10 +1,7 @@
 package ch.olivsoft.android.blindman;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.media.AudioManager;
 import android.media.SoundPool;
-import android.os.Build;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -35,14 +32,9 @@ public enum Effect {
         this.hasAnimationListener = hasAnimationListener;
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     public static void loadDynamicElements(Context context, AnimationListener animationListener) {
         // Create SoundPool and AlphaAnimation
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-            //noinspection deprecation
-            soundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 0);
-        else
-            soundPool = new SoundPool.Builder().setMaxStreams(3).build();
+        soundPool = new SoundPool.Builder().setMaxStreams(3).build();
         AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.7f);
         alphaAnimation.setDuration(50);
         // In total this gives 3 dim-down-then-brighten-up phases
