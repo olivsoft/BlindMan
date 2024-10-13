@@ -250,6 +250,8 @@ public class ColorPickerView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldW, int oldH) {
         super.onSizeChanged(w, h, oldW, oldH);
+        if (this.isInEditMode())
+            return;
 
         // Determine the translation for onDraw.
         // No matter how big the view is in the end, we
@@ -275,7 +277,11 @@ public class ColorPickerView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
+        super.onDraw(canvas);
+        if (this.isInEditMode())
+            return;
+
         canvas.translate(tX, tY);
         canvas.drawCircle(0, 0, centerRadius, centerPaint);
         canvas.drawCircle(0, 0, circleRadius - centerRadius / 2f, circlePaint);

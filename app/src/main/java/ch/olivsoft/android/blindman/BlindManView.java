@@ -177,7 +177,8 @@ public class BlindManView extends View
         // Allocate size-dependent objects
         border = new Rect(0, 0, fieldWidth, fieldHeight);
         border.inset(oSize / 2, oSize / 2);
-        goal = new Rect(fieldWidth - 3 * oSize, fieldHeight - 3 * oSize, fieldWidth - oSize, fieldHeight - oSize);
+        goal = new Rect(fieldWidth - 3 * oSize, fieldHeight - 3 * oSize,
+                fieldWidth - oSize, fieldHeight - oSize);
         player = new Rect(oSize, oSize, 2 * oSize, 2 * oSize);
         obstacles = new HashSet<>(fieldWidth * fieldHeight / (oSize * oSize) / 2);
 
@@ -242,7 +243,7 @@ public class BlindManView extends View
         invalidate();
     }
 
-    // This is well prepared
+    // No time-consuming stuff here
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
@@ -282,7 +283,8 @@ public class BlindManView extends View
         if (lives == 0)
             canvas.drawOval(drawingRect, drawingPaint);
         else
-            canvas.drawArc(drawingRect, 0, 360 - 360f / lives * hits, true, drawingPaint);
+            canvas.drawArc(drawingRect, 0, 360 - 360f / lives * hits,
+                    true, drawingPaint);
 
         // Obstacles have their own draw routine. The color
         // is set in the OnDraw override (see above).
@@ -298,14 +300,9 @@ public class BlindManView extends View
         // Try the move with a copy of the player
         pp.set(player);
         if (Math.abs(x) > Math.abs(y))
-            if (x > 0)
-                pp.offset(oSize, 0);
-            else
-                pp.offset(-oSize, 0);
-        else if (y > 0)
-            pp.offset(0, oSize);
+            pp.offset(x > 0 ? oSize : -oSize, 0);
         else
-            pp.offset(0, -oSize);
+            pp.offset(0, y > 0 ? oSize : -oSize);
 
         // Check for borders
         if (pp.left <= 0 || pp.top <= 0
