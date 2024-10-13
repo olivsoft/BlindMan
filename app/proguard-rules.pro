@@ -15,3 +15,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# For mapping.txt file (see https://developer.android.com/studio/build/shrink-code#decode-stack-trace)
+#-keepattributes LineNumberTable,SourceFile
+#-renamesourcefileattribute SourceFile
+
+# Keep the no-args constructor of the deserialized class
+#-keep,allowshrinking class * extends androidx.startup.Initializer
+#-keepclassmembers class ch.olivsoft.android.blindman.* { <init>(); }

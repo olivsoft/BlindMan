@@ -110,8 +110,8 @@ public class BlindManView extends View
     // This is also called by the layout mechanism.
     // We use it to initialize all the size-dependent members.
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+        super.onSizeChanged(w, h, oldW, oldH);
         if (this.isInEditMode())
             return;
 

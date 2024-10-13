@@ -248,8 +248,8 @@ public class ColorPickerView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+        super.onSizeChanged(w, h, oldW, oldH);
 
         // Determine the translation for onDraw.
         // No matter how big the view is in the end, we
@@ -304,7 +304,7 @@ public class ColorPickerView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean retval = super.onTouchEvent(event);
+        boolean retVal = super.onTouchEvent(event);
 
         // Here we use double on purpose. This is not for precision
         // but because x and y are only used as Math function arguments.
@@ -352,7 +352,7 @@ public class ColorPickerView extends View {
                 break;
 
             default:
-                return retval;
+                return retVal;
         }
 
         return true;
