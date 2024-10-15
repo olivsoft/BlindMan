@@ -232,6 +232,10 @@ public class ColorPickerView extends View {
     // are a bit careful.
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (this.isInEditMode())
+            return;
+
         // We determine the screen size through a strange
         // and buggy function (see comments in source).
         // For a perfect look the size must be an even number.
