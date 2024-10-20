@@ -11,8 +11,6 @@ import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -20,13 +18,13 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-public class BlindManView extends View
-        implements AnimationListener, OnGestureListener, OnDoubleTapListener {
+public class BlindManView extends View implements AnimationListener {
 
     // Constants
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
@@ -49,9 +47,6 @@ public class BlindManView extends View
     int size = 1;
     int background = 1;
 
-    // Non-private internal variables (for efficient inner class access)
-    Rect player;
-
     // Private internal variables
     private int lives = allowedLives.get(2); // 3 lives is the default
     private int hits = 0;
@@ -62,6 +57,7 @@ public class BlindManView extends View
     private int offWidth;
     private int offHeight;
     private int oSize;
+    private Rect player;
     private Rect goal;
     private Rect border;
     private HashSet<Obstacle> obstacles;
@@ -132,13 +128,13 @@ public class BlindManView extends View
         dragStarter = new DragStarter();
         dragHandler = new DragHandler();
 
-        // Overriding methods of a SimpleGestureListener would be sufficient
-        // but we implement the full interfaces because we think it looks cleaner.
+        // Overriding methods of a SimpleGestureListener is sufficient.
         // Strange: DoubleTap listening works also without explicitly setting it.
         // In our case, setLongPressEnabled and setClickable are required in this
         // combination, there are many articles on why this is the case.
-        gestureDetector = new GestureDetector(context, this);
-        gestureDetector.setOnDoubleTapListener(this);
+        GestureListener gestureListener = new GestureListener();
+        gestureDetector = new GestureDetector(context, gestureListener);
+        gestureDetector.setOnDoubleTapListener(gestureListener);
         gestureDetector.setIsLongpressEnabled(false);
         this.setClickable(true);
 
@@ -350,7 +346,6 @@ public class BlindManView extends View
         }
     }
 
-
     // Touch event handling
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -410,71 +405,55 @@ public class BlindManView extends View
         }
     }
 
+    // DoubleTap and Gesture implementations. Only four methods
+    // are needed, therefore we extend the simple helper class.
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
-    // DoubleTap and Gesture interfaces. Only four methods
-    // are effectively used, the five last ones are empty.
-    public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2,
-                           float velocityX, float velocityY) {
-        Log.d(LOG_TAG, "onFling called");
-        if (gameState != GameState.PLAY)
-            return false;
+        @Override
+        public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                               float velocityX, float velocityY) {
+            Log.d(LOG_TAG, "onFling called");
+            if (gameState != GameState.PLAY)
+                return false;
 
-        // Make a move
-        makeMove(velocityX, velocityY);
-        return true;
+            // Make a move
+            makeMove(velocityX, velocityY);
+            return true;
+        }
+
+        @Override
+        public void onShowPress(@NonNull MotionEvent e) {
+            Log.d(LOG_TAG, "onShowPress called");
+            if (gameState != GameState.PLAY)
+                return;
+
+            // Start dragging immediately
+            dragStarter.cancelTimer();
+            dragHandler.resetPosition(e);
+            dragHandler.startDragMode();
+            Effect.GRAB.makeEffect(BlindManView.this);
+        }
+
+        @Override
+        public boolean onDown(@NonNull MotionEvent e) {
+            // onDown must always return true in this usage pattern
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(@NonNull MotionEvent e) {
+            Log.d(LOG_TAG, "onDoubleTap called");
+
+            for (Obstacle o : obstacles)
+                o.setVisible();
+            // Cancel drag mode (if active)
+            dragHandler.stopDragMode();
+            gameState = GameState.HINT;
+            invalidate();
+
+            return true;
+        }
     }
-
-    public void onShowPress(@NonNull MotionEvent e) {
-        Log.d(LOG_TAG, "onShowPress called");
-        if (gameState != GameState.PLAY)
-            return;
-
-        // Start dragging immediately
-        dragStarter.cancelTimer();
-        dragHandler.resetPosition(e);
-        dragHandler.startDragMode();
-        Effect.GRAB.makeEffect(this);
-    }
-
-    public boolean onDown(@NonNull MotionEvent e) {
-        // onDown must always return true in this usage pattern
-        return true;
-    }
-
-    public boolean onDoubleTap(@NonNull MotionEvent e) {
-        Log.d(LOG_TAG, "onDoubleTap called");
-
-        for (Obstacle o : obstacles)
-            o.setVisible();
-        // Cancel drag mode (if active)
-        dragHandler.stopDragMode();
-        gameState = GameState.HINT;
-        invalidate();
-
-        return true;
-    }
-
-    // Empty implementations
-    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
-        return false;
-    }
-
-    public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
-        return false;
-    }
-
-    public boolean onSingleTapUp(@NonNull MotionEvent e) {
-        return false;
-    }
-
-    public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2,
-                            float distanceX, float distanceY) {
-        return false;
-    }
-
-    public void onLongPress(@NonNull MotionEvent e) {
-    }
-
 
     // Animation interface
     public void onAnimationStart(Animation animation) {
@@ -502,7 +481,6 @@ public class BlindManView extends View
         swapColors = false;
         invalidate();
     }
-
 
     // Drag starting class
     private class DragStarter extends SimpleCountDownTimer {

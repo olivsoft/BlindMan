@@ -28,6 +28,8 @@ import java.util.List;
 public class BlindManActivity extends AppCompatActivity implements Player.Listener {
 
     // Constants
+    private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
+
     private static final String PREF_FIRST = "PREF_FIRST";
     private static final String PREF_LEVEL = "PREF_LEVEL";
     private static final String PREF_SIZE = "PREF_SIZE";
@@ -49,16 +51,11 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     private static final int DIALOG_ABOUT = 31;
     private static final int DIALOG_MASK_COLORS = 101;
 
-    // Tag for debug messages
-    private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
+    // View and Music Player
+    private BlindManView bmView;
+    private MusicPlayer musicPlayer;
 
-    // Variables and methods are only declared private if they are not accessed
-    // by inner classes. This is done for efficiency (see Android documentation).
-    BlindManView bmView;
-
-    // Music and volume control
-    MusicPlayer musicPlayer;
-
+    // Set the right channel for volume control
     void setVolumeControlStream() {
         setVolumeControlStream(musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled()
                 ? AudioManager.STREAM_MUSIC : AudioManager.USE_DEFAULT_STREAM_TYPE);
@@ -385,6 +382,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         return true;
     }
 
+    // Player error
     @Override
     public void onPlayerError(@NonNull PlaybackException error) {
         Player.Listener.super.onPlayerError(error);
