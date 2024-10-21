@@ -61,7 +61,7 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                 ? AudioManager.STREAM_MUSIC : AudioManager.USE_DEFAULT_STREAM_TYPE);
     }
 
-    // Life cycle
+    // Lifecycle
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +100,9 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
             c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
         Log.d(LOG_TAG, "Preferences loaded");
 
+        // Set the volume control
+        setVolumeControlStream();
+
         // Show the help dialog at the very first execution
         if (p.getBoolean(PREF_FIRST, true))
             doDialog(DIALOG_HELP);
@@ -136,8 +139,6 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
     protected void onResume() {
         super.onResume();
         musicPlayer.resume();
-
-        // Here it makes sense to adjust the volume control stream
         setVolumeControlStream();
     }
 
