@@ -1,8 +1,10 @@
 package ch.olivsoft.android.blindman;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.shapes.Shape;
 
 public class Obstacle extends PaintDrawable {
 
@@ -10,11 +12,12 @@ public class Obstacle extends PaintDrawable {
     private boolean hidden = false;
 
     Obstacle(int ix, int iy, int size) {
+        super();
         // The allocated shape in a PaintDrawable is
         // a rectangle defined by its bounds
-        this.setBounds(ix * size, iy * size, (ix + 1) * size, (iy + 1) * size);
-        this.setCornerRadius(0.1f * size);
-        this.getPaint().setAntiAlias(true);
+        setBounds(ix * size, iy * size, (ix + 1) * size, (iy + 1) * size);
+        setCornerRadius(0.1f * size);
+        getPaint().setAntiAlias(true);
     }
 
     // Some get and set.
@@ -49,9 +52,12 @@ public class Obstacle extends PaintDrawable {
         return Rect.intersects(getBounds(), r);
     }
 
+    // Draw only visible obstacles, and in the right color
     @Override
-    public void draw(Canvas canvas) {
-        if (!hidden)
-            super.draw(canvas);
+    protected void onDraw(Shape shape, Canvas canvas, Paint paint) {
+        if (hidden)
+            return;
+        paint.setColor(ColoredPart.OBSTACLE.color);
+        super.onDraw(shape, canvas, paint);
     }
 }

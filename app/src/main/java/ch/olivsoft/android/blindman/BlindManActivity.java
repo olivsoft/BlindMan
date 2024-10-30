@@ -254,13 +254,13 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
                 b.setTitle(R.string.menu_lives);
                 // The ArrayAdapter does not produce the same layout as a direct call with R... or a bare array.
                 // Therefore, a more general approach is used to create the list of choices.
-                List<String> items = new ArrayList<>(BlindManView.allowedLives.size());
-                for (int i : BlindManView.allowedLives)
+                List<String> items = new ArrayList<>(BlindManView.ALLOWED_LIVES.size());
+                for (int i : BlindManView.ALLOWED_LIVES)
                     items.add(i != 0 ? String.valueOf(i) : "∞");
-                int currSel = BlindManView.allowedLives.indexOf(bmView.getLives());
+                int currSel = BlindManView.ALLOWED_LIVES.indexOf(bmView.getLives());
                 b.setSingleChoiceItems(items.toArray(new String[0]), currSel, (dialog, which) -> {
                     dialog.dismiss();
-                    bmView.setLives(BlindManView.allowedLives.get(which));
+                    bmView.setLives(BlindManView.ALLOWED_LIVES.get(which));
                 });
                 break;
 

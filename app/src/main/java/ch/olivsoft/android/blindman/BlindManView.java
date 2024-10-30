@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -29,7 +28,8 @@ public class BlindManView extends View implements AnimationListener {
     // Constants
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
-    private static final int[] BACKGROUND_ALPHA = new int[]{0, 0x40, 0x80};
+    private static final int[] BACKGROUND_ALPHA = {0, 0x40, 0x80};
+    private static final int[] OBSTACLE_DENSITIES = {20, 27, 35};
     private static final int DRAG_START_DELAY = 200;
     private static final int DRAG_END_DELAY = 300;
 
@@ -41,14 +41,14 @@ public class BlindManView extends View implements AnimationListener {
     private GameState gameState = GameState.IDLE;
 
     // Variables visible to main activity
-    static final List<Integer> allowedLives = List.of(1, 2, 3, 4, 6, 9, 12, 0);
     TextView textView;
-    int level = 1;
+    static final List<Integer> ALLOWED_LIVES = List.of(1, 2, 3, 4, 6, 9, 12, 0);
     int size = 1;
+    int level = 1;
     int background = 1;
 
     // Private internal variables
-    private int lives = allowedLives.get(2); // 3 lives is the default
+    private int lives = ALLOWED_LIVES.get(2); // 3 lives is the default
     private int hits = 0;
     private int viewWidth;
     private int viewHeight;
@@ -84,7 +84,7 @@ public class BlindManView extends View implements AnimationListener {
 
     void setLives(int newLives) {
         // Reset in case something went completely wrong
-        lives = allowedLives.contains(newLives) ? newLives : allowedLives.get(2);
+        lives = ALLOWED_LIVES.contains(newLives) ? newLives : ALLOWED_LIVES.get(2);
         if (gameState == GameState.PLAY) {
             if (newLives > 0 && hits >= newLives)
                 newGame(0);
@@ -143,22 +143,19 @@ public class BlindManView extends View implements AnimationListener {
     }
 
     void initField(int newSize) {
-        // Check who called
-        if (newSize > 0)
+        if (newSize > OBSTACLE_DENSITIES.length)
+            size = 1;
+        else if (newSize > 0)
             size = newSize;
 
-        // Initialize obstacle density depending on size choice and aspect ratio.
-        // The hard-coded factors are tuning parameters, they roughly indicate how
-        // many obstacles per size and how many for high aspect ratios are added.
-        int d0 = -2 + 12 * size
-                + 8 * Math.max(viewWidth, viewHeight) / Math.min(viewWidth, viewHeight);
-
-        // Optimize obstacle size for minimal screen-waste on borders
+        // Initialize and optimize obstacle density
+        int d0 = OBSTACLE_DENSITIES[size - 1];
         int od = d0;
-        int r = 2 * d0;
+        int or = 2 * d0;
         for (int d = d0 - 2; d <= d0 + 2; d++) {
-            if (viewWidth % d + viewHeight % d <= r) {
-                r = viewWidth % d + viewHeight % d;
+            int r = viewWidth % d + viewHeight % d;
+            if (r <= or) {
+                or = r;
                 od = d;
             }
         }
@@ -220,17 +217,8 @@ public class BlindManView extends View implements AnimationListener {
                     obsLine.add(widthAcross);
             }
             // Now, the real obstacles are created
-            for (int i : obsLine) {
-                obstacles.add(new Obstacle(o ? i : iLine, o ? iLine : i, oSize) {
-                    @Override
-                    protected void onDraw(Shape shape, Canvas canvas, Paint paint) {
-                        // This looks like the most concise and
-                        // efficient way to set the obstacle color
-                        paint.setColor(ColoredPart.OBSTACLE.color);
-                        super.onDraw(shape, canvas, paint);
-                    }
-                });
-            }
+            for (int i : obsLine)
+                obstacles.add(new Obstacle(o ? i : iLine, o ? iLine : i, oSize));
         }
 
         // Now we are in show state
@@ -282,8 +270,7 @@ public class BlindManView extends View implements AnimationListener {
             canvas.drawArc(drawingRect, 0, 360 - 360f / lives * hits,
                     true, drawingPaint);
 
-        // Obstacles have their own draw routine. The color
-        // is set in the OnDraw override (see above).
+        // Obstacles have their own onDraw method
         for (Obstacle o : obstacles)
             o.draw(canvas);
     }
