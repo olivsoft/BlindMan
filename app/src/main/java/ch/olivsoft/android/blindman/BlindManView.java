@@ -29,16 +29,9 @@ public class BlindManView extends View implements AnimationListener {
     private static final String LOG_TAG = BlindManView.class.getSimpleName();
     private static final int FULL_ALPHA = 0xFF;
     private static final int[] BACKGROUND_ALPHA = {0, 0x40, 0x80};
-    private static final int[] OBSTACLE_DENSITIES = {20, 27, 35};
+    private static final int[] OBSTACLE_ROWS = {8, 11, 15};
     private static final int DRAG_START_DELAY = 200;
     private static final int DRAG_END_DELAY = 300;
-
-    // Game states
-    private enum GameState {
-        IDLE, SHOW, PLAY, HINT
-    }
-
-    private GameState gameState = GameState.IDLE;
 
     // Variables visible to main activity
     TextView textView;
@@ -76,6 +69,13 @@ public class BlindManView extends View implements AnimationListener {
 
     // Animation
     private boolean swapColors = false;
+
+    // Game states
+    private enum GameState {
+        IDLE, SHOW, PLAY, HINT
+    }
+
+    private GameState gameState = GameState.IDLE;
 
     // Get and set only for non-trivial cases
     int getLives() {
@@ -143,23 +143,11 @@ public class BlindManView extends View implements AnimationListener {
     }
 
     void initField(int newSize) {
-        if (newSize > OBSTACLE_DENSITIES.length)
-            size = 1;
-        else if (newSize > 0)
-            size = newSize;
+        if (newSize > 0)
+            size = Math.min(newSize, OBSTACLE_ROWS.length);
 
-        // Initialize and optimize obstacle density
-        int d0 = OBSTACLE_DENSITIES[size - 1];
-        int od = d0;
-        int or = 2 * d0;
-        for (int d = d0 - 2; d <= d0 + 2; d++) {
-            int r = viewWidth % d + viewHeight % d;
-            if (r <= or) {
-                or = r;
-                od = d;
-            }
-        }
-        oSize = Math.max(viewWidth, viewHeight) / od;
+        // Obstacle and field sizes
+        oSize = Math.max(viewWidth, viewHeight) / (2 * OBSTACLE_ROWS[size - 1] + 7);
         fieldWidth = viewWidth - viewWidth % oSize;
         fieldHeight = viewHeight - viewHeight % oSize;
 
@@ -564,7 +552,7 @@ public class BlindManView extends View implements AnimationListener {
                     return true;
 
                 default:
-                    // We did not to consume the event
+                    // We did not consume the event
                     return false;
             }
         }

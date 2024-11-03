@@ -3,10 +3,10 @@ package ch.olivsoft.android.blindman;
 import android.graphics.Color;
 
 public enum ColoredPart {
-    FIELD(Color.argb(0xFF, 0, 0x80, 0xFF)),
-    PLAYER(Color.argb(0xFF, 0xFF, 0x80, 0)),
-    GOAL(Color.argb(0xFF, 0, 0xFF, 0x80)),
-    OBSTACLE(Color.argb(0xFF, 0xC0, 0xFF, 0));
+    FIELD(Color.rgb(0, 0x80, 0xFF)),
+    PLAYER(Color.rgb(0xFF, 0x80, 0)),
+    GOAL(Color.rgb(0, 0xFF, 0x80)),
+    OBSTACLE(Color.rgb(0xC0, 0xFF, 0));
 
     public int color;
     public final int defaultColor;
