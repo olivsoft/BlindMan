@@ -25,7 +25,7 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlindManActivity extends AppCompatActivity implements Player.Listener {
+public class BlindManActivity extends AppCompatActivity {
 
     // Constants
     private static final String LOG_TAG = BlindManActivity.class.getSimpleName();
@@ -83,8 +83,14 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         MobileAds.setRequestConfiguration(configuration);
         ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder().build());
 
-        // Create the music player
-        musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, this);
+        // Create music player (needed in preferences)
+        musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, new Player.Listener() {
+            @Override
+            public void onPlayerError(@NonNull PlaybackException error) {
+                musicPlayer.toggle(false);
+                doDialog(DIALOG_MIDI);
+            }
+        });
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
@@ -100,10 +106,10 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
             c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
         Log.d(LOG_TAG, "Preferences loaded");
 
-        // Set the volume control
+        // Set volume control
         setVolumeControlStream();
 
-        // Show the help dialog at the very first execution
+        // Show help dialog at very first execution
         if (p.getBoolean(PREF_FIRST, true))
             doDialog(DIALOG_HELP);
     }
@@ -381,13 +387,5 @@ public class BlindManActivity extends AppCompatActivity implements Player.Listen
         }
 
         return true;
-    }
-
-    // Player error
-    @Override
-    public void onPlayerError(@NonNull PlaybackException error) {
-        Player.Listener.super.onPlayerError(error);
-        musicPlayer.toggle(false);
-        doDialog(DIALOG_MIDI);
     }
 }
