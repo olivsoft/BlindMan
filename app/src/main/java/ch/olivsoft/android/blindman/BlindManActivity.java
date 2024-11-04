@@ -73,7 +73,7 @@ public class BlindManActivity extends AppCompatActivity {
         bmView = findViewById(R.id.blindman_view);
         bmView.textView = findViewById(R.id.text_view);
 
-        // Initialize ad banner. Test device are older and current phones.
+        // Initialize ad banner. Test devices are older and current phones.
         List<String> testDeviceIds = List.of(
                 "98DDF74ECDE599B008274ED3B5C5DCA5",
                 "54A8240637407DBE6671033FDA2C7FCA",
@@ -87,6 +87,7 @@ public class BlindManActivity extends AppCompatActivity {
         musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
+                Log.e(LOG_TAG, "MusicPlayer error", error);
                 musicPlayer.toggle(false);
                 doDialog(DIALOG_MIDI);
             }
