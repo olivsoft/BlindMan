@@ -2,7 +2,7 @@
 <resources>
 
     <!-- The item styles do not seem to work. Programmatically, they do. -->
-    <style name="BlindmanTheme" parent="Theme.AppCompat">
+    <style name="BlindmanTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:dialogTheme">@style/ColorPickerDialog</item>
         <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
     </style>
@@ -11,15 +11,15 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textAlignment">gravity</item>
-
-        <!-- Difficult to get any of this to work... -->
-        <item name="windowFixedWidthMajor">60%</item>
-        <item name="windowFixedWidthMinor">60%</item>
-        <item name="android:windowMinWidthMajor">60%</item>
-        <item name="android:windowMinWidthMinor">60%</item>
+        <item name="android:windowMinWidthMajor">10%</item>
+        <item name="android:windowMinWidthMinor">10%</item>
     </style>
 
-    <style name="ColorPickerDialog" parent="@style/BlindmanAlertDialog">
-        <item name="android:windowIsFloating">true</item>
+    <style name="ColorPickerDialog" parent="android:Theme.DeviceDefault.Dialog.MinWidth">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textAlignment">gravity</item>
+        <item name="android:windowMinWidthMajor">10%</item>
+        <item name="android:windowMinWidthMinor">10%</item>
     </style>
 </resources>

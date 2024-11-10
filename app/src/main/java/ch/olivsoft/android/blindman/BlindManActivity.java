@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.appcompat.widget.Toolbar;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 
@@ -56,18 +57,20 @@ public class BlindManActivity extends AppCompatActivity {
     private MusicPlayer musicPlayer;
 
     // Set the right channel for volume control
-    void setVolumeControlStream() {
+    private void setVolumeControlStream() {
         setVolumeControlStream(musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled()
                 ? AudioManager.STREAM_MUSIC : AudioManager.USE_DEFAULT_STREAM_TYPE);
     }
 
     // Lifecycle
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set content view
+        // Set content view and toolbar
         setContentView(R.layout.main);
+        Toolbar toolbar = findViewById(R.id.blindman_toolbar);
+        setSupportActionBar(toolbar);
 
         // Store references of layout objects
         bmView = findViewById(R.id.blindman_view);
@@ -81,17 +84,20 @@ public class BlindManActivity extends AppCompatActivity {
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-        ((AdView) findViewById(R.id.ad_view)).loadAd(new AdRequest.Builder().build());
+        AdView adView = findViewById(R.id.ad_view);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
 
         // Create music player (needed in preferences)
-        musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, new Player.Listener() {
+        Player.Listener listener = new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 Log.e(LOG_TAG, "MusicPlayer error", error);
                 musicPlayer.toggle(false);
                 doDialog(DIALOG_MIDI);
             }
-        });
+        };
+        musicPlayer = new MusicPlayer(this, R.raw.nervous_cubase, true, listener);
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
@@ -210,12 +216,15 @@ public class BlindManActivity extends AppCompatActivity {
     }
 
     // Call the selected dialog
-    protected void doDialog(int id) {
+    private void doDialog(int id) {
         BlindManDialogFragment.newInstance(id).show(getSupportFragmentManager(), "dialog");
     }
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
     AppCompatDialog createDialog(int id) {
+        // We use/need this to apply custom styles to the dialogs
+        ContextThemeWrapper ctw;
+
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
             int icp = id - DIALOG_MASK_COLORS;
@@ -224,9 +233,8 @@ public class BlindManActivity extends AppCompatActivity {
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            // A custom style is applied, as long as other ways do not work.
-            ContextThemeWrapper cCPD = new ContextThemeWrapper(this, R.style.ColorPickerDialog);
-            return ColorPickerView.createDialog(cCPD, title, cp.color, (dialog, which) -> {
+            ctw = new ContextThemeWrapper(this, R.style.ColorPickerDialog);
+            return ColorPickerView.createDialog(ctw, title, cp.color, (dialog, which) -> {
                 dialog.dismiss();
                 cp.color = which;
                 bmView.invalidate();
@@ -236,8 +244,8 @@ public class BlindManActivity extends AppCompatActivity {
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
         // A custom style is applied programmatically (does not work via attributes).
-        ContextThemeWrapper cAD = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
-        AlertDialog.Builder b = new AlertDialog.Builder(cAD);
+        ctw = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
+        AlertDialog.Builder b = new AlertDialog.Builder(ctw);
 
         switch (id) {
             case DIALOG_LEVEL:

@@ -94,37 +94,16 @@ public class BlindManView extends View implements AnimationListener {
     }
 
     // This constructor is called by the layout mechanism.
-    // We use this to initialize a few long-living members.
+    // Size-independent members can be initialized here.
     public BlindManView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (this.isInEditMode())
             return;
 
-        initGlobals(context);
-    }
-
-    // This is also called by the layout mechanism.
-    // We use it to initialize all the size-dependent members.
-    @Override
-    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
-        super.onSizeChanged(w, h, oldW, oldH);
-        if (this.isInEditMode())
-            return;
-
-        // Copy view width and height and initialize game field
-        viewWidth = w;
-        viewHeight = h;
-        initField(0);
-    }
-
-    private void initGlobals(Context context) {
-        // Some objects are completely independent of size and GameState
         random = new Random();
+        pp = new Rect();
         drawingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         drawingRect = new RectF();
-        pp = new Rect();
-
-        // The drag starter and handler instances can be created here
         dragStarter = new DragStarter();
         dragHandler = new DragHandler();
 
@@ -140,6 +119,20 @@ public class BlindManView extends View implements AnimationListener {
 
         // Effects need some additional initialization
         Effect.loadDynamicElements(context, this);
+    }
+
+    // This is also called by the layout mechanism.
+    // Here, size-dependent members are initialized.
+    @Override
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+        super.onSizeChanged(w, h, oldW, oldH);
+        if (this.isInEditMode())
+            return;
+
+        // Copy view width and height and initialize game field
+        viewWidth = w;
+        viewHeight = h;
+        initField(0);
     }
 
     void initField(int newSize) {
