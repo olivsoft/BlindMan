@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- The item styles do not seem to work. Programmatically, they do. -->
-    <style name="BlindmanTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:dialogTheme">@style/ColorPickerDialog</item>
-        <item name="android:alertDialogTheme">@style/BlindmanAlertDialog</item>
+    <style name="BlindmanTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- This includes several styles, above all the game field background color -->
+        <item name="colorPrimary">@android:color/black</item>
+
+        <!-- Same color as game field -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Dialog themes, although they do not seem to work. Programmatically, they do. -->
+        <item name="dialogTheme">@style/BlindmanDialogTheme</item>
+        <item name="android:dialogTheme">@style/BlindmanDialogTheme</item>
+        <item name="alertDialogTheme">@style/BlindmanDialogTheme</item>
+        <item name="android:alertDialogTheme">@style/BlindmanDialogTheme</item>
     </style>
 
-    <style name="BlindmanAlertDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth">
+    <style name="BlindmanDialogTheme" parent="Theme.Material3.Dark.Dialog">
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textAlignment">gravity</item>
-        <item name="android:windowMinWidthMajor">10%</item>
-        <item name="android:windowMinWidthMinor">10%</item>
-    </style>
-
-    <style name="ColorPickerDialog" parent="android:Theme.DeviceDefault.Dialog.MinWidth">
-        <item name="android:gravity">center</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:textAlignment">gravity</item>
-        <item name="android:windowMinWidthMajor">10%</item>
-        <item name="android:windowMinWidthMinor">10%</item>
     </style>
 </resources>

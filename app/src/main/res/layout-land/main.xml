@@ -2,21 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/blindman_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/blindman_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ch.olivsoft.android.blindman.BlindManView
         android:id="@+id/blindman_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/ad_view"
-        android:layout_below="@id/blindman_toolbar"
-        android:background="?attr/colorPrimaryDark"
+        android:layout_below="@id/app_bar"
+        android:background="?attr/colorPrimary"
         android:contentDescription="@string/desc_view" />
 
     <TextView
@@ -27,11 +34,11 @@
         android:layout_alignParentStart="true"
         android:layout_toStartOf="@id/ad_view"
         android:contentDescription="@string/desc_text"
+        android:gravity="center_vertical"
         android:paddingStart="20dp"
         android:paddingEnd="0dp"
-        android:gravity="center_vertical"
-        android:textSize="16sp"
-        android:text="@string/text_placeholder" />
+        android:text="@string/text_placeholder"
+        android:textSize="16sp" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/ad_view"

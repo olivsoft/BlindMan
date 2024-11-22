@@ -223,7 +223,7 @@ public class BlindManActivity extends AppCompatActivity {
     // This is the relevant dialog creation method. It is called through the dialog fragment.
     AppCompatDialog createDialog(int id) {
         // We use/need this to apply custom styles to the dialogs
-        ContextThemeWrapper ctw;
+        ContextThemeWrapper ctw = new ContextThemeWrapper(this, R.style.BlindmanDialogTheme);
 
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
@@ -233,7 +233,6 @@ public class BlindManActivity extends AppCompatActivity {
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            ctw = new ContextThemeWrapper(this, R.style.ColorPickerDialog);
             return ColorPickerView.createDialog(ctw, title, cp.color, (dialog, which) -> {
                 dialog.dismiss();
                 cp.color = which;
@@ -243,8 +242,6 @@ public class BlindManActivity extends AppCompatActivity {
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
-        // A custom style is applied programmatically (does not work via attributes).
-        ctw = new ContextThemeWrapper(this, R.style.BlindmanAlertDialog);
         AlertDialog.Builder b = new AlertDialog.Builder(ctw);
 
         switch (id) {
