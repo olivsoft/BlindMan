@@ -26,6 +26,8 @@ import com.google.android.gms.ads.RequestConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.olivsoft.android.blindman.databinding.MainBinding;
+
 public class BlindManActivity extends AppCompatActivity {
 
     // Constants
@@ -68,13 +70,14 @@ public class BlindManActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Set content view and toolbar
-        setContentView(R.layout.main);
-        Toolbar toolbar = findViewById(R.id.blindman_toolbar);
+        MainBinding binding = MainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        Toolbar toolbar = binding.blindmanToolbar;
         setSupportActionBar(toolbar);
 
         // Store references of layout objects
-        bmView = findViewById(R.id.blindman_view);
-        bmView.textView = findViewById(R.id.text_view);
+        bmView = binding.blindmanView;
+        bmView.textView = binding.textView;
 
         // Initialize ad banner. Test devices are older and current phones.
         List<String> testDeviceIds = List.of(
@@ -84,7 +87,7 @@ public class BlindManActivity extends AppCompatActivity {
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-        AdView adView = findViewById(R.id.ad_view);
+        AdView adView = binding.adView;
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
 
