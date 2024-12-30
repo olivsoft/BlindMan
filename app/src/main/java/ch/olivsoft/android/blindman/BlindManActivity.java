@@ -72,11 +72,11 @@ public class BlindManActivity extends AppCompatActivity {
         // Set content view and toolbar
         MainBinding binding = MainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Toolbar toolbar = binding.blindmanToolbar;
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         // Store references of layout objects
-        bmView = binding.blindmanView;
+        bmView = binding.gameView;
         bmView.textView = binding.textView;
 
         // Initialize ad banner. Test devices are older and current phones.

@@ -167,7 +167,6 @@ public class ColorPickerView extends View {
             @Override
             public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
                 super.onRestoreInstanceState(savedInstanceState);
-                view = binding.colorpickerMainview;
                 view.setColorDialogParameters(this,
                         savedInstanceState.getInt(INITIAL_COLOR), listener);
             }
@@ -178,7 +177,7 @@ public class ColorPickerView extends View {
                 binding = ColorpickerBinding.inflate(getLayoutInflater());
                 setContentView(binding.getRoot());
                 setTitle(dialogTitle);
-                view = binding.colorpickerMainview;
+                view = binding.colorPickerView;
                 if (savedInstanceState == null)
                     view.setColorDialogParameters(this, initialColor, listener);
             }

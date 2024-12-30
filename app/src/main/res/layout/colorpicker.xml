@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <ch.olivsoft.android.blindman.ColorPickerView
-        android:id="@+id/colorpicker_mainview"
+        android:id="@+id/color_picker_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
