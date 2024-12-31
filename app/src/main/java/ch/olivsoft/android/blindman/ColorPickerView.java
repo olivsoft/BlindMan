@@ -31,11 +31,11 @@ import ch.olivsoft.android.blindman.databinding.ColorpickerBinding;
  * Use the factory method
  * {@link ColorPickerView#createDialog(Context, String, int, DialogInterface.OnClickListener)}
  * doing all the work for you. The picked color (int) is passed back like in other dialogs via
- * a regular {@link DialogInterface.OnClickListener}. Alternatively, create a
+ * a regular {@link DialogInterface.OnClickListener}. Alternatively, create an
  * {@link AppCompatDialog} and pass this view (e.g., from a layout resource) to the dialog's
- * {@link AppCompatActivity#setContentView(View)} method. You have to call the
- * {@link ColorPickerView#setColorDialogParameters(DialogInterface,
- * int, DialogInterface.OnClickListener)} after that to complete the initialization.
+ * {@link AppCompatActivity#setContentView(View)} method. You then have to call
+ * {@link ColorPickerView#setColorPickerOnClickListener(DialogInterface, DialogInterface.OnClickListener)}
+ * and {@link ColorPickerView#setInitialColor(int)} to complete the initialization.
  * <br/>
  * <br/>
  * <b>Notice:</b>
@@ -70,54 +70,53 @@ public class ColorPickerView extends View {
     // Variables
     private DialogInterface dialog;
     private DialogInterface.OnClickListener listener;
-    private Rect measureRect;
+    private final Rect measureRect;
     private int tX, tY, circleRadius, centerRadius;
-    private Paint circlePaint, centerPaint;
-    private TextPaint textPaint;
+    private final Paint circlePaint, centerPaint;
+    private final TextPaint textPaint;
     private int textHeight;
     private boolean trackingCenter = false;
     private boolean highlightCenter;
 
-    /**
-     * Simple constructor to use when creating the view from code. Do not forget to call
-     * {@link ColorPickerView#setColorDialogParameters(DialogInterface,
-     * int, DialogInterface.OnClickListener)} afterwards.
-     *
-     * @param context The Context the view is running in
-     */
-    public ColorPickerView(Context context) {
-        super(context);
-    }
-
-    /**
-     * Formal constructor for layout mechanism if used that way. Do not forget to call
-     * {@link ColorPickerView#setColorDialogParameters(DialogInterface,
-     * int, DialogInterface.OnClickListener)} afterwards.
-     */
-    public ColorPickerView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
 
     /**
      * Use this method to initialize the {@link ColorPickerView} embedded into
-     * a {@link AppCompatDialog}.
+     * an {@link AppCompatDialog}.
      *
-     * @param dialog       The embedding dialog
-     * @param initialColor The initial color
-     * @param listener     The callback listener
+     * @param dialog   The embedding dialog
+     * @param listener The callback listener
      */
-    public void setColorDialogParameters(DialogInterface dialog, int initialColor,
-                                         DialogInterface.OnClickListener listener) {
+    public void setColorPickerOnClickListener(DialogInterface dialog,
+                                              DialogInterface.OnClickListener listener) {
         this.dialog = dialog;
         this.listener = listener;
+    }
 
-        // This may be helpful. It includes a bit of margin for good looks in case of no layout.
-        int d = 2 * (circleRadius + EDGE);
-        this.setMinimumWidth(d);
-        this.setMinimumHeight(d);
+    /**
+     * Sets the initial color of the color picker.
+     *
+     * @param initialColor The initial color
+     */
+    public void setInitialColor(int initialColor) {
+        centerPaint.setColor(initialColor);
+    }
 
-        // Content description
-        this.setContentDescription(LOG_TAG);
+    /**
+     * Returns the currently selected color
+     *
+     * @return Selected color (argb)
+     */
+    public int getSelectedColor() {
+        return centerPaint.getColor();
+    }
+
+    /**
+     * Constructor for layout mechanism. Do not forget to call
+     * {@link ColorPickerView#setColorPickerOnClickListener(DialogInterface, DialogInterface.OnClickListener)}
+     * afterwards.
+     */
+    public ColorPickerView(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
         // Initialize all variables that are not size-dependent
         measureRect = new Rect();
@@ -127,7 +126,6 @@ public class ColorPickerView extends View {
         circlePaint.setStyle(Paint.Style.STROKE);
 
         centerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        centerPaint.setColor(initialColor);
 
         textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.DEV_KERN_TEXT_FLAG);
         textPaint.setTextAlign(Align.CENTER);
@@ -135,7 +133,7 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Use this factory method to create a {@link AppCompatDialog} that contains a new
+     * Use this factory method to create an {@link AppCompatDialog} that contains a new
      * {@link ColorPickerView} instance.
      *
      * @param context      A valid context
@@ -153,7 +151,6 @@ public class ColorPickerView extends View {
         // properly. We also preserve the color state here!
         return new AppCompatDialog(context) {
             private static final String INITIAL_COLOR = "INITIAL_COLOR";
-            ColorpickerBinding binding;
             private ColorPickerView view;
 
             @NonNull
@@ -167,30 +164,22 @@ public class ColorPickerView extends View {
             @Override
             public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
                 super.onRestoreInstanceState(savedInstanceState);
-                view.setColorDialogParameters(this,
-                        savedInstanceState.getInt(INITIAL_COLOR), listener);
+                view.setInitialColor(savedInstanceState.getInt(INITIAL_COLOR));
             }
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-                binding = ColorpickerBinding.inflate(getLayoutInflater());
-                setContentView(binding.getRoot());
                 setTitle(dialogTitle);
+                ColorpickerBinding binding = ColorpickerBinding.inflate(getLayoutInflater());
+                setContentView(binding.getRoot());
                 view = binding.colorPickerView;
-                if (savedInstanceState == null)
-                    view.setColorDialogParameters(this, initialColor, listener);
+                view.setColorPickerOnClickListener(this, listener);
+                if (savedInstanceState == null) {
+                    view.setInitialColor(initialColor);
+                }
             }
         };
-    }
-
-    /**
-     * Returns the currently selected color
-     *
-     * @return Selected color (argb)
-     */
-    public int getSelectedColor() {
-        return centerPaint.getColor();
     }
 
     /**
@@ -326,10 +315,8 @@ public class ColorPickerView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         boolean retVal = super.onTouchEvent(event);
 
-        // Here we use double on purpose. This is not for precision
-        // but because x and y are only used as Math function arguments.
-        double x = event.getX() - tX;
-        double y = event.getY() - tY;
+        float x = event.getX() - tX;
+        float y = event.getY() - tY;
         boolean inCenter = Math.hypot(x, y) <= centerRadius;
 
         switch (event.getAction()) {
@@ -365,9 +352,10 @@ public class ColorPickerView extends View {
                     if (inCenter) {
                         // This is a click!
                         performClick();
-                    } else
+                    } else {
                         // No selection yet
                         invalidate();
+                    }
                 }
                 break;
 
