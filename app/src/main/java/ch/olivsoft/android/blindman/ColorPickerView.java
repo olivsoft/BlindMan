@@ -368,9 +368,13 @@ public class ColorPickerView extends View {
 
     @Override
     public boolean performClick() {
-        super.performClick();
-        // Pass selected color to listener
-        listener.onClick(dialog, getSelectedColor());
-        return true;
+        if (dialog != null && listener != null) {
+            // Pass selected color to listener
+            listener.onClick(dialog, getSelectedColor());
+            super.performClick();
+            return true;
+        } else {
+            return super.performClick();
+        }
     }
 }
