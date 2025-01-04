@@ -40,7 +40,7 @@ public class BlindManActivity extends AppCompatActivity {
     private static final String PREF_HAPTICS = "PREF_HAPTICS";
     private static final String PREF_SOUND = "PREF_SOUND";
     private static final String PREF_MUSIC = "PREF_MUSIC";
-    private static final String PREF_COL = "PREF_COL_";
+    private static final String PREF_COL_ = "PREF_COL_";
     private static final String PREF_BACKGROUND = "PREF_BACKGROUND";
 
     private static final int DIALOG_LEVEL = 1;
@@ -113,7 +113,7 @@ public class BlindManActivity extends AppCompatActivity {
         bmView.setSoundEffectsEnabled(p.getBoolean(PREF_SOUND, true));
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
-            c.color = p.getInt(PREF_COL + c.name(), c.defaultColor);
+            c.color = p.getInt(PREF_COL_ + c.name(), c.defaultColor);
         Log.d(LOG_TAG, "Preferences loaded");
 
         // Set volume control
@@ -146,7 +146,7 @@ public class BlindManActivity extends AppCompatActivity {
         e.putBoolean(PREF_SOUND, bmView.isSoundEffectsEnabled());
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled);
         for (ColoredPart c : ColoredPart.values())
-            e.putInt(PREF_COL + c.name(), c.color);
+            e.putInt(PREF_COL_ + c.name(), c.color);
         e.putBoolean(PREF_FIRST, false);
         e.apply();
     }
