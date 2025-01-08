@@ -1,11 +1,13 @@
 package ch.olivsoft.android.blindman;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
@@ -17,7 +19,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDialog;
 
 import ch.olivsoft.android.blindman.databinding.ColorpickerBinding;
@@ -32,10 +33,10 @@ import ch.olivsoft.android.blindman.databinding.ColorpickerBinding;
  * {@link ColorPickerView#createDialog(Context, String, int, DialogInterface.OnClickListener)}
  * doing all the work for you. The picked color (int) is passed back like in other dialogs via
  * a regular {@link DialogInterface.OnClickListener}. Alternatively, create an
- * {@link AppCompatDialog} and pass this view (e.g., from a layout resource) to the dialog's
- * {@link AppCompatActivity#setContentView(View)} method. You then have to call
- * {@link ColorPickerView#setColorPickerOnClickListener(DialogInterface, DialogInterface.OnClickListener)}
- * and {@link ColorPickerView#setInitialColor(int)} to complete the initialization.
+ * {@link AppCompatDialog} and pass this view (e.g., from a layout resource) to the
+ * {@link AppCompatDialog#setContentView(View)} method. You then have to call
+ * {@link ColorPickerView#setInitialColor(int)} to complete the initialization, and you can catch
+ * the selected color with an onClickListener, with clickable disabled.
  * <br/>
  * <br/>
  * <b>Notice:</b>
@@ -44,8 +45,6 @@ import ch.olivsoft.android.blindman.databinding.ColorpickerBinding;
  * href="http://www.apache.org/licenses/LICENSE-2.0">this license</a>. Apart
  * from reordering, comments and renaming, the major changes are as follows:
  * <ul>
- * <li>The listener interface has been replaced by an available one from the
- * platform's {@link DialogInterface}.
  * <li>An "OK" text in "anti-color" is placed onto the central button.
  * <li>The total size is to a certain extent determined from the total available
  * screen size.
@@ -68,29 +67,15 @@ public class ColorPickerView extends View {
             Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED};
 
     // Variables
-    private DialogInterface dialog;
-    private DialogInterface.OnClickListener listener;
     private final Rect measureRect;
-    private int tX, tY, circleRadius, centerRadius;
+    private final Point centerPoint = new Point();
+    private int circleRadius, centerRadius;
     private final Paint circlePaint, centerPaint;
     private final TextPaint textPaint;
     private int textHeight;
     private boolean trackingCenter = false;
     private boolean highlightCenter;
 
-
-    /**
-     * Use this method to initialize the {@link ColorPickerView} embedded into
-     * an {@link AppCompatDialog}.
-     *
-     * @param dialog   The embedding dialog
-     * @param listener The callback listener
-     */
-    public void setColorPickerOnClickListener(DialogInterface dialog,
-                                              DialogInterface.OnClickListener listener) {
-        this.dialog = dialog;
-        this.listener = listener;
-    }
 
     /**
      * Sets the initial color of the color picker.
@@ -111,9 +96,7 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Constructor for layout mechanism. Do not forget to call
-     * {@link ColorPickerView#setColorPickerOnClickListener(DialogInterface, DialogInterface.OnClickListener)}
-     * afterwards.
+     * Constructor for layout mechanism.
      */
     public ColorPickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -146,9 +129,6 @@ public class ColorPickerView extends View {
             Context context, String dialogTitle, int initialColor,
             DialogInterface.OnClickListener listener) {
 
-        // This hides the somewhat confusing double use of the dialog reference
-        // from the caller. It is the best way of handling OnClick(Dialog, int)
-        // properly. We also preserve the color state here!
         return new AppCompatDialog(context) {
             private static final String INITIAL_COLOR = "INITIAL_COLOR";
             private ColorPickerView view;
@@ -156,6 +136,7 @@ public class ColorPickerView extends View {
             @NonNull
             @Override
             public Bundle onSaveInstanceState() {
+                // We preserve the color state!
                 Bundle bundle = super.onSaveInstanceState();
                 bundle.putInt(INITIAL_COLOR, view.getSelectedColor());
                 return bundle;
@@ -174,10 +155,13 @@ public class ColorPickerView extends View {
                 ColorpickerBinding binding = ColorpickerBinding.inflate(getLayoutInflater());
                 setContentView(binding.getRoot());
                 view = binding.colorPickerView;
-                view.setColorPickerOnClickListener(this, listener);
-                if (savedInstanceState == null) {
+                if (savedInstanceState == null)
                     view.setInitialColor(initialColor);
-                }
+                // The view will send back a click once the color is selected.
+                // Therefore, all other clicks must be disabled.
+                view.setOnClickListener(v ->
+                        listener.onClick(this, view.getSelectedColor()));
+                view.setClickable(false);
             }
         };
     }
@@ -233,19 +217,19 @@ public class ColorPickerView extends View {
         if (this.isInEditMode())
             return;
 
-        // We determine the screen size through a strange
-        // and buggy function (see comments in source).
-        // For a perfect look the size must be an even number.
         getWindowVisibleDisplayFrame(measureRect);
         if (measureRect.isEmpty()) {
             setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
             return;
         }
-        circleRadius = Math.max(Math.min(
-                measureRect.width(), measureRect.height()) / 4, MIN_R);
+
+        circleRadius = Math.max(MIN_R,
+                Math.min(measureRect.width(), measureRect.height()) / 4);
         Log.i(LOG_TAG, String.format("Measured radius: %d", circleRadius));
+
         // Give a bit of space on the edges
         int d = 2 * (circleRadius + EDGE);
+        // d is an even number which is important for the view to look good
         setMeasuredDimension(d, d);
     }
 
@@ -258,16 +242,7 @@ public class ColorPickerView extends View {
         // Determine the translation for onDraw.
         // No matter how big the view is in the end, we
         // want to paint in the center of it.
-        tX = w / 2;
-        tY = h / 2;
-
-        // One more check if the size requested in onMeasure has been realized.
-        // If not we need to adjust the radius of the circle again. This should
-        // never be the case if the layout mechanism works correctly.
-        if (circleRadius + EDGE > Math.min(tX, tY)) {
-            circleRadius = Math.min(tX, tY) - EDGE;
-            Log.w(LOG_TAG, String.format("Reduced radius: %d", circleRadius));
-        }
+        centerPoint.set(w / 2, h / 2);
 
         // This is the moment to set all other size dependent properties
         centerRadius = circleRadius / 3;
@@ -284,7 +259,7 @@ public class ColorPickerView extends View {
         if (this.isInEditMode())
             return;
 
-        canvas.translate(tX, tY);
+        canvas.translate(centerPoint.x, centerPoint.y);
         canvas.drawCircle(0, 0, centerRadius, centerPaint);
         canvas.drawCircle(0, 0, circleRadius - centerRadius / 2f, circlePaint);
 
@@ -311,12 +286,13 @@ public class ColorPickerView extends View {
         canvas.drawText(OK, 0, textHeight / 2f, textPaint);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean retVal = super.onTouchEvent(event);
 
-        float x = event.getX() - tX;
-        float y = event.getY() - tY;
+        float x = event.getX() - centerPoint.x;
+        float y = event.getY() - centerPoint.y;
         boolean inCenter = Math.hypot(x, y) <= centerRadius;
 
         switch (event.getAction()) {
@@ -327,6 +303,8 @@ public class ColorPickerView extends View {
                     invalidate();
                     break;
                 }
+                // The missing break is on purpose!
+                // A simple DOWN event will also change the color as in MOVE.
 
             case MotionEvent.ACTION_MOVE:
                 if (trackingCenter) {
@@ -350,8 +328,9 @@ public class ColorPickerView extends View {
                 if (trackingCenter) {
                     trackingCenter = false;
                     if (inCenter) {
-                        // This is a click!
-                        performClick();
+                        // This is a click! Catch it as
+                        // the caller with an OnClickListener.
+                        return performClick();
                     } else {
                         // No selection yet
                         invalidate();
@@ -364,17 +343,5 @@ public class ColorPickerView extends View {
         }
 
         return true;
-    }
-
-    @Override
-    public boolean performClick() {
-        if (dialog != null && listener != null) {
-            // Pass selected color to listener
-            listener.onClick(dialog, getSelectedColor());
-            super.performClick();
-            return true;
-        } else {
-            return super.performClick();
-        }
     }
 }
