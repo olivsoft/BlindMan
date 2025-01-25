@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="BlindmanTheme" parent="Theme.Material3.Dark.NoActionBar">
         <!-- This includes several styles, above all the game field background color -->
@@ -9,7 +9,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
-        <!-- Dialog themes, although they do not seem to work. Programmatically, they do. -->
+        <!-- Dialog themes -->
         <item name="dialogTheme">@style/BlindmanDialogTheme</item>
         <item name="android:dialogTheme">@style/BlindmanDialogTheme</item>
         <item name="alertDialogTheme">@style/BlindmanDialogTheme</item>
@@ -20,5 +20,7 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textAlignment">gravity</item>
+        <!-- Same color as menu background -->
+        <item name="android:background">?attr/colorSurfaceContainer</item>
     </style>
 </resources>

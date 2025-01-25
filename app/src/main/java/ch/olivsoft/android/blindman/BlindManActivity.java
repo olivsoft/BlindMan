@@ -8,22 +8,19 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
-import androidx.appcompat.widget.Toolbar;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ch.olivsoft.android.blindman.databinding.MainBinding;
@@ -69,27 +66,21 @@ public class BlindManActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set content view and toolbar
+        // Assign bindings, set content view and toolbar
         MainBinding binding = MainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        Toolbar toolbar = binding.toolbar;
-        setSupportActionBar(toolbar);
-
-        // Store references of layout objects
         bmView = binding.gameView;
         bmView.textView = binding.textView;
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
 
         // Initialize ad banner. Test devices are older and current phones.
         List<String> testDeviceIds = List.of(
                 "98DDF74ECDE599B008274ED3B5C5DCA5",
                 "54A8240637407DBE6671033FDA2C7FCA",
                 "B6B9CB212805EAF05227298CC384418C");
-        RequestConfiguration configuration =
-                new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
-        MobileAds.setRequestConfiguration(configuration);
-        AdView adView = binding.adView;
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+        MobileAds.setRequestConfiguration(new RequestConfiguration
+                .Builder().setTestDeviceIds(testDeviceIds).build());
+        binding.adView.loadAd(new AdRequest.Builder().build());
 
         // Create music player (needed in preferences)
         Player.Listener listener = new Player.Listener() {
@@ -225,9 +216,6 @@ public class BlindManActivity extends AppCompatActivity {
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
     AppCompatDialog createDialog(int id) {
-        // We use/need this to apply custom styles to the dialogs
-        ContextThemeWrapper ctw = new ContextThemeWrapper(this, R.style.BlindmanDialogTheme);
-
         // First we treat the color picker
         if (id >= DIALOG_MASK_COLORS) {
             int icp = id - DIALOG_MASK_COLORS;
@@ -236,21 +224,26 @@ public class BlindManActivity extends AppCompatActivity {
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            return ColorPickerView.createDialog(ctw, title, cp.color, (dialog, which) -> {
+            return ColorPickerView.createDialog(this, title, cp.color, (dialog, which) -> {
                 dialog.dismiss();
                 cp.color = which;
                 bmView.invalidate();
+                doDialog(DIALOG_COLORS);
             });
         }
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // For readability throughout the many cases we don't use chaining.
-        AlertDialog.Builder b = new AlertDialog.Builder(ctw);
+        // We use custom ArrayAdapter layouts for some of the list choice types.
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        ArrayAdapter<String> a;
 
         switch (id) {
             case DIALOG_LEVEL:
                 b.setTitle(R.string.menu_level);
-                b.setSingleChoiceItems(R.array.items_level, bmView.level - 1, (dialog, which) -> {
+                a = new ArrayAdapter<>(this, R.layout.dialog_singlechoice_item);
+                a.addAll(getResources().getStringArray(R.array.items_level));
+                b.setSingleChoiceItems(a, bmView.level - 1, (dialog, which) -> {
                     dialog.dismiss();
                     bmView.newGame(which + 1);
                 });
@@ -258,7 +251,9 @@ public class BlindManActivity extends AppCompatActivity {
 
             case DIALOG_SIZE:
                 b.setTitle(R.string.menu_size);
-                b.setSingleChoiceItems(R.array.items_size, bmView.size - 1, (dialog, which) -> {
+                a = new ArrayAdapter<>(this, R.layout.dialog_singlechoice_item);
+                a.addAll(getResources().getStringArray(R.array.items_size));
+                b.setSingleChoiceItems(a, bmView.size - 1, (dialog, which) -> {
                     dialog.dismiss();
                     bmView.initField(which + 1);
                     bmView.newGame(0);
@@ -267,13 +262,11 @@ public class BlindManActivity extends AppCompatActivity {
 
             case DIALOG_LIVES:
                 b.setTitle(R.string.menu_lives);
-                // The ArrayAdapter does not produce the same layout as a direct call with R... or a bare array.
-                // Therefore, a more general approach is used to create the list of choices.
-                List<String> items = new ArrayList<>(BlindManView.ALLOWED_LIVES.size());
+                a = new ArrayAdapter<>(this, R.layout.dialog_singlechoice_item);
                 for (int i : BlindManView.ALLOWED_LIVES)
-                    items.add(i != 0 ? String.valueOf(i) : "∞");
+                    a.add(i != 0 ? String.valueOf(i) : "∞");
                 int currSel = BlindManView.ALLOWED_LIVES.indexOf(bmView.getLives());
-                b.setSingleChoiceItems(items.toArray(new String[0]), currSel, (dialog, which) -> {
+                b.setSingleChoiceItems(a, currSel, (dialog, which) -> {
                     dialog.dismiss();
                     bmView.setLives(BlindManView.ALLOWED_LIVES.get(which));
                 });
@@ -281,7 +274,9 @@ public class BlindManActivity extends AppCompatActivity {
 
             case DIALOG_COLORS:
                 b.setTitle(R.string.menu_colors);
-                b.setItems(R.array.items_colors, (dialog, which) -> {
+                a = new ArrayAdapter<>(this, R.layout.dialog_list_item);
+                a.addAll(getResources().getStringArray(R.array.items_colors));
+                b.setAdapter(a, (dialog, which) -> {
                     dialog.dismiss();
                     if (which == ColoredPart.values().length) {
                         // Reset colors
@@ -292,11 +287,14 @@ public class BlindManActivity extends AppCompatActivity {
                         doDialog(which + DIALOG_MASK_COLORS);
                     }
                 });
+                b.setPositiveButton(android.R.string.ok, null);
                 break;
 
             case DIALOG_BACKGROUND:
                 b.setTitle(R.string.menu_background);
-                b.setSingleChoiceItems(R.array.items_background, bmView.background, (dialog, which) -> {
+                a = new ArrayAdapter<>(this, R.layout.dialog_singlechoice_item);
+                a.addAll(getResources().getStringArray(R.array.items_background));
+                b.setSingleChoiceItems(a, bmView.background, (dialog, which) -> {
                     dialog.dismiss();
                     bmView.background = which;
                     bmView.invalidate();
@@ -309,6 +307,7 @@ public class BlindManActivity extends AppCompatActivity {
                         bmView.isHapticFeedbackEnabled(),
                         bmView.isSoundEffectsEnabled(),
                         musicPlayer.isMusicEnabled};
+                // Unfortunately, the adapter cannot be used here. Looks are ok though.
                 b.setMultiChoiceItems(R.array.items_effects, effEnabled, (dialog, which, isChecked) -> {
                     switch (which) {
                         case 0:
@@ -329,7 +328,6 @@ public class BlindManActivity extends AppCompatActivity {
                             dialog.dismiss();
                     }
                 });
-                // A button press in an AlertDialog includes dismiss (!)
                 b.setPositiveButton(android.R.string.ok, null);
                 break;
 
