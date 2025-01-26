@@ -1,54 +1,44 @@
-package ch.olivsoft.android.blindman;
+package ch.olivsoft.android.blindman
 
-import android.os.CountDownTimer;
+import android.os.CountDownTimer
 
 /**
  * Counts down until cancelled or the given time has elapsed.
- * This timer extends {@link CountDownTimer} and includes
+ * This timer extends [CountDownTimer] and includes
  * a method to check if it is currently running.
  * It does not call any intermediate ticks.
  * To use this class extend from it and override onTimerElapsed.
  *
  * @author Oliver Fritz, OlivSoft
  */
-public abstract class SimpleCountDownTimer extends CountDownTimer {
+abstract class SimpleCountDownTimer(millis: Long) : CountDownTimer(millis, millis) {
 
-    private boolean timerRunning = false;
-
-    public SimpleCountDownTimer(long millis) {
-        super(millis, millis);
-    }
-
-    public final boolean isTimerRunning() {
-        return timerRunning;
-    }
+    var isTimerRunning = false
 
     // Pseudo overrides
-    public synchronized final void startTimer() {
-        if (timerRunning)
-            return;
-        timerRunning = true;
-        start();
+    @Synchronized
+    fun startTimer() {
+        if (isTimerRunning) return
+        isTimerRunning = true
+        start()
     }
 
-    public synchronized final void cancelTimer() {
-        if (!timerRunning)
-            return;
-        timerRunning = false;
-        cancel();
+    @Synchronized
+    fun cancelTimer() {
+        if (!isTimerRunning) return
+        isTimerRunning = false
+        cancel()
     }
 
     // This must be overridden
-    public abstract void onTimerElapsed();
+    abstract fun onTimerElapsed()
 
-    @Override
-    public final void onFinish() {
-        timerRunning = false;
-        onTimerElapsed();
+    override fun onFinish() {
+        isTimerRunning = false
+        onTimerElapsed()
     }
 
     // Get rid of this method
-    @Override
-    public final void onTick(long millisUntilFinished) {
+    override fun onTick(millisUntilFinished: Long) {
     }
 }
