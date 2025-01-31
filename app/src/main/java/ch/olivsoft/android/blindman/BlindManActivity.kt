@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman
 
-import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.media.AudioManager
 import android.os.Bundle
@@ -8,7 +7,10 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
+import android.widget.CheckedTextView
+import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
@@ -38,16 +40,10 @@ class BlindManActivity : AppCompatActivity() {
         private const val PREF_COL_ = "PREF_COL_"
         private const val PREF_BACKGROUND = "PREF_BACKGROUND"
 
-        private const val DIALOG_LEVEL = 1
-        private const val DIALOG_SIZE = 2
-        private const val DIALOG_LIVES = 3
-        private const val DIALOG_COLORS = 4
-        private const val DIALOG_BACKGROUND = 5
-        private const val DIALOG_SOUND = 6
-        private const val DIALOG_MIDI = 11
-        private const val DIALOG_HELP = 21
-        private const val DIALOG_ABOUT = 31
-        private const val DIALOG_MASK_COLORS = 101
+        // Dialog ids not defined in R.
+        // Must have values starting after color part ids.
+        private val DIALOG_HELP = ColoredPart.entries.size
+        private val DIALOG_MIDI = DIALOG_HELP + 1
     }
 
     // View and Music Player
@@ -71,7 +67,6 @@ class BlindManActivity : AppCompatActivity() {
         val binding = MainBinding.inflate(layoutInflater)
         bmView = binding.gameView
         bmView.textView = binding.textView
-        Log.d(LOG_TAG, "View inflated and bound")
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
@@ -161,19 +156,10 @@ class BlindManActivity : AppCompatActivity() {
         return true
     }
 
-    @SuppressLint("NonConstantResourceId")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_level -> doDialog(DIALOG_LEVEL)
-            R.id.menu_size -> doDialog(DIALOG_SIZE)
-            R.id.menu_lives -> doDialog(DIALOG_LIVES)
-            R.id.menu_colors -> doDialog(DIALOG_COLORS)
-            R.id.menu_background -> doDialog(DIALOG_BACKGROUND)
-            R.id.menu_sound -> doDialog(DIALOG_SOUND)
-            R.id.menu_about -> doDialog(DIALOG_ABOUT)
-            R.id.menu_help -> doDialog(DIALOG_HELP)
             R.id.menu_quit -> finish()
-            else -> return super.onOptionsItemSelected(item)
+            else -> doDialog(item.itemId)
         }
         return true
     }
@@ -186,10 +172,9 @@ class BlindManActivity : AppCompatActivity() {
     // This is the relevant dialog creation method. It is called through the dialog fragment.
     fun createDialog(id: Int): AppCompatDialog {
         // First we treat the color picker
-        if (id >= DIALOG_MASK_COLORS) {
-            val icp = id - DIALOG_MASK_COLORS
-            val title = resources.getStringArray(R.array.items_colors)[icp]
-            val cp = ColoredPart.entries[icp]
+        if (id < ColoredPart.entries.size) {
+            val title = resources.getStringArray(R.array.items_colors)[id]
+            val cp = ColoredPart.entries[id]
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
@@ -199,33 +184,33 @@ class BlindManActivity : AppCompatActivity() {
                 dialog.dismiss()
                 cp.color = which
                 bmView.invalidate()
-                doDialog(DIALOG_COLORS)
+                doDialog(R.id.menu_colors)
             }
         }
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
-        // For readability throughout the many cases we don't use chaining.
-        // We use custom ArrayAdapter layouts for some of the list choice types.
-        val b = AlertDialog.Builder(this)
+        // We use custom ArrayAdapter layouts for all list choice types.
         val a: ArrayAdapter<String>
+        val b = AlertDialog.Builder(this)
 
         when (id) {
-            DIALOG_LEVEL -> {
-                b.setTitle(R.string.menu_level)
+            R.id.menu_level -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_level))
+                b.setTitle(R.string.menu_level)
                 b.setSingleChoiceItems(
                     a, bmView.level - 1
                 ) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
                     bmView.newGame(which + 1)
                 }
+                return b.create()
             }
 
-            DIALOG_SIZE -> {
-                b.setTitle(R.string.menu_size)
+            R.id.menu_size -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_size))
+                b.setTitle(R.string.menu_size)
                 b.setSingleChoiceItems(
                     a, bmView.size - 1
                 ) { dialog: DialogInterface, which: Int ->
@@ -233,24 +218,29 @@ class BlindManActivity : AppCompatActivity() {
                     bmView.initField(which + 1)
                     bmView.newGame(0)
                 }
+                return b.create()
             }
 
-            DIALOG_LIVES -> {
-                b.setTitle(R.string.menu_lives)
+            R.id.menu_lives -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 for (i in BlindManView.ALLOWED_LIVES)
-                    a.add(if (i != 0) i.toString() else "∞")
+                    a.add(if (i == 0) "∞" else i.toString())
                 val currSel = BlindManView.ALLOWED_LIVES.indexOf(bmView.lives)
-                b.setSingleChoiceItems(a, currSel) { dialog: DialogInterface, which: Int ->
+                b.setTitle(R.string.menu_lives)
+                b.setSingleChoiceItems(
+                    a, currSel
+                ) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
                     bmView.lives = BlindManView.ALLOWED_LIVES[which]
                 }
+                return b.create()
             }
 
-            DIALOG_COLORS -> {
-                b.setTitle(R.string.menu_colors)
+            R.id.menu_colors -> {
                 a = ArrayAdapter(this, R.layout.dialog_list_item)
                 a.addAll(*resources.getStringArray(R.array.items_colors))
+                b.setTitle(R.string.menu_colors)
+                b.setPositiveButton(android.R.string.ok, null)
                 b.setAdapter(a) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
                     if (which == ColoredPart.entries.size) {
@@ -258,87 +248,91 @@ class BlindManActivity : AppCompatActivity() {
                         resetAll()
                         bmView.invalidate()
                     } else {
-                        // Call color picker dialog
-                        doDialog(which + DIALOG_MASK_COLORS)
+                        // Call the color picker dialog
+                        doDialog(which)
                     }
                 }
-                b.setPositiveButton(android.R.string.ok, null)
+                return b.create()
             }
 
-            DIALOG_BACKGROUND -> {
-                b.setTitle(R.string.menu_background)
+            R.id.menu_background -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_background))
+                b.setTitle(R.string.menu_background)
                 b.setSingleChoiceItems(
-                    a, bmView.background
+                    a,
+                    bmView.background
                 ) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
                     bmView.background = which
                     bmView.invalidate()
                 }
+                return b.create()
             }
 
-            DIALOG_SOUND -> {
-                b.setTitle(R.string.menu_sound)
-                val effEnabled = booleanArrayOf(
-                    bmView.isHapticFeedbackEnabled,
-                    bmView.isSoundEffectsEnabled,
-                    musicPlayer.isMusicEnabled
-                )
-                // Unfortunately, the adapter cannot be used here. Looks are ok though.
-                b.setMultiChoiceItems(
-                    R.array.items_effects, effEnabled
-                ) { dialog: DialogInterface, which: Int, isChecked: Boolean ->
-                    when (which) {
-                        0 -> bmView.isHapticFeedbackEnabled = isChecked
+            // Custom layout version of a multi choice dialog with
+            // same font size and appearance as all other list dialogs
+            R.id.menu_sound -> {
+                a = ArrayAdapter(this, R.layout.dialog_multichoice_item)
+                a.addAll(*resources.getStringArray(R.array.items_effects))
+                val d = b.setTitle(R.string.menu_sound)
+                    .setAdapter(a, null)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create()
+                d.listView.let {
+                    // Set initial states and listener. Both explicit here.
+                    // The OnShowListener is THE way to set initial states.
+                    it.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+                    it.itemsCanFocus = false
+                    d.setOnShowListener { _ ->
+                        it.setItemChecked(0, bmView.isHapticFeedbackEnabled)
+                        it.setItemChecked(1, bmView.isSoundEffectsEnabled)
+                        it.setItemChecked(2, musicPlayer.isMusicEnabled)
+                    }
+                    it.onItemClickListener = OnItemClickListener { _, view, position, _ ->
+                        val ctv = view as CheckedTextView
+                        when (position) {
+                            0 -> bmView.isHapticFeedbackEnabled = ctv.isChecked
 
-                        1 -> {
-                            bmView.isSoundEffectsEnabled = isChecked
-                            setVolumeControlStream()
+                            1 -> {
+                                bmView.isSoundEffectsEnabled = ctv.isChecked
+                                setVolumeControlStream()
+                            }
+
+                            2 -> {
+                                musicPlayer.toggle(ctv.isChecked)
+                                setVolumeControlStream()
+                            }
+
+                            else -> d.dismiss()
                         }
-
-                        2 -> {
-                            musicPlayer.toggle(isChecked)
-                            setVolumeControlStream()
-                        }
-
-                        else -> dialog.dismiss()
                     }
                 }
-                b.setPositiveButton(android.R.string.ok, null)
+                return d
             }
 
-            DIALOG_MIDI -> {
-                b.setTitle(R.string.title_midi)
-                b.setMessage(R.string.text_midi)
-                b.setPositiveButton(android.R.string.ok, null)
-            }
+            R.id.menu_about -> return b.setTitle(R.string.menu_about)
+                .setMessage(R.string.text_about)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
 
-            DIALOG_ABOUT -> {
-                b.setTitle(R.string.menu_about)
-                b.setMessage(R.string.text_about)
-                b.setPositiveButton(android.R.string.ok, null)
-            }
+            DIALOG_MIDI -> return b.setTitle(R.string.title_midi)
+                .setMessage(R.string.text_midi)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
 
-            DIALOG_HELP -> {
-                b.setTitle(R.string.menu_help)
-                b.setMessage(R.string.text_help)
-                b.setPositiveButton(android.R.string.ok, null)
-            }
-
-            else -> {
-                b.setTitle(R.string.menu_help)
-                b.setMessage(R.string.text_help)
-                b.setPositiveButton(android.R.string.ok, null)
-            }
+            // Includes help dialog
+            else -> return b.setTitle(R.string.menu_help)
+                .setMessage(R.string.text_help)
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
         }
-
-        return b.create()
     }
 
     // Keys are treated here
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action != KeyEvent.ACTION_DOWN) return false
+        if (event.action != KeyEvent.ACTION_DOWN)
+            return false
 
         when (keyCode) {
             KeyEvent.KEYCODE_DPAD_RIGHT,
@@ -361,7 +355,6 @@ class BlindManActivity : AppCompatActivity() {
 
             else -> return super.onKeyDown(keyCode, event)
         }
-
         return true
     }
 }
