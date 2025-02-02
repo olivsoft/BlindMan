@@ -3,15 +3,15 @@
     <string name="desc_view">Spielfeld</string>
     <string name="desc_ad">Werbung</string>
 
-    <string name="menu_level">Niveau</string>
-    <string name="menu_size">Größe</string>
-    <string name="menu_lives">Leben</string>
-    <string name="menu_colors">Farben</string>
-    <string name="menu_background">Hintergrund</string>
-    <string name="menu_sound">Vibration &amp; Ton</string>
-    <string name="menu_help">Hilfe</string>
-    <string name="menu_about">Über BlindMan</string>
-    <string name="menu_quit">Beenden</string>
+    <string name="title_level">Niveau</string>
+    <string name="title_size">Größe</string>
+    <string name="title_lives">Leben</string>
+    <string name="title_colors">Farben</string>
+    <string name="title_background">Hintergrund</string>
+    <string name="title_sound">Vibration &amp; Ton</string>
+    <string name="title_help">Hilfe</string>
+    <string name="title_about">Über BlindMan</string>
+    <string name="title_quit">Beenden</string>
     
     <string name="mess_start">Tippen um loszulaufen</string>
     <string name="mess_show">Tippen um die Hindernisse anzuzeigen</string>

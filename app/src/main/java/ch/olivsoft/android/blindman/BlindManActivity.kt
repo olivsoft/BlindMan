@@ -39,11 +39,6 @@ class BlindManActivity : AppCompatActivity() {
         private const val PREF_MUSIC = "PREF_MUSIC"
         private const val PREF_COL_ = "PREF_COL_"
         private const val PREF_BACKGROUND = "PREF_BACKGROUND"
-
-        // Dialog ids not defined in R.
-        // Must have values starting after color part ids.
-        private val DIALOG_HELP = ColoredPart.entries.size
-        private val DIALOG_MIDI = DIALOG_HELP + 1
     }
 
     // View and Music Player
@@ -86,7 +81,7 @@ class BlindManActivity : AppCompatActivity() {
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(LOG_TAG, "MusicPlayer error", error)
                 musicPlayer.toggle(false)
-                doDialog(DIALOG_MIDI)
+                doDialog(R.id.midi)
             }
         }
         musicPlayer = MusicPlayer(this, R.raw.nervous_cubase, true, listener)
@@ -110,7 +105,7 @@ class BlindManActivity : AppCompatActivity() {
 
         // Show help dialog at very first execution
         if (p.getBoolean(PREF_FIRST, true))
-            doDialog(DIALOG_HELP)
+            doDialog(R.id.help)
     }
 
     override fun onStart() {
@@ -158,7 +153,7 @@ class BlindManActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_quit -> finish()
+            R.id.quit -> finish()
             else -> doDialog(item.itemId)
         }
         return true
@@ -184,7 +179,7 @@ class BlindManActivity : AppCompatActivity() {
                 dialog.dismiss()
                 cp.color = which
                 bmView.invalidate()
-                doDialog(R.id.menu_colors)
+                doDialog(R.id.colors)
             }
         }
 
@@ -194,10 +189,10 @@ class BlindManActivity : AppCompatActivity() {
         val b = AlertDialog.Builder(this)
 
         when (id) {
-            R.id.menu_level -> {
+            R.id.level -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_level))
-                b.setTitle(R.string.menu_level)
+                b.setTitle(R.string.title_level)
                 b.setSingleChoiceItems(
                     a, bmView.level - 1
                 ) { dialog: DialogInterface, which: Int ->
@@ -207,10 +202,10 @@ class BlindManActivity : AppCompatActivity() {
                 return b.create()
             }
 
-            R.id.menu_size -> {
+            R.id.size -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_size))
-                b.setTitle(R.string.menu_size)
+                b.setTitle(R.string.title_size)
                 b.setSingleChoiceItems(
                     a, bmView.size - 1
                 ) { dialog: DialogInterface, which: Int ->
@@ -221,12 +216,12 @@ class BlindManActivity : AppCompatActivity() {
                 return b.create()
             }
 
-            R.id.menu_lives -> {
+            R.id.lives -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 for (i in BlindManView.ALLOWED_LIVES)
                     a.add(if (i == 0) "∞" else i.toString())
                 val currSel = BlindManView.ALLOWED_LIVES.indexOf(bmView.lives)
-                b.setTitle(R.string.menu_lives)
+                b.setTitle(R.string.title_lives)
                 b.setSingleChoiceItems(
                     a, currSel
                 ) { dialog: DialogInterface, which: Int ->
@@ -236,10 +231,10 @@ class BlindManActivity : AppCompatActivity() {
                 return b.create()
             }
 
-            R.id.menu_colors -> {
+            R.id.colors -> {
                 a = ArrayAdapter(this, R.layout.dialog_list_item)
                 a.addAll(*resources.getStringArray(R.array.items_colors))
-                b.setTitle(R.string.menu_colors)
+                b.setTitle(R.string.title_colors)
                 b.setPositiveButton(android.R.string.ok, null)
                 b.setAdapter(a) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
@@ -255,10 +250,10 @@ class BlindManActivity : AppCompatActivity() {
                 return b.create()
             }
 
-            R.id.menu_background -> {
+            R.id.background -> {
                 a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_background))
-                b.setTitle(R.string.menu_background)
+                b.setTitle(R.string.title_background)
                 b.setSingleChoiceItems(
                     a,
                     bmView.background
@@ -272,10 +267,10 @@ class BlindManActivity : AppCompatActivity() {
 
             // Custom layout version of a multi choice dialog with
             // same font size and appearance as all other list dialogs
-            R.id.menu_sound -> {
+            R.id.sound -> {
                 a = ArrayAdapter(this, R.layout.dialog_multichoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_effects))
-                val d = b.setTitle(R.string.menu_sound)
+                val d = b.setTitle(R.string.title_sound)
                     .setAdapter(a, null)
                     .setPositiveButton(android.R.string.ok, null)
                     .create()
@@ -311,18 +306,18 @@ class BlindManActivity : AppCompatActivity() {
                 return d
             }
 
-            R.id.menu_about -> return b.setTitle(R.string.menu_about)
+            R.id.about -> return b.setTitle(R.string.title_about)
                 .setMessage(R.string.text_about)
                 .setPositiveButton(android.R.string.ok, null)
                 .create()
 
-            DIALOG_MIDI -> return b.setTitle(R.string.title_midi)
+            R.id.midi -> return b.setTitle(R.string.title_midi)
                 .setMessage(R.string.text_midi)
                 .setPositiveButton(android.R.string.ok, null)
                 .create()
 
-            // Includes help dialog
-            else -> return b.setTitle(R.string.menu_help)
+            // Includes help
+            else -> return b.setTitle(R.string.title_help)
                 .setMessage(R.string.text_help)
                 .setPositiveButton(android.R.string.ok, null)
                 .create()

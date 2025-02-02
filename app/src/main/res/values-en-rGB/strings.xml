@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="menu_colors">Colours</string>
+    <string name="title_colors">Colours</string>
 </resources>

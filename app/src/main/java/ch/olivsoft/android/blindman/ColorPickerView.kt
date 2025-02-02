@@ -147,7 +147,6 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    // Initialize all variables that are not size-dependent
     private val measureRect = Rect()
     private val centerPoint = PointF()
     private var circleRadius = 0
@@ -174,11 +173,10 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
      * Constructor for layout mechanism.
      */
     init {
+        // Initialize all variables that are not size-dependent
         circlePaint.setShader(SweepGradient(0f, 0f, COLORS, null))
         circlePaint.style = Paint.Style.STROKE
-
         centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-
         textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.DEV_KERN_TEXT_FLAG)
         textPaint.textAlign = Align.CENTER
         textPaint.setTypeface(Typeface.DEFAULT_BOLD)
@@ -212,12 +210,8 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         if (this.isInEditMode)
             return
 
-        // Determine the translation for onDraw.
-        // No matter how big the view is in the end, we
-        // want to paint in the center of it.
+        // This is the moment to set size dependent properties
         centerPoint.set(w / 2f, h / 2f)
-
-        // This is the moment to set all other size dependent properties
         centerRadius = circleRadius / 3
         circlePaint.strokeWidth = centerRadius.toFloat()
         centerPaint.strokeWidth = circleRadius / 20f
@@ -238,7 +232,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         if (trackingCenter) {
             // This is just for adding a little ring around the OK button
             // which shows if we touch still in the center. It is dimmed
-            // if we move out of the center.
+            // when we move out of the center.
             centerPaint.style = Paint.Style.STROKE
             if (!highlightCenter)
                 centerPaint.alpha = FULL_ALPHA / 2

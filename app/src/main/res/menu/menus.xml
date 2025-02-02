@@ -1,42 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_level"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_level" />
+        android:id="@+id/level"
+        android:title="@string/title_level"
+        app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/menu_size"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_size" />
+        android:id="@+id/size"
+        android:title="@string/title_size"
+        app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/menu_lives"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_lives" />
+        android:id="@+id/lives"
+        android:title="@string/title_lives"
+        app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/menu_colors"
-        app:showAsAction="ifRoom"
-        android:title="@string/menu_colors" />
+        android:id="@+id/colors"
+        android:title="@string/title_colors"
+        app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/menu_background"
-        app:showAsAction="never"
-        android:title="@string/menu_background" />
+        android:id="@+id/background"
+        android:title="@string/title_background"
+        app:showAsAction="never" />
     <item
-        android:id="@+id/menu_sound"
-        app:showAsAction="never"
-        android:title="@string/menu_sound" />
+        android:id="@+id/sound"
+        android:title="@string/title_sound"
+        app:showAsAction="never" />
     <item
-        android:id="@+id/menu_help"
-        app:showAsAction="never"
-        android:title="@string/menu_help" />
+        android:id="@+id/help"
+        android:title="@string/title_help"
+        app:showAsAction="never" />
     <item
-        android:id="@+id/menu_about"
-        app:showAsAction="never"
-        android:title="@string/menu_about" />
+        android:id="@+id/about"
+        android:title="@string/title_about"
+        app:showAsAction="never" />
     <item
-        android:id="@+id/menu_quit"
-        app:showAsAction="never"
-        android:title="@string/menu_quit" />
+        android:id="@+id/quit"
+        android:title="@string/title_quit"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/midi"
+        android:title="@string/title_midi"
+        android:visible="false" />
 
 </menu>

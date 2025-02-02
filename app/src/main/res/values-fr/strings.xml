@@ -3,15 +3,15 @@
     <string name="desc_view">Vue du jeu</string>
     <string name="desc_ad">Publicité</string>
 
-    <string name="menu_level">Difficulté</string>
-    <string name="menu_size">Grandeur</string>
-    <string name="menu_lives">Vies</string>
-    <string name="menu_colors">Couleurs</string>
-    <string name="menu_background">Arrière-plan</string>
-    <string name="menu_sound">Vibration &amp; Son</string>
-    <string name="menu_help">Aide</string>
-    <string name="menu_about">À propos de BlindMan</string>
-    <string name="menu_quit">Quitter</string>
+    <string name="title_level">Difficulté</string>
+    <string name="title_size">Grandeur</string>
+    <string name="title_lives">Vies</string>
+    <string name="title_colors">Couleurs</string>
+    <string name="title_background">Arrière-plan</string>
+    <string name="title_sound">Vibration &amp; Son</string>
+    <string name="title_help">Aide</string>
+    <string name="title_about">À propos de BlindMan</string>
+    <string name="title_quit">Quitter</string>
     
     <string name="mess_start">Taper pour commencer</string>
     <string name="mess_show">Taper pour montrer les obstacles</string>
@@ -34,7 +34,8 @@
             conditions de la Creative Commons 3.0 Attribution Licence.
     </string>
     <string name="title_midi">Musique</string>
-    <string name="text_midi">Malheureusement, il n\'est pas possible de jouer de la musique sur cet appareil.</string>
+    <string name="text_midi">Malheureusement, il n\'est pas possible de jouer de la musique
+        sur cet appareil.</string>
     
     <string-array name="items_level">
         <item >Facile</item>

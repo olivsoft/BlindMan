@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="menu_size" tools:ignore="Typos">Grösse</string>
+    <string name="title_size" tools:ignore="Typos">Grösse</string>
     <string name="mess_hits">Zusammenstösse:</string>
     <string name="text_help">Tippen Sie auf den Schirm, um die Hindernisse anzuzeigen.
             Sehen Sie sich das Spielfeld gut an und merken Sie es sich!
