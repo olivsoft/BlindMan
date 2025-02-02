@@ -9,7 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
-import android.widget.CheckedTextView
+import android.widget.Checkable
 import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -255,8 +255,7 @@ class BlindManActivity : AppCompatActivity() {
                 a.addAll(*resources.getStringArray(R.array.items_background))
                 b.setTitle(R.string.title_background)
                 b.setSingleChoiceItems(
-                    a,
-                    bmView.background
+                    a, bmView.background
                 ) { dialog: DialogInterface, which: Int ->
                     dialog.dismiss()
                     bmView.background = which
@@ -285,17 +284,17 @@ class BlindManActivity : AppCompatActivity() {
                         it.setItemChecked(2, musicPlayer.isMusicEnabled)
                     }
                     it.onItemClickListener = OnItemClickListener { _, view, position, _ ->
-                        val ctv = view as CheckedTextView
+                        val c = view as Checkable
                         when (position) {
-                            0 -> bmView.isHapticFeedbackEnabled = ctv.isChecked
+                            0 -> bmView.isHapticFeedbackEnabled = c.isChecked
 
                             1 -> {
-                                bmView.isSoundEffectsEnabled = ctv.isChecked
+                                bmView.isSoundEffectsEnabled = c.isChecked
                                 setVolumeControlStream()
                             }
 
                             2 -> {
-                                musicPlayer.toggle(ctv.isChecked)
+                                musicPlayer.toggle(c.isChecked)
                                 setVolumeControlStream()
                             }
 
