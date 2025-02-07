@@ -15,10 +15,10 @@ import android.view.View
 import android.view.animation.Animation
 import android.widget.TextView
 import ch.olivsoft.android.blindman.Effect.Companion.loadDynamicElements
-import java.util.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 class BlindManView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs), Animation.AnimationListener {
@@ -64,7 +64,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     private lateinit var goal: Rect
     private lateinit var border: Rect
     private lateinit var obstacles: HashSet<Obstacle>
-    private val random = Random()
+    private val random = Random.Default
 
     // Game motion
     private val dragStarter: DragStarter
@@ -152,9 +152,10 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         // Check who called
         if (newLevel > 0) level = newLevel
 
-        // Player goes (back) to initial position, hits are cleared.
+        // Player goes (back) to initial position, hits are cleared, obstacles recreated.
         player.offsetTo(oSize, oSize)
         hits = 0
+        obstacles.clear()
 
         // Determine the orientation and count the available space for obstacles.
         // Last obstacle line is 5 units before goal-side end of canvas.
@@ -163,13 +164,11 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         val lastAcross = (if (o) fieldHeight else fieldWidth) / oSize - 5
         val widthAcross = (if (o) fieldWidth else fieldHeight) / oSize - 2
 
-        // Number of obstacles in each across line
+        // The number of obstacles per line is based on the level.
+        // A HashSet eliminates duplicates. Every second line
+        // across contains randomly placed obstacles.
         val numObs = (0.3 * widthAcross * level).toInt()
-
-        obstacles.clear()
-        // A HashSet eliminates duplicates
         val obsLine = HashSet<Int>(numObs)
-        // Every second line across contains obstacles
         var iLine = 3
         while (iLine <= lastAcross) {
             obsLine.clear()
@@ -183,10 +182,10 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 if (random.nextFloat() >= 0.8) obsLine.add(widthAcross)
             }
             // Now, the real obstacles are created
-            for (i in obsLine)
-                obstacles.add(
-                    Obstacle(if (o) i else iLine, if (o) iLine else i, oSize)
-                )
+            for (i in obsLine) {
+                val obstacle = Obstacle(if (o) i else iLine, if (o) iLine else i, oSize)
+                obstacles.add(obstacle)
+            }
             iLine += 2
         }
 

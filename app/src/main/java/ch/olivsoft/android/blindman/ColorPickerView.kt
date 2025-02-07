@@ -215,7 +215,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         centerRadius = circleRadius / 3
         circlePaint.strokeWidth = centerRadius.toFloat()
         centerPaint.strokeWidth = circleRadius / 20f
-        textPaint.textSize = 4 * (centerRadius / 5f) - 1 // Odd!
+        textPaint.textSize = 0.8f * centerRadius
         textPaint.getTextBounds(OK, 0, OK.length, measureRect)
         textHeight = measureRect.height()
     }

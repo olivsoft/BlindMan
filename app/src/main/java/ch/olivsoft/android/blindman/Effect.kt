@@ -19,6 +19,9 @@ enum class Effect(
     GOAL(-1, R.raw.tada, true, true),
     OVER(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false);
 
+    private var soundID = -1
+    private var animation: Animation? = null
+
     companion object {
         private val LOG_TAG = Effect::class.simpleName
         private lateinit var soundPool: SoundPool
@@ -51,9 +54,6 @@ enum class Effect(
             }
         }
     }
-
-    private var soundID = -1
-    private var animation: Animation? = null
 
     fun makeEffect(view: View) {
         // These calls all return immediately, the effects are done
