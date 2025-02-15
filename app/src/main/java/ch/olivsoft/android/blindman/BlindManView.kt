@@ -204,43 +204,45 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         // Translate used space into center
         canvas.translate(offWidth, offHeight)
 
-        // Field background
-        drawingPaint.color = ColoredPart.FIELD.color
-        drawingPaint.alpha = BACKGROUND_ALPHA[background]
-        drawingPaint.style = Paint.Style.FILL
-        canvas.drawRect(border, drawingPaint)
+        with(drawingPaint) {
+            // Field background
+            color = ColoredPart.FIELD.color
+            alpha = BACKGROUND_ALPHA[background]
+            style = Paint.Style.FILL
+            canvas.drawRect(border, this)
 
-        // Field border with reduced thickness
-        drawingPaint.alpha = FULL_ALPHA
-        drawingPaint.style = Paint.Style.STROKE
-        drawingPaint.strokeWidth = oSize / 2f
-        canvas.drawRect(border, drawingPaint)
+            // Field border with reduced thickness
+            alpha = FULL_ALPHA
+            style = Paint.Style.STROKE
+            strokeWidth = oSize / 2f
+            canvas.drawRect(border, this)
 
-        // Goal fully filled
-        drawingPaint.style = Paint.Style.FILL
-        drawingPaint.color = if (swapColors) ColoredPart.PLAYER.color else ColoredPart.GOAL.color
-        canvas.drawRect(goal, drawingPaint)
+            // Goal fully filled
+            style = Paint.Style.FILL
+            color = if (swapColors) ColoredPart.PLAYER.color else ColoredPart.GOAL.color
+            canvas.drawRect(goal, this)
 
-        // Player is drawn after goal because it may be on top
-        drawingRect.set(player)
-        drawingPaint.color =
-            if (swapColors) ColoredPart.GOAL.color
-            else ColoredPart.PLAYER.color
-        if (dragHandler.isDragModeActive) {
-            // In drag mode the player looks like a ring
-            val w = 0.1f * oSize
-            drawingRect.inset(w, w)
-            drawingPaint.style = Paint.Style.STROKE
-            drawingPaint.strokeWidth = 2 * w
+            // Player is drawn after goal because it may be on top
+            drawingRect.set(player)
+            color =
+                if (swapColors) ColoredPart.GOAL.color
+                else ColoredPart.PLAYER.color
+            if (dragHandler.isDragModeActive) {
+                // In drag mode the player looks like a ring
+                val w = 0.1f * oSize
+                drawingRect.inset(w, w)
+                style = Paint.Style.STROKE
+                strokeWidth = 2 * w
+            }
+            if (lives == 0)
+                canvas.drawOval(drawingRect, this)
+            else
+                canvas.drawArc(
+                    drawingRect, 0f,
+                    360 - 360f / lives * hits,
+                    true, this
+                )
         }
-        if (lives == 0)
-            canvas.drawOval(drawingRect, drawingPaint)
-        else
-            canvas.drawArc(
-                drawingRect, 0f,
-                360 - 360f / lives * hits,
-                true, drawingPaint
-            )
 
         // Obstacles have their own onDraw method
         for (o in obstacles)

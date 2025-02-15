@@ -58,14 +58,7 @@ class BlindManActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Assign bindings, set content view and toolbar
-        val binding = MainBinding.inflate(layoutInflater)
-        bmView = binding.gameView
-        bmView.textView = binding.textView
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-
-        // Initialize ad banner. Test devices are older and current phones.
+        // Configure ad banner. Test devices are older and current phones.
         val testDeviceIds = listOf(
             "98DDF74ECDE599B008274ED3B5C5DCA5",
             "54A8240637407DBE6671033FDA2C7FCA",
@@ -74,7 +67,15 @@ class BlindManActivity : AppCompatActivity() {
         MobileAds.setRequestConfiguration(
             RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         )
-        binding.adView.loadAd(AdRequest.Builder().build())
+
+        // Assign bindings, load toolbar, content view and ad view
+        with(MainBinding.inflate(layoutInflater)) {
+            bmView = gameView
+            bmView.textView = textView
+            setContentView(root)
+            setSupportActionBar(toolbar)
+            adView.loadAd(AdRequest.Builder().build())
+        }
 
         // Create music player (needed in preferences)
         val listener = object : Player.Listener {
@@ -89,12 +90,14 @@ class BlindManActivity : AppCompatActivity() {
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
         val p = getPreferences(MODE_PRIVATE)
-        bmView.level = p.getInt(PREF_LEVEL, bmView.level)
-        bmView.size = p.getInt(PREF_SIZE, bmView.size)
-        bmView.background = p.getInt(PREF_BACKGROUND, bmView.background)
-        bmView.lives = p.getInt(PREF_LIVES, bmView.lives)
-        bmView.isHapticFeedbackEnabled = p.getBoolean(PREF_HAPTICS, true)
-        bmView.isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
+        with(bmView) {
+            level = p.getInt(PREF_LEVEL, level)
+            size = p.getInt(PREF_SIZE, size)
+            background = p.getInt(PREF_BACKGROUND, background)
+            lives = p.getInt(PREF_LIVES, lives)
+            isHapticFeedbackEnabled = p.getBoolean(PREF_HAPTICS, true)
+            isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
+        }
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
         for (c in ColoredPart.entries)
             c.color = p.getInt(PREF_COL_ + c.name, c.defaultColor)
@@ -120,12 +123,14 @@ class BlindManActivity : AppCompatActivity() {
         // This is the recommended place to save persistent
         // settings (not onStop)
         val e = getPreferences(MODE_PRIVATE).edit()
-        e.putInt(PREF_LEVEL, bmView.level)
-        e.putInt(PREF_SIZE, bmView.size)
-        e.putInt(PREF_BACKGROUND, bmView.background)
-        e.putInt(PREF_LIVES, bmView.lives)
-        e.putBoolean(PREF_HAPTICS, bmView.isHapticFeedbackEnabled)
-        e.putBoolean(PREF_SOUND, bmView.isSoundEffectsEnabled)
+        with(bmView) {
+            e.putInt(PREF_LEVEL, level)
+            e.putInt(PREF_SIZE, size)
+            e.putInt(PREF_BACKGROUND, background)
+            e.putInt(PREF_LIVES, lives)
+            e.putBoolean(PREF_HAPTICS, isHapticFeedbackEnabled)
+            e.putBoolean(PREF_SOUND, isSoundEffectsEnabled)
+        }
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
         for (c in ColoredPart.entries)
             e.putInt(PREF_COL_ + c.name, c.color)
@@ -273,17 +278,17 @@ class BlindManActivity : AppCompatActivity() {
                     .setAdapter(a, null)
                     .setPositiveButton(android.R.string.ok, null)
                     .create()
-                d.listView.let {
+                with(d.listView) {
                     // Set initial states and listener. Both explicit here.
                     // The OnShowListener is THE way to set initial states.
-                    it.choiceMode = ListView.CHOICE_MODE_MULTIPLE
-                    it.itemsCanFocus = false
+                    choiceMode = ListView.CHOICE_MODE_MULTIPLE
+                    itemsCanFocus = false
                     d.setOnShowListener { _ ->
-                        it.setItemChecked(0, bmView.isHapticFeedbackEnabled)
-                        it.setItemChecked(1, bmView.isSoundEffectsEnabled)
-                        it.setItemChecked(2, musicPlayer.isMusicEnabled)
+                        setItemChecked(0, bmView.isHapticFeedbackEnabled)
+                        setItemChecked(1, bmView.isSoundEffectsEnabled)
+                        setItemChecked(2, musicPlayer.isMusicEnabled)
                     }
-                    it.onItemClickListener = OnItemClickListener { _, view, position, _ ->
+                    onItemClickListener = OnItemClickListener { _, view, position, _ ->
                         val c = view as Checkable
                         when (position) {
                             0 -> bmView.isHapticFeedbackEnabled = c.isChecked

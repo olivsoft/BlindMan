@@ -32,11 +32,12 @@ enum class Effect(
         ) {
             // Create SoundPool and AlphaAnimation
             soundPool = SoundPool.Builder().setMaxStreams(3).build()
-            val alphaAnimation = AlphaAnimation(1.0f, 0.7f)
-            alphaAnimation.duration = 50
-            // In total this gives 3 dim-down-then-brighten-up phases
-            alphaAnimation.repeatMode = Animation.REVERSE
-            alphaAnimation.repeatCount = 5
+            val alphaAnimation = AlphaAnimation(1.0f, 0.7f).apply {
+                duration = 50
+                // In total this gives 3 dim-down-then-brighten-up phases
+                repeatMode = Animation.REVERSE
+                repeatCount = 5
+            }
 
             // Load sound and animations according to flags
             for (e in entries) {

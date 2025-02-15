@@ -104,9 +104,10 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                 override fun onCreate(savedInstanceState: Bundle?) {
                     super.onCreate(savedInstanceState)
                     setTitle(dialogTitle)
-                    val binding = ColorpickerBinding.inflate(layoutInflater)
-                    setContentView(binding.root)
-                    view = binding.colorPickerView
+                    with(ColorpickerBinding.inflate(layoutInflater)) {
+                        setContentView(root)
+                        view = colorPickerView
+                    }
                     if (savedInstanceState == null)
                         view.selectedColor = initialColor
                     // The view will send back a click once the color is selected.
@@ -225,9 +226,11 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         if (this.isInEditMode)
             return
 
-        canvas.translate(centerPoint.x, centerPoint.y)
-        canvas.drawCircle(0f, 0f, centerRadius.toFloat(), centerPaint)
-        canvas.drawCircle(0f, 0f, circleRadius - centerRadius / 2f, circlePaint)
+        with(canvas) {
+            translate(centerPoint.x, centerPoint.y)
+            drawCircle(0f, 0f, centerRadius.toFloat(), centerPaint)
+            drawCircle(0f, 0f, circleRadius - centerRadius / 2f, circlePaint)
+        }
 
         if (trackingCenter) {
             // This is just for adding a little ring around the OK button
