@@ -16,6 +16,7 @@
     <string name="title_help" tools:ignore="MissingTranslation">Help</string>
     <string name="title_about" tools:ignore="MissingTranslation">About BlindMan</string>
     <string name="title_quit" tools:ignore="MissingTranslation">Quit</string>
+    <string name="title_close" tools:ignore="MissingTranslation">Close</string>
 
     <string name="mess_start" tools:ignore="MissingTranslation">Tap on the screen to start moving</string>
     <string name="mess_show" tools:ignore="MissingTranslation">Tap on the screen to show the obstacles</string>

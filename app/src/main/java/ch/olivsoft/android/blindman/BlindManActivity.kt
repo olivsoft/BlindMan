@@ -240,19 +240,25 @@ class BlindManActivity : AppCompatActivity() {
                 a = ArrayAdapter(this, R.layout.dialog_list_item)
                 a.addAll(*resources.getStringArray(R.array.items_colors))
                 b.setTitle(R.string.title_colors)
-                b.setPositiveButton(android.R.string.ok, null)
-                b.setAdapter(a) { dialog: DialogInterface, which: Int ->
-                    dialog.dismiss()
-                    if (which == ColoredPart.entries.size) {
-                        // Reset colors
-                        resetAll()
-                        bmView.invalidate()
-                    } else {
-                        // Call the color picker dialog
-                        doDialog(which)
+                b.setPositiveButton(R.string.title_close, null)
+                // Avoid dismissing the dialog when a list item is clicked
+                b.setAdapter(a, null)
+                return b.create().apply {
+                    with(listView) {
+                        itemsCanFocus = false
+                        onItemClickListener = OnItemClickListener { _, _, position, _ ->
+                            if (position == ColoredPart.entries.size) {
+                                // Reset colors
+                                resetAll()
+                                bmView.invalidate()
+                            } else {
+                                // Call the color picker dialog
+                                dismiss()
+                                doDialog(position)
+                            }
+                        }
                     }
                 }
-                return b.create()
             }
 
             R.id.background -> {
@@ -274,40 +280,40 @@ class BlindManActivity : AppCompatActivity() {
             R.id.sound -> {
                 a = ArrayAdapter(this, R.layout.dialog_multichoice_item)
                 a.addAll(*resources.getStringArray(R.array.items_effects))
-                val d = b.setTitle(R.string.title_sound)
-                    .setAdapter(a, null)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create()
-                with(d.listView) {
-                    // Set initial states and listener. Both explicit here.
-                    // The OnShowListener is THE way to set initial states.
-                    choiceMode = ListView.CHOICE_MODE_MULTIPLE
-                    itemsCanFocus = false
-                    d.setOnShowListener { _ ->
-                        setItemChecked(0, bmView.isHapticFeedbackEnabled)
-                        setItemChecked(1, bmView.isSoundEffectsEnabled)
-                        setItemChecked(2, musicPlayer.isMusicEnabled)
-                    }
-                    onItemClickListener = OnItemClickListener { _, view, position, _ ->
-                        val c = view as Checkable
-                        when (position) {
-                            0 -> bmView.isHapticFeedbackEnabled = c.isChecked
+                b.setTitle(R.string.title_sound)
+                b.setAdapter(a, null)
+                b.setPositiveButton(R.string.title_close, null)
+                return b.create().apply {
+                    with(listView) {
+                        // Set initial states and listener. Both explicit here.
+                        // The OnShowListener is THE way to set initial states.
+                        choiceMode = ListView.CHOICE_MODE_MULTIPLE
+                        itemsCanFocus = false
+                        setOnShowListener { _ ->
+                            setItemChecked(0, bmView.isHapticFeedbackEnabled)
+                            setItemChecked(1, bmView.isSoundEffectsEnabled)
+                            setItemChecked(2, musicPlayer.isMusicEnabled)
+                        }
+                        onItemClickListener = OnItemClickListener { _, view, position, _ ->
+                            val c = view as Checkable
+                            when (position) {
+                                0 -> bmView.isHapticFeedbackEnabled = c.isChecked
 
-                            1 -> {
-                                bmView.isSoundEffectsEnabled = c.isChecked
-                                setVolumeControlStream()
+                                1 -> {
+                                    bmView.isSoundEffectsEnabled = c.isChecked
+                                    setVolumeControlStream()
+                                }
+
+                                2 -> {
+                                    musicPlayer.toggle(c.isChecked)
+                                    setVolumeControlStream()
+                                }
+
+                                else -> dismiss()
                             }
-
-                            2 -> {
-                                musicPlayer.toggle(c.isChecked)
-                                setVolumeControlStream()
-                            }
-
-                            else -> d.dismiss()
                         }
                     }
                 }
-                return d
             }
 
             R.id.about -> return b.setTitle(R.string.title_about)

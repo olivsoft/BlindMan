@@ -12,7 +12,8 @@
     <string name="title_help">Hilfe</string>
     <string name="title_about">Über BlindMan</string>
     <string name="title_quit">Beenden</string>
-    
+    <string name="title_close">Schließen</string>
+
     <string name="mess_start">Tippen um loszulaufen</string>
     <string name="mess_show">Tippen um die Hindernisse anzuzeigen</string>
     <string name="mess_goal">Glückwunsch!</string>
