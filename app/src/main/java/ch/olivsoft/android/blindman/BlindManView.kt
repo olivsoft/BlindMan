@@ -224,9 +224,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
             // Player is drawn after goal because it may be on top
             drawingRect.set(player)
-            color =
-                if (swapColors) ColoredPart.GOAL.color
-                else ColoredPart.PLAYER.color
+            color = if (swapColors) ColoredPart.GOAL.color else ColoredPart.PLAYER.color
             if (dragHandler.isDragModeActive) {
                 // In drag mode the player looks like a ring
                 val w = 0.1f * oSize
