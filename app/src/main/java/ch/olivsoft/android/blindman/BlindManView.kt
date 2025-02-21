@@ -18,6 +18,7 @@ import ch.olivsoft.android.blindman.Effect.Companion.loadDynamicElements
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sign
 import kotlin.random.Random
 
 class BlindManView(context: Context?, attrs: AttributeSet?) :
@@ -243,20 +244,20 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
 
         // Obstacles have their own onDraw method
-        for (o in obstacles)
-            o.draw(canvas)
+        obstacles.forEach { it.draw(canvas) }
     }
 
     // Move logic
     fun makeMove(x: Float, y: Float) {
-        if (gameState != GameState.PLAY) return
+        if (gameState != GameState.PLAY)
+            return
 
         // Try the move with a copy of the player
         pp.set(player)
         if (abs(x) > abs(y))
-            pp.offset(if (x > 0) oSize else -oSize, 0)
+            pp.offset(sign(x).toInt() * oSize, 0)
         else
-            pp.offset(0, if (y > 0) oSize else -oSize)
+            pp.offset(0, sign(y).toInt() * oSize)
 
         // Check for borders
         if (pp.left <= 0 ||
@@ -267,13 +268,13 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             return
 
         // Check for an obstacle
-        for (o in obstacles) {
-            if (o.intersects(pp)) {
-                if (!o.isHit()) {
+        obstacles.forEach {
+            if (it.intersects(pp)) {
+                if (!it.isHit()) {
                     // Bad luck, we hit a hidden obstacle!
                     // Invalidate the area of the now visible
                     // obstacle and the player that lost one life.
-                    o.setHit()
+                    it.setHit()
                     hits++
                     invalidate()
                     if (lives == 0 || hits < lives) {
@@ -343,8 +344,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             }
 
             GameState.SHOW -> {
-                for (o in obstacles)
-                    o.setHidden()
+                obstacles.forEach { it.setHidden() }
                 gameState = GameState.PLAY
                 textView.setText(R.string.mess_hits)
                 textView.append(" 0")
@@ -354,8 +354,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             }
 
             GameState.HINT -> {
-                for (o in obstacles)
-                    o.setVisibleIfHit()
+                obstacles.forEach { it.setVisibleIfHit() }
                 gameState = GameState.PLAY
                 invalidate()
                 // Start to move again
@@ -402,8 +401,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         override fun onDoubleTap(e: MotionEvent): Boolean {
             Log.d(LOG_TAG, "onDoubleTap called")
 
-            for (o in obstacles)
-                o.setVisible()
+            obstacles.forEach { it.setVisible() }
             // Cancel drag mode (if active)
             dragHandler.stopDragMode()
             gameState = GameState.HINT

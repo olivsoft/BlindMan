@@ -19,11 +19,11 @@ class BlindManDialogFragment : AppCompatDialogFragment() {
         private const val ID = "id"
 
         fun newInstance(id: Int): BlindManDialogFragment {
-            val f = BlindManDialogFragment()
-            val args = Bundle()
-            args.putInt(ID, id)
-            f.arguments = args
-            return f
+            return BlindManDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ID, id)
+                }
+            }
         }
     }
 
@@ -34,8 +34,7 @@ class BlindManDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AppCompatDialog {
         super.onCreateDialog(savedInstanceState)
-        val args = arguments
-        val id = args?.getInt(ID) ?: 0
+        val id = arguments?.getInt(ID) ?: R.id.help
         return blindManActivity.createDialog(id)
     }
 }

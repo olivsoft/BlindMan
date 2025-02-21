@@ -18,7 +18,6 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import ch.olivsoft.android.blindman.BlindManDialogFragment.Companion.newInstance
 import ch.olivsoft.android.blindman.ColorPickerView.Companion.createDialog
-import ch.olivsoft.android.blindman.ColoredPart.Companion.resetAll
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -99,8 +98,7 @@ class BlindManActivity : AppCompatActivity() {
             isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
         }
         musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
-        for (c in ColoredPart.entries)
-            c.color = p.getInt(PREF_COL_ + c.name, c.defaultColor)
+        ColoredPart.getAllFromPreferences(p, PREF_COL_)
         Log.d(LOG_TAG, "Preferences loaded")
 
         // Set volume control
@@ -132,8 +130,7 @@ class BlindManActivity : AppCompatActivity() {
             e.putBoolean(PREF_SOUND, isSoundEffectsEnabled)
         }
         e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
-        for (c in ColoredPart.entries)
-            e.putInt(PREF_COL_ + c.name, c.color)
+        ColoredPart.putAllToPreferences(e, PREF_COL_)
         e.putBoolean(PREF_FIRST, false)
         e.apply()
     }
@@ -249,7 +246,7 @@ class BlindManActivity : AppCompatActivity() {
                         onItemClickListener = OnItemClickListener { _, _, position, _ ->
                             if (position == ColoredPart.entries.size) {
                                 // Reset colors
-                                resetAll()
+                                ColoredPart.resetAll()
                                 bmView.invalidate()
                             } else {
                                 // Call the color picker dialog

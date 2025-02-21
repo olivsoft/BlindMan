@@ -1,5 +1,6 @@
 package ch.olivsoft.android.blindman
 
+import android.content.SharedPreferences
 import android.graphics.Color
 
 enum class ColoredPart(val defaultColor: Int) {
@@ -8,15 +9,27 @@ enum class ColoredPart(val defaultColor: Int) {
     GOAL(Color.rgb(0, 0xFF, 0x80)),
     OBSTACLE(Color.rgb(0xC0, 0xFF, 0));
 
-    var color: Int = 0
+    var color = defaultColor
 
     fun reset() {
-        this.color = this.defaultColor
+        color = defaultColor
     }
 
     companion object {
         fun resetAll() {
-            for (c in entries) c.reset()
+            entries.forEach { it.reset() }
+        }
+
+        fun getAllFromPreferences(p: SharedPreferences, prefix: String) {
+            entries.forEach {
+                it.color = p.getInt(prefix + it.name, it.defaultColor)
+            }
+        }
+
+        fun putAllToPreferences(e: SharedPreferences.Editor, prefix: String) {
+            entries.forEach {
+                e.putInt(prefix + it.name, it.color)
+            }
         }
     }
 }
