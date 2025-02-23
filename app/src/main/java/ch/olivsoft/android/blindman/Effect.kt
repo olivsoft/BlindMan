@@ -20,20 +20,11 @@ enum class Effect(
     OVER(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false);
 
     private var soundID = -1
-    private var effectAnimation: Animation? = null
+    private var alphaAnimation: Animation? = null
 
     companion object {
         private val LOG_TAG = Effect::class.simpleName
         private val soundPool = SoundPool.Builder().setMaxStreams(3).build()
-
-        private class EffectAnimation : AlphaAnimation(1.0f, 0.7f) {
-            init {
-                duration = 50
-                // In total this gives 3 dim-down-then-brighten-up phases
-                repeatMode = Animation.REVERSE
-                repeatCount = 5
-            }
-        }
 
         fun loadDynamicElements(context: Context?, listener: Animation.AnimationListener) {
             // Load sound and animations according to flags
@@ -44,7 +35,11 @@ enum class Effect(
                         Log.d(LOG_TAG, "$name sound loaded")
                     }
                     if (hasAnimation) {
-                        effectAnimation = EffectAnimation().apply {
+                        // Alpha animation with 3 dim-down-then-brighten-up phases
+                        alphaAnimation = AlphaAnimation(1.0f, 0.7f).apply {
+                            duration = 50
+                            repeatMode = Animation.REVERSE
+                            repeatCount = 5
                             if (hasListener)
                                 setAnimationListener(listener)
                         }
@@ -57,11 +52,11 @@ enum class Effect(
 
     fun makeEffect(view: View) {
         // These calls all return immediately, the effects are done
-        // in parallel asynchronously. So, the order does not matter.
-        // View also has an "animation", so, we use a distinct variable name.
+        // in parallel asynchronously. Therefore, the order does not matter.
+        // We use "alphaAnimation" because View also has an "animation" property.
         with(view) {
-            if (hasAnimation && effectAnimation != null)
-                startAnimation(effectAnimation)
+            if (hasAnimation && alphaAnimation != null)
+                startAnimation(alphaAnimation)
             if (isHapticFeedbackEnabled && hapticFeedback >= 0)
                 performHapticFeedback(hapticFeedback)
             if (isSoundEffectsEnabled && soundID >= 0)
