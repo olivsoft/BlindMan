@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -308,8 +307,12 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    // Touch event handling
-    @SuppressLint("ClickableViewAccessibility")
+    // Touch event handling, including required override
+    override fun performClick(): Boolean {
+        return if (hasOnClickListeners()) super.performClick()
+        else false
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // First we consider the play state
         if (gameState == GameState.PLAY) {
@@ -361,7 +364,10 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 return gestureDetector.onTouchEvent(event)
             }
 
-            else -> return false
+            else -> {
+                Log.e(LOG_TAG, "Unknown game state")
+                return performClick()
+            }
         }
     }
 

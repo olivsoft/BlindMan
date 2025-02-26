@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Canvas
@@ -257,7 +256,6 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         canvas.drawText(OK, 0f, textHeight / 2f, textPaint)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val retVal = super.onTouchEvent(event)
 
@@ -293,6 +291,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                     if (inCenter) {
                         // This is a click! Catch it as
                         // the caller with an OnClickListener.
+                        // Satisfy the compiler with the override below.
                         return performClick()
                     } else {
                         // No selection yet
@@ -305,5 +304,10 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         }
 
         return true
+    }
+
+    override fun performClick(): Boolean {
+        return if (hasOnClickListeners()) super.performClick()
+        else false
     }
 }
