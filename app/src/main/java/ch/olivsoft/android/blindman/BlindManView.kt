@@ -150,7 +150,8 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
     fun newGame(newLevel: Int) {
         // Check who called
-        if (newLevel > 0) level = newLevel
+        if (newLevel > 0)
+            level = newLevel
 
         // Player goes (back) to initial position, hits are cleared, obstacles recreated.
         player.offsetTo(oSize, oSize)

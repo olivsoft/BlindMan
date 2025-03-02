@@ -22,7 +22,7 @@ import androidx.media3.exoplayer.ExoPlayer
 class MusicPlayer(
     private val context: Context,
     resId: Int,
-    private val looping: Boolean,
+    looping: Boolean,
     private val listener: Player.Listener?
 ) {
 
@@ -34,21 +34,18 @@ class MusicPlayer(
     // Public variables
     var isMusicEnabled: Boolean = false
 
-    // Private and inner class access variables
+    // Private variables
     private var player: ExoPlayer? = null
-    private val musicUri: Uri
-    private var musicPosition: Long = 0
-
-    // Constructor
-    init {
-        val resources = context.resources
-        this.musicUri = Uri.Builder()
+    private var position = 0L
+    private val repeat = if (looping) ExoPlayer.REPEAT_MODE_ONE else ExoPlayer.REPEAT_MODE_OFF
+    private val music = MediaItem.fromUri(context.resources.run {
+        Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(resId))
-            .appendPath(resources.getResourceTypeName(resId))
-            .appendPath(resources.getResourceEntryName(resId))
+            .authority(getResourcePackageName(resId))
+            .appendPath(getResourceTypeName(resId))
+            .appendPath(getResourceEntryName(resId))
             .build()
-    }
+    })
 
     // Convenience method for error and exception handling
     private fun stopOnError(message: String, e: Exception) {
@@ -73,16 +70,16 @@ class MusicPlayer(
     fun start() {
         if (!isMusicEnabled)
             return
+        // For starting, we always recreate a player.
+        // When stopping, we always release the player again.
         try {
-            // For starting, we always recreate a player with
-            // the convenient factory method. Equally, when stopping
-            // we always release the player immediately.
-            player = ExoPlayer.Builder(context).build()
-            player!!.setMediaItem(MediaItem.fromUri(musicUri))
-            if (looping) player!!.repeatMode = ExoPlayer.REPEAT_MODE_ONE
-            listener?.let { player!!.addListener(it) }
-            player!!.prepare()
-            player!!.play()
+            player = ExoPlayer.Builder(context).build().apply {
+                setMediaItem(music)
+                repeatMode = repeat
+                listener?.let { addListener(it) }
+                prepare()
+                play()
+            }
         } catch (e: Exception) {
             stopOnError("Exception thrown in start", e)
         }
@@ -92,7 +89,7 @@ class MusicPlayer(
         if (!isMusicEnabled || player == null)
             return
         try {
-            musicPosition = player!!.currentPosition
+            position = player!!.currentPosition
             player!!.pause()
         } catch (e: Exception) {
             stopOnError("Exception thrown in pause", e)
@@ -103,7 +100,7 @@ class MusicPlayer(
         if (!isMusicEnabled || player == null)
             return
         try {
-            player!!.seekTo(musicPosition)
+            player!!.seekTo(position)
             player!!.play()
         } catch (e: Exception) {
             stopOnError("Exception thrown in resume", e)
@@ -113,11 +110,10 @@ class MusicPlayer(
     fun stop() {
         if (player == null)
             return
-        // Be very careful here because if stop is called in released state
+        // Careful here! If stop is called in released state
         // (which is possible, e.g., at application end) this will throw
-        // an exception. We want to release the player after each stop because
-        // we re-create it with each start. The final statement
-        // setting the player to null helps to guard against this situation.
+        // an exception. The final statement setting the player to null
+        // helps to guard against this situation.
         try {
             player!!.stop()
             player!!.release()
