@@ -13,8 +13,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.widget.TextView
-import ch.olivsoft.android.blindman.Effect.Companion.loadDynamicElements
 import kotlin.math.abs
+import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
@@ -104,7 +104,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         this.isClickable = true
 
         // Effects need some additional initialization
-        loadDynamicElements(context, this)
+        Effect.loadDynamicElements(context, this)
         Log.d(LOG_TAG, "View created")
     }
 
@@ -173,7 +173,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         var iLine = 3
         while (iLine <= lastAcross) {
             obsLine.clear()
-            for (n in 1..numObs) {
+            repeat(numObs) {
                 // Random number between and including 1 and widthAcross
                 obsLine.add(1 + random.nextInt(widthAcross))
             }
@@ -268,31 +268,29 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             return
 
         // Check for an obstacle
-        obstacles.forEach {
-            if (it.intersects(pp)) {
-                if (!it.isHit()) {
-                    // Bad luck, we hit a hidden obstacle!
-                    // Invalidate the area of the now visible
-                    // obstacle and the player that lost one life.
-                    it.setHit()
-                    hits++
-                    invalidate()
-                    if (lives == 0 || hits < lives) {
-                        // Go on
-                        textView.setText(R.string.mess_hits)
-                        textView.append(" $hits")
-                        Effect.HIT.makeEffect(this)
-                    } else {
-                        // Game over
-                        dragHandler.stopDragMode()
-                        gameState = GameState.IDLE
-                        textView.setText(R.string.mess_over)
-                        Effect.OVER.makeEffect(this)
-                    }
+        obstacles.find { it.intersects(pp) }?.let {
+            if (!it.isHit()) {
+                // Bad luck, we hit a hidden obstacle!
+                // Invalidate the area of the now visible
+                // obstacle and the player that lost one life.
+                it.setHit()
+                hits++
+                invalidate()
+                if (lives == 0 || hits < lives) {
+                    // Go on
+                    textView.setText(R.string.mess_hits)
+                    textView.append(" $hits")
+                    Effect.HIT.makeEffect(this)
+                } else {
+                    // Game over
+                    dragHandler.stopDragMode()
+                    gameState = GameState.IDLE
+                    textView.setText(R.string.mess_over)
+                    Effect.OVER.makeEffect(this)
                 }
-                // In any case, this move has no future
-                return
             }
+            // In any case, this move has no future
+            return
         }
 
         // All is fine, the move can be performed.
@@ -339,8 +337,6 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         if (event.action != MotionEvent.ACTION_DOWN)
             return true
 
-        // This switch clause uses return statements in each case.
-        // So we do not need break statements or a final return.
         when (gameState) {
             GameState.IDLE -> {
                 newGame(0)
@@ -472,13 +468,14 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
     // Drag handling class
     private inner class DragHandler : SimpleCountDownTimer(DRAG_END_DELAY) {
-        // Public access for efficiency
+        // Public variable
         var isDragModeActive: Boolean = false
 
         // Private variables
         private var oldX = 0f
         private var oldY = 0f
 
+        // Override
         override fun onTimerElapsed() {
             if (isDragModeActive)
                 stopDragMode()
@@ -520,7 +517,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                     val dX = e.x - oldX
                     val dY = e.y - oldY
                     // Motion amplification gives a good user experience
-                    if (dX * dX + dY * dY > 0.4f * oSize * oSize) {
+                    if (hypot(dX, dY) > 0.65f * oSize) {
                         makeMove(dX, dY)
                         oldX += dX
                         oldY += dY

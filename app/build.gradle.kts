@@ -8,7 +8,7 @@ android {
     compileSdk = 35
     defaultConfig {
         applicationId = "ch.olivsoft.android.blindman"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
         versionCode = 31
         versionName = "1.31"

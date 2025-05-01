@@ -7,11 +7,7 @@ import android.graphics.drawable.PaintDrawable
 import android.graphics.drawable.shapes.Shape
 
 class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
-    // Some get and set.
-    // We do NOT use the inherited setVisible method and hope
-    // that no-one ever calls isVisible. That is also why we use
-    // "hidden" instead of "visible" as property of an obstacle.
-    // We implement many simple methods in order to relieve
+    // We implement all necessary methods in order to relieve
     // the caller from taking care of the obstacle's state logic.
 
     private var hit = false
@@ -23,6 +19,12 @@ class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
         setBounds(ix * size, iy * size, (ix + 1) * size, (iy + 1) * size)
         setCornerRadius(0.1f * size)
         paint.isAntiAlias = true
+    }
+
+    // Just for safety reasons. This should not be used.
+    override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
+        hidden = !visible
+        return true
     }
 
     fun isHit(): Boolean {

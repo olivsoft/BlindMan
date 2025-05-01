@@ -16,12 +16,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import ch.olivsoft.android.blindman.BlindManDialogFragment.Companion.newInstance
-import ch.olivsoft.android.blindman.ColorPickerView.Companion.createDialog
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import androidx.core.content.edit
 
 class BlindManActivity : AppCompatActivity() {
 
@@ -120,19 +119,19 @@ class BlindManActivity : AppCompatActivity() {
 
         // This is the recommended place to save persistent
         // settings (not onStop)
-        val e = getPreferences(MODE_PRIVATE).edit()
-        with(bmView) {
-            e.putInt(PREF_LEVEL, level)
-            e.putInt(PREF_SIZE, size)
-            e.putInt(PREF_BACKGROUND, background)
-            e.putInt(PREF_LIVES, lives)
-            e.putBoolean(PREF_HAPTICS, isHapticFeedbackEnabled)
-            e.putBoolean(PREF_SOUND, isSoundEffectsEnabled)
+        getPreferences(MODE_PRIVATE).edit {
+            with(bmView) {
+                putInt(PREF_LEVEL, level)
+                putInt(PREF_SIZE, size)
+                putInt(PREF_BACKGROUND, background)
+                putInt(PREF_LIVES, lives)
+                putBoolean(PREF_HAPTICS, isHapticFeedbackEnabled)
+                putBoolean(PREF_SOUND, isSoundEffectsEnabled)
+            }
+            putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
+            ColoredPart.putAllToPreferences(this, PREF_COL_)
+            putBoolean(PREF_FIRST, false)
         }
-        e.putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
-        ColoredPart.putAllToPreferences(e, PREF_COL_)
-        e.putBoolean(PREF_FIRST, false)
-        e.apply()
     }
 
     override fun onResume() {
@@ -163,7 +162,7 @@ class BlindManActivity : AppCompatActivity() {
 
     // Call the selected dialog
     private fun doDialog(id: Int) {
-        newInstance(id).show(supportFragmentManager, "dialog")
+        BlindManDialogFragment.newInstance(id).show(supportFragmentManager, "dialog")
     }
 
     // This is the relevant dialog creation method. It is called through the dialog fragment.
@@ -175,7 +174,7 @@ class BlindManActivity : AppCompatActivity() {
 
             // We can embed our nice color picker view into a regular dialog.
             // For that we use the provided factory method.
-            return createDialog(
+            return ColorPickerView.createDialog(
                 this, title, cp.color
             ) { dialog: DialogInterface, which: Int ->
                 dialog.dismiss()

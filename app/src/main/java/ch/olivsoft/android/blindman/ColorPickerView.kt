@@ -22,6 +22,7 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * [View] for a color selection dialog.
@@ -119,7 +120,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
 
         // Helper functions for getting a color from a circular angle...
         private fun interpolateLinear(a: Int, b: Int, f: Float): Int {
-            return a + Math.round(f * (b - a))
+            return a + (f * (b - a)).roundToInt()
         }
 
         private fun getColorFromAngle(x: Double, y: Double): Int {
