@@ -119,35 +119,34 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         }
 
         // Helper functions for getting a color from a circular angle...
-        private fun interpolateLinear(a: Int, b: Int, f: Float): Int {
+        private fun interpolateInt(a: Int, b: Int, f: Float): Int {
             return a + (f * (b - a)).roundToInt()
         }
 
-        private fun getColorFromAngle(x: Double, y: Double): Int {
+        private fun getColorFromAngle(x: Float, y: Float): Int {
             // The "angle" (x, y) is projected to (-0.5..0.5],
-            // then (-0.5..0) is moved to (0.5..1).
-            // So, "f" interpolates the full circle.
-            var f = (atan2(y, x) / 2 / Math.PI).toFloat()
+            // then (-0.5..0] is moved to (0.5..1].
+            // So, f interpolates the full circle.
+            var f = atan2(y, x) / 2f / Math.PI.toFloat()
             if (f < 0)
                 f += 1f
 
-            // Stretch to array length and extract integer (i) and fractional (f)
-            // part
-            f *= (COLORS.size - 1)
+            // Stretch to array length and extract integer (i) and fractional (f) part
+            f *= COLORS.size - 1
             val i = f.toInt()
             f -= i
 
             // Interpolate color
             val ca = COLORS[i]
             val cb = COLORS[i + 1]
-            val r = interpolateLinear(Color.red(ca), Color.red(cb), f)
-            val g = interpolateLinear(Color.green(ca), Color.green(cb), f)
-            val b = interpolateLinear(Color.blue(ca), Color.blue(cb), f)
-
+            val r = interpolateInt(Color.red(ca), Color.red(cb), f)
+            val g = interpolateInt(Color.green(ca), Color.green(cb), f)
+            val b = interpolateInt(Color.blue(ca), Color.blue(cb), f)
             return Color.rgb(r, g, b)
         }
     }
 
+    // Variables
     private val measureRect = Rect()
     private val centerPoint = PointF()
     private var circleRadius = 0
@@ -175,17 +174,16 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
      */
     init {
         // Initialize all variables that are not size-dependent
-        circlePaint.setShader(SweepGradient(0f, 0f, COLORS, null))
+        circlePaint.shader = SweepGradient(0f, 0f, COLORS, null)
         circlePaint.style = Paint.Style.STROKE
         centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.DEV_KERN_TEXT_FLAG)
         textPaint.textAlign = Align.CENTER
-        textPaint.setTypeface(Typeface.DEFAULT_BOLD)
+        textPaint.typeface = Typeface.DEFAULT_BOLD
     }
 
-    // Measure, size and draw. Measure and size events can
-    // come in surprising numbers and order. Therefore, we
-    // are a bit careful.
+    // Measure, size and draw. Measure and size events can come in surprising
+    // numbers and order. Therefore, we are a bit careful.
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         if (this.isInEditMode)
@@ -250,7 +248,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         }
 
         // Add a nicely anti-colored "OK" in the center.
-        // Careful: c contains alpha, which must be
+        // Careful: color contains alpha, which must be
         // the same value (not "anti") as the background.
         textPaint.color = centerPaint.color.inv()
         textPaint.alpha = centerPaint.alpha
@@ -260,8 +258,8 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val retVal = super.onTouchEvent(event)
 
-        val x = event.x - centerPoint.x.toDouble()
-        val y = event.y - centerPoint.y.toDouble()
+        val x = event.x - centerPoint.x
+        val y = event.y - centerPoint.y
         val inCenter = hypot(x, y) <= centerRadius
 
         when (event.action) {

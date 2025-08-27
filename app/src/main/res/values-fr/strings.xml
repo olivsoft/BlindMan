@@ -51,8 +51,8 @@
     <string-array name="items_colors">
         <item >Champs</item>
         <item >Joueur</item>
-        <item >But</item>
         <item >Obstacles</item>
+        <item >But</item>
         <item >Remettre</item>
     </string-array>
     <string-array name="items_background">

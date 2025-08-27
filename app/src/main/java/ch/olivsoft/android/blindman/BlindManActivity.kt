@@ -76,14 +76,15 @@ class BlindManActivity : AppCompatActivity() {
         }
 
         // Create music player (needed in preferences)
-        val listener = object : Player.Listener {
-            override fun onPlayerError(error: PlaybackException) {
-                Log.e(LOG_TAG, "MusicPlayer error", error)
-                musicPlayer.toggle(false)
-                doDialog(R.id.midi)
-            }
-        }
-        musicPlayer = MusicPlayer(this, R.raw.nervous_cubase, true, listener)
+        musicPlayer = MusicPlayer(
+            this, R.raw.nervous_cubase, true,
+            object : Player.Listener {
+                override fun onPlayerError(error: PlaybackException) {
+                    Log.e(LOG_TAG, "MusicPlayer error", error)
+                    musicPlayer.toggle(false)
+                    showDialogFragment(R.id.midi)
+                }
+            })
 
         // Assign saved preference values to their variables.
         // Use default values from their declarations if available.
@@ -105,7 +106,7 @@ class BlindManActivity : AppCompatActivity() {
 
         // Show help dialog at very first execution
         if (p.getBoolean(PREF_FIRST, true))
-            doDialog(R.id.help)
+            showDialogFragment(R.id.help)
     }
 
     override fun onStart() {
@@ -155,13 +156,13 @@ class BlindManActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.quit -> finish()
-            else -> doDialog(item.itemId)
+            else -> showDialogFragment(item.itemId)
         }
         return true
     }
 
     // Call the selected dialog
-    private fun doDialog(id: Int) {
+    private fun showDialogFragment(id: Int) {
         BlindManDialogFragment.newInstance(id).show(supportFragmentManager, "dialog")
     }
 
@@ -180,7 +181,7 @@ class BlindManActivity : AppCompatActivity() {
                 dialog.dismiss()
                 cp.color = which
                 bmView.invalidate()
-                doDialog(R.id.colors)
+                showDialogFragment(R.id.colors)
             }
         }
 
@@ -250,7 +251,7 @@ class BlindManActivity : AppCompatActivity() {
                             } else {
                                 // Call the color picker dialog
                                 dismiss()
-                                doDialog(position)
+                                showDialogFragment(position)
                             }
                         }
                     }
@@ -351,8 +352,6 @@ class BlindManActivity : AppCompatActivity() {
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_NUMPAD_2,
             KeyEvent.KEYCODE_PAGE_DOWN -> bmView.makeMove(0f, 1f)
-
-            KeyEvent.KEYCODE_BACK -> super.onBackPressedDispatcher.onBackPressed()
 
             else -> return super.onKeyDown(keyCode, event)
         }

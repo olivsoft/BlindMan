@@ -51,8 +51,8 @@
     <string-array name="items_colors">
         <item >Feld</item>
         <item >Spieler</item>
-        <item >Ziel</item>
         <item >Hindernisse</item>
+        <item >Ziel</item>
         <item >Zurücksetzen</item>
     </string-array>
     <string-array name="items_background">

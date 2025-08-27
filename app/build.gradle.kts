@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "ch.olivsoft.android.blindman"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "ch.olivsoft.android.blindman"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 31
         versionName = "1.31"
     }
@@ -30,8 +30,8 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        jvmToolchain(11)
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

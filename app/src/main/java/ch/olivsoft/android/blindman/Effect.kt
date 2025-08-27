@@ -16,8 +16,8 @@ enum class Effect(
 ) {
     GRAB(HapticFeedbackConstants.LONG_PRESS, -1, false, false),
     HIT(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.boing, false, false),
-    GOAL(-1, R.raw.tada, true, true),
-    OVER(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false);
+    OVER(HapticFeedbackConstants.VIRTUAL_KEY, R.raw.crash, true, false),
+    GOAL(-1, R.raw.tada, true, true);
 
     private var soundID = -1
     private var alphaAnimation: Animation? = null

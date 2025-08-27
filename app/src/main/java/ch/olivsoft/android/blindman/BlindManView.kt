@@ -100,6 +100,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         val gestureListener = GestureListener()
         gestureDetector = GestureDetector(context, gestureListener)
         gestureDetector.setOnDoubleTapListener(gestureListener)
+        @Suppress("UsePropertyAccessSyntax")
         gestureDetector.setIsLongpressEnabled(false)
         this.isClickable = true
 

@@ -53,7 +53,7 @@ class MusicPlayer(
         // already defined onError callback (with fairly useless arguments).
         Log.e(LOG_TAG, message, e)
         toggle(false)
-        listener?.onPlayerError((e as PlaybackException))
+        listener?.onPlayerError(e as PlaybackException)
     }
 
     // The magic toggle function
