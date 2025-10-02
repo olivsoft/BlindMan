@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
@@ -14,13 +15,14 @@ import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
+import androidx.core.content.edit
+import androidx.core.view.MenuProvider
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
-import androidx.core.content.edit
 
 class BlindManActivity : AppCompatActivity() {
 
@@ -41,12 +43,12 @@ class BlindManActivity : AppCompatActivity() {
 
     // View and Music Player
     private lateinit var bmView: BlindManView
-    private lateinit var musicPlayer: MusicPlayer
+    private lateinit var mPlayer: MusicPlayer
 
     // Set the right channel for volume control
     private fun setVolumeControlStream() {
         volumeControlStream =
-            if (musicPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled)
+            if (mPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled)
                 AudioManager.STREAM_MUSIC
             else
                 AudioManager.USE_DEFAULT_STREAM_TYPE
@@ -76,12 +78,12 @@ class BlindManActivity : AppCompatActivity() {
         }
 
         // Create music player (needed in preferences)
-        musicPlayer = MusicPlayer(
+        mPlayer = MusicPlayer(
             this, R.raw.nervous_cubase, true,
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     Log.e(LOG_TAG, "MusicPlayer error", error)
-                    musicPlayer.toggle(false)
+                    mPlayer.toggle(false)
                     showDialogFragment(R.id.midi)
                 }
             })
@@ -97,12 +99,28 @@ class BlindManActivity : AppCompatActivity() {
             isHapticFeedbackEnabled = p.getBoolean(PREF_HAPTICS, true)
             isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
         }
-        musicPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
+        mPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, mPlayer.isMusicEnabled)
         ColoredPart.getAllFromPreferences(p, PREF_COL_)
         Log.d(LOG_TAG, "Preferences loaded")
 
         // Set volume control
         setVolumeControlStream()
+
+        // Add menu
+        addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu_main, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                val id = menuItem.itemId
+                when (id) {
+                    R.id.quit -> finish()
+                    else -> showDialogFragment(id)
+                }
+                return true
+            }
+        })
 
         // Show help dialog at very first execution
         if (p.getBoolean(PREF_FIRST, true))
@@ -111,12 +129,12 @@ class BlindManActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        musicPlayer.start()
+        mPlayer.start()
     }
 
     override fun onPause() {
         super.onPause()
-        musicPlayer.pause()
+        mPlayer.pause()
 
         // This is the recommended place to save persistent
         // settings (not onStop)
@@ -129,7 +147,7 @@ class BlindManActivity : AppCompatActivity() {
                 putBoolean(PREF_HAPTICS, isHapticFeedbackEnabled)
                 putBoolean(PREF_SOUND, isSoundEffectsEnabled)
             }
-            putBoolean(PREF_MUSIC, musicPlayer.isMusicEnabled)
+            putBoolean(PREF_MUSIC, mPlayer.isMusicEnabled)
             ColoredPart.putAllToPreferences(this, PREF_COL_)
             putBoolean(PREF_FIRST, false)
         }
@@ -137,31 +155,16 @@ class BlindManActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        musicPlayer.resume()
+        mPlayer.resume()
         setVolumeControlStream()
     }
 
     override fun onStop() {
         super.onStop()
-        musicPlayer.stop()
+        mPlayer.stop()
     }
 
-    // Menu
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.menus, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.quit -> finish()
-            else -> showDialogFragment(item.itemId)
-        }
-        return true
-    }
-
-    // Call the selected dialog
+    // Show the dialog fragment
     private fun showDialogFragment(id: Int) {
         BlindManDialogFragment.newInstance(id).show(supportFragmentManager, "dialog")
     }
@@ -289,7 +292,7 @@ class BlindManActivity : AppCompatActivity() {
                         setOnShowListener { _ ->
                             setItemChecked(0, bmView.isHapticFeedbackEnabled)
                             setItemChecked(1, bmView.isSoundEffectsEnabled)
-                            setItemChecked(2, musicPlayer.isMusicEnabled)
+                            setItemChecked(2, mPlayer.isMusicEnabled)
                         }
                         onItemClickListener = OnItemClickListener { _, view, position, _ ->
                             val c = view as Checkable
@@ -302,7 +305,7 @@ class BlindManActivity : AppCompatActivity() {
                                 }
 
                                 2 -> {
-                                    musicPlayer.toggle(c.isChecked)
+                                    mPlayer.toggle(c.isChecked)
                                     setVolumeControlStream()
                                 }
 
