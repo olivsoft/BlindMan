@@ -45,15 +45,6 @@ class BlindManActivity : AppCompatActivity() {
     private lateinit var bmView: BlindManView
     private lateinit var mPlayer: MusicPlayer
 
-    // Set the right channel for volume control
-    private fun setVolumeControlStream() {
-        volumeControlStream =
-            if (mPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled)
-                AudioManager.STREAM_MUSIC
-            else
-                AudioManager.USE_DEFAULT_STREAM_TYPE
-    }
-
     // Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,10 +104,9 @@ class BlindManActivity : AppCompatActivity() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                val id = menuItem.itemId
-                when (id) {
+                when (menuItem.itemId) {
                     R.id.quit -> finish()
-                    else -> showDialogFragment(id)
+                    else -> showDialogFragment(menuItem.itemId)
                 }
                 return true
             }
@@ -162,6 +152,33 @@ class BlindManActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         mPlayer.stop()
+    }
+
+    // Keys are treated here
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.action != KeyEvent.ACTION_DOWN)
+            return false
+
+        when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_NUMPAD_6,
+            KeyEvent.KEYCODE_SOFT_RIGHT -> bmView.makeMove(1f, 0f)
+
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_NUMPAD_4,
+            KeyEvent.KEYCODE_SOFT_LEFT -> bmView.makeMove(-1f, 0f)
+
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_NUMPAD_8,
+            KeyEvent.KEYCODE_PAGE_UP -> bmView.makeMove(0f, -1f)
+
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_NUMPAD_2,
+            KeyEvent.KEYCODE_PAGE_DOWN -> bmView.makeMove(0f, 1f)
+
+            else -> return super.onKeyDown(keyCode, event)
+        }
+        return true
     }
 
     // Show the dialog fragment
@@ -334,30 +351,12 @@ class BlindManActivity : AppCompatActivity() {
         }
     }
 
-    // Keys are treated here
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action != KeyEvent.ACTION_DOWN)
-            return false
-
-        when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_NUMPAD_6,
-            KeyEvent.KEYCODE_SOFT_RIGHT -> bmView.makeMove(1f, 0f)
-
-            KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_NUMPAD_4,
-            KeyEvent.KEYCODE_SOFT_LEFT -> bmView.makeMove(-1f, 0f)
-
-            KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_NUMPAD_8,
-            KeyEvent.KEYCODE_PAGE_UP -> bmView.makeMove(0f, -1f)
-
-            KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_NUMPAD_2,
-            KeyEvent.KEYCODE_PAGE_DOWN -> bmView.makeMove(0f, 1f)
-
-            else -> return super.onKeyDown(keyCode, event)
-        }
-        return true
+    // Set the right channel for volume control
+    private fun setVolumeControlStream() {
+        volumeControlStream =
+            if (mPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled)
+                AudioManager.STREAM_MUSIC
+            else
+                AudioManager.USE_DEFAULT_STREAM_TYPE
     }
 }
