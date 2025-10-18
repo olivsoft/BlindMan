@@ -67,12 +67,11 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     private val random = Random.Default
 
     // Game motion
-    private val dragStarter: DragStarter
-    private val dragHandler: DragHandler
-    private val gestureDetector: GestureDetector
+    private val gestureDetector = GestureDetector(context, GestureListener())
+    private val dragStarter = DragStarter()
+    private val dragHandler = DragHandler()
 
-    // For efficiency, objects used in onDraw should be created in advance.
-    // We add further such objects from makeMove.
+    // Drawing
     private val drawingPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val drawingRect = RectF()
     private val pp = Rect()
@@ -80,36 +79,20 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     // Animation
     private var swapColors = false
 
-    // Game states
+    // Game state
     private enum class GameState {
         IDLE, SHOW, PLAY, HINT
     }
 
     private var gameState = GameState.IDLE
 
-    // This constructor is called by the layout mechanism.
-    // Size-independent members can be initialized here.
+    // Constructor
     init {
-        dragStarter = DragStarter()
-        dragHandler = DragHandler()
-
-        // Overriding methods of a SimpleGestureListener is sufficient.
-        // Strange: DoubleTap listening works also without explicitly setting it.
-        // In our case, setLongPressEnabled and setClickable are required in this
-        // combination, there are many articles on why this is the case.
-        val gestureListener = GestureListener()
-        gestureDetector = GestureDetector(context, gestureListener)
-        gestureDetector.setOnDoubleTapListener(gestureListener)
-        @Suppress("UsePropertyAccessSyntax")
-        gestureDetector.setIsLongpressEnabled(false)
-        this.isClickable = true
-
         // Effects need some additional initialization
         Effect.loadDynamicElements(context, this)
-        Log.d(LOG_TAG, "View created")
     }
 
-    // This is also called by the layout mechanism.
+    // This is called by the layout mechanism
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         // Store width and height
@@ -119,7 +102,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             initField(0)
     }
 
-    // Here, size-dependent members are set.
+    // Here, size-dependent members are set
     fun initField(newSize: Int) {
         if (newSize > 0)
             size = min(newSize, OBSTACLE_ROWS.size)
@@ -307,12 +290,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    // Touch event handling, including required override
-    override fun performClick(): Boolean {
-        return if (hasOnClickListeners()) super.performClick()
-        else false
-    }
-
+    // Touch event handling including required override
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // First we consider the play state
         if (gameState == GameState.PLAY) {
@@ -369,9 +347,30 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
+    override fun performClick(): Boolean {
+        return super.performClick() && hasOnClickListeners()
+    }
+
     // DoubleTap and Gesture implementations. Only four methods
-    // are needed, therefore we extend the simple helper class.
+    // are needed. Therefore, we extend the simple helper class.
     private inner class GestureListener : SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean {
+            // onDown must always return true in this usage pattern
+            return true
+        }
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            Log.d(LOG_TAG, "onDoubleTap called")
+
+            obstacles.forEach { it.setVisible() }
+            // Cancel drag mode (if active)
+            dragHandler.stopDragMode()
+            gameState = GameState.HINT
+            invalidate()
+
+            return true
+        }
+
         override fun onFling(
             e1: MotionEvent?, e2: MotionEvent,
             velocityX: Float, velocityY: Float
@@ -396,65 +395,19 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             dragHandler.startDragMode()
             Effect.GRAB.makeEffect(this@BlindManView)
         }
-
-        override fun onDown(e: MotionEvent): Boolean {
-            // onDown must always return true in this usage pattern
-            return true
-        }
-
-        override fun onDoubleTap(e: MotionEvent): Boolean {
-            Log.d(LOG_TAG, "onDoubleTap called")
-
-            obstacles.forEach { it.setVisible() }
-            // Cancel drag mode (if active)
-            dragHandler.stopDragMode()
-            gameState = GameState.HINT
-            invalidate()
-
-            return true
-        }
-    }
-
-    // Animation interface
-    override fun onAnimationStart(animation: Animation) {
-        // Start the cycle with inverted colors
-        swapColors = true
-        invalidate()
-    }
-
-    override fun onAnimationRepeat(animation: Animation) {
-        if (gameState != GameState.IDLE) {
-            // Someone was quick in tapping on the screen. According to
-            // the documentation, onAnimationEnd is called after cancel,
-            // so we don't have to do it. reset, however, must be
-            // called manually. Note: cancel only exists since FROYO.
-            animation.cancel()
-            animation.reset()
-            return
-        }
-        swapColors = !swapColors
-        invalidate()
-    }
-
-    override fun onAnimationEnd(animation: Animation) {
-        // Restore colors and redraw again
-        swapColors = false
-        invalidate()
     }
 
     // Drag starting class
     private inner class DragStarter : SimpleCountDownTimer(DRAG_START_DELAY) {
         fun startTimer(e: MotionEvent): Boolean {
-            // This is a very well guarded routine: Make sure a motion in
-            // non-dragging mode only starts the timer and later dragging
-            // if a number of conditions are fulfilled.
+            // Decide if a move on the screen should start the dragging mode
             val doStart = !isTimerRunning
                     && !dragHandler.isDragModeActive
                     && e.action == MotionEvent.ACTION_MOVE
             if (doStart) {
                 dragHandler.resetPosition(e)
                 startTimer()
-                Log.d(LOG_TAG, "DragStarter STARTED")
+                Log.d(LOG_TAG, "DragStarter started")
             }
             return doStart
         }
@@ -529,5 +482,32 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 else -> return false
             }
         }
+    }
+
+    // Animation interface
+    override fun onAnimationStart(animation: Animation) {
+        // Start the cycle with inverted colors
+        swapColors = true
+        invalidate()
+    }
+
+    override fun onAnimationRepeat(animation: Animation) {
+        if (gameState != GameState.IDLE) {
+            // Someone was quick in tapping on the screen. According to
+            // the documentation, onAnimationEnd is called after cancel,
+            // so we don't have to do it. reset, however, must be
+            // called manually. Note: cancel only exists since FROYO.
+            animation.cancel()
+            animation.reset()
+            return
+        }
+        swapColors = !swapColors
+        invalidate()
+    }
+
+    override fun onAnimationEnd(animation: Animation) {
+        // Restore colors and redraw again
+        swapColors = false
+        invalidate()
     }
 }

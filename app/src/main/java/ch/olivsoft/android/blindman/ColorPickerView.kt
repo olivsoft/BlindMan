@@ -77,28 +77,21 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
          * @param context      A valid context
          * @param dialogTitle  The title of the dialog
          * @param initialColor The initial color
-         * @param listener     The callback listener
-         * @return A dialog containing the color picker view
+         * @param listener     The dialog click listener
+         * @return An [AppCompatDialog] containing the color picker view
          */
         fun createDialog(
             context: Context, dialogTitle: String?, initialColor: Int,
             listener: DialogInterface.OnClickListener
         ): AppCompatDialog {
             return object : AppCompatDialog(context) {
+                // Constants and variables
+                val INITIAL_COLOR = "INITIAL_COLOR"
+                lateinit var view: ColorPickerView
 
-                private val INITIAL_COLOR = "INITIAL_COLOR"
-                private lateinit var view: ColorPickerView
-
-                override fun onSaveInstanceState(): Bundle {
-                    // We preserve the color state!
-                    val bundle = super.onSaveInstanceState()
-                    bundle.putInt(INITIAL_COLOR, view.selectedColor)
-                    return bundle
-                }
-
-                override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-                    super.onRestoreInstanceState(savedInstanceState)
-                    view.selectedColor = savedInstanceState.getInt(INITIAL_COLOR)
+                // Call the dialog click listener from the view click listener
+                val colorListener = OnClickListener {
+                    listener.onClick(this, view.selectedColor)
                 }
 
                 override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,19 +99,26 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                     setTitle(dialogTitle)
                     with(ColorpickerBinding.inflate(layoutInflater)) {
                         setContentView(root)
-                        view = colorPickerView
+                        view = colorPickerView.apply {
+                            selectedColor =
+                                savedInstanceState?.getInt(INITIAL_COLOR) ?: initialColor
+                            setOnClickListener(colorListener)
+                            // The view is NOT clickable, only the central "OK" is
+                            isClickable = false
+                        }
                     }
-                    if (savedInstanceState == null)
-                        view.selectedColor = initialColor
-                    // The view will send back a click once the color is selected.
-                    // Therefore, all other clicks must be disabled.
-                    view.setOnClickListener { listener.onClick(this, view.selectedColor) }
-                    view.isClickable = false
+                }
+
+                // Preserve the color state
+                override fun onSaveInstanceState(): Bundle {
+                    return super.onSaveInstanceState().apply {
+                        putInt(INITIAL_COLOR, view.selectedColor)
+                    }
                 }
             }
         }
 
-        // Helper functions for getting a color from a circular angle...
+        // Helper functions for getting a color from a circular angle
         private fun interpolateInt(a: Int, b: Int, f: Float): Int {
             return a + (f * (b - a)).roundToInt()
         }
@@ -152,14 +152,14 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
     private var circleRadius = 0
     private var centerRadius = 0
     private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val centerPaint: Paint
-    private val textPaint: TextPaint
+    private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.DEV_KERN_TEXT_FLAG)
     private var textHeight = 0
     private var trackingCenter = false
     private var highlightCenter = false
 
     /**
-     * Sets and gets the selected color.
+     * Sets and gets the selected color
      */
     var selectedColor: Int
         set(value) {
@@ -170,14 +170,12 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
         }
 
     /**
-     * Constructor for layout mechanism.
+     * Constructor
      */
     init {
-        // Initialize all variables that are not size-dependent
+        // Treat all variables that are not size-dependent
         circlePaint.shader = SweepGradient(0f, 0f, COLORS, null)
         circlePaint.style = Paint.Style.STROKE
-        centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG or Paint.DEV_KERN_TEXT_FLAG)
         textPaint.textAlign = Align.CENTER
         textPaint.typeface = Typeface.DEFAULT_BOLD
     }
@@ -238,8 +236,7 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
             if (!highlightCenter)
                 centerPaint.alpha = FULL_ALPHA / 2
             canvas.drawCircle(
-                0f, 0f,
-                2 * centerRadius - centerPaint.strokeWidth, centerPaint
+                0f, 0f, 2 * centerRadius - centerPaint.strokeWidth, centerPaint
             )
 
             // Reset to standard
@@ -247,28 +244,27 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
             centerPaint.alpha = FULL_ALPHA
         }
 
-        // Add a nicely anti-colored "OK" in the center.
-        // Careful: color contains alpha, which must be
-        // the same value (not "anti") as the background.
+        // Add a nicely anti-colored (but equally bright) "OK" in the center
         textPaint.color = centerPaint.color.inv()
         textPaint.alpha = centerPaint.alpha
         canvas.drawText(OK, 0f, textHeight / 2f, textPaint)
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val retVal = super.onTouchEvent(event)
+    override fun onTouchEvent(e: MotionEvent): Boolean {
+        val retVal = super.onTouchEvent(e)
 
-        val x = event.x - centerPoint.x
-        val y = event.y - centerPoint.y
-        val inCenter = hypot(x, y) <= centerRadius
+        e.offsetLocation(-centerPoint.x, -centerPoint.y)
+        val r = hypot(e.x, e.y)
+        val inCenter = r <= centerRadius
+        val onCircle = r <= circleRadius && r >= circleRadius - centerRadius
 
-        when (event.action) {
+        when (e.action) {
             MotionEvent.ACTION_DOWN -> {
                 trackingCenter = inCenter
                 if (inCenter)
                     highlightCenter = true
-                else
-                    centerPaint.color = getColorFromAngle(x, y)
+                else if (onCircle)
+                    centerPaint.color = getColorFromAngle(e.x, e.y)
                 invalidate()
             }
 
@@ -279,7 +275,8 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                         invalidate()
                     }
                 } else {
-                    centerPaint.color = getColorFromAngle(x, y)
+                    if (onCircle)
+                        centerPaint.color = getColorFromAngle(e.x, e.y)
                     invalidate()
                 }
             }
@@ -290,7 +287,6 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                     if (inCenter) {
                         // This is a click! Catch it as
                         // the caller with an OnClickListener.
-                        // Satisfy the compiler with the override below.
                         return performClick()
                     } else {
                         // No selection yet
@@ -306,7 +302,6 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun performClick(): Boolean {
-        return if (hasOnClickListeners()) super.performClick()
-        else false
+        return super.performClick() && hasOnClickListeners()
     }
 }

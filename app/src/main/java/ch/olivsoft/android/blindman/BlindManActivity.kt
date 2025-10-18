@@ -1,6 +1,5 @@
 package ch.olivsoft.android.blindman
 
-import android.content.DialogInterface
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +18,7 @@ import androidx.core.content.edit
 import androidx.core.view.MenuProvider
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import ch.olivsoft.android.blindman.BlindManView.Companion.ALLOWED_LIVES
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -197,7 +197,7 @@ class BlindManActivity : AppCompatActivity() {
             // For that we use the provided factory method.
             return ColorPickerView.createDialog(
                 this, title, cp.color
-            ) { dialog: DialogInterface, which: Int ->
+            ) { dialog, which ->
                 dialog.dismiss()
                 cp.color = which
                 bmView.invalidate()
@@ -207,17 +207,17 @@ class BlindManActivity : AppCompatActivity() {
 
         // Now we treat all the cases which can easily be built as an AlertDialog.
         // We use custom ArrayAdapter layouts for all list choice types.
-        val a: ArrayAdapter<String>
         val b = AlertDialog.Builder(this)
 
         when (id) {
             R.id.level -> {
-                a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
-                a.addAll(*resources.getStringArray(R.array.items_level))
                 b.setTitle(R.string.title_level)
                 b.setSingleChoiceItems(
-                    a, bmView.level - 1
-                ) { dialog: DialogInterface, which: Int ->
+                    ArrayAdapter(
+                        this, R.layout.dialog_singlechoice_item,
+                        resources.getStringArray(R.array.items_level)
+                    ), bmView.level - 1
+                ) { dialog, which ->
                     dialog.dismiss()
                     bmView.newGame(which + 1)
                 }
@@ -225,12 +225,13 @@ class BlindManActivity : AppCompatActivity() {
             }
 
             R.id.size -> {
-                a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
-                a.addAll(*resources.getStringArray(R.array.items_size))
                 b.setTitle(R.string.title_size)
                 b.setSingleChoiceItems(
-                    a, bmView.size - 1
-                ) { dialog: DialogInterface, which: Int ->
+                    ArrayAdapter(
+                        this, R.layout.dialog_singlechoice_item,
+                        resources.getStringArray(R.array.items_size)
+                    ), bmView.size - 1
+                ) { dialog, which ->
                     dialog.dismiss()
                     bmView.initField(which + 1)
                     bmView.newGame(0)
@@ -239,27 +240,31 @@ class BlindManActivity : AppCompatActivity() {
             }
 
             R.id.lives -> {
-                a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
-                for (i in BlindManView.ALLOWED_LIVES)
-                    a.add(if (i == 0) "∞" else i.toString())
-                val currSel = BlindManView.ALLOWED_LIVES.indexOf(bmView.lives)
                 b.setTitle(R.string.title_lives)
                 b.setSingleChoiceItems(
-                    a, currSel
-                ) { dialog: DialogInterface, which: Int ->
+                    ArrayAdapter(
+                        this, R.layout.dialog_singlechoice_item,
+                        ALLOWED_LIVES.map {
+                            if (it == 0) "∞" else it.toString()
+                        }
+                    ), ALLOWED_LIVES.indexOf(bmView.lives)
+                ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.lives = BlindManView.ALLOWED_LIVES[which]
+                    bmView.lives = ALLOWED_LIVES[which]
                 }
                 return b.create()
             }
 
             R.id.colors -> {
-                a = ArrayAdapter(this, R.layout.dialog_list_item)
-                a.addAll(*resources.getStringArray(R.array.items_colors))
                 b.setTitle(R.string.title_colors)
                 b.setPositiveButton(R.string.title_close, null)
                 // Avoid dismissing the dialog when a list item is clicked
-                b.setAdapter(a, null)
+                b.setAdapter(
+                    ArrayAdapter(
+                        this, R.layout.dialog_list_item,
+                        resources.getStringArray(R.array.items_colors)
+                    ), null
+                )
                 return b.create().apply {
                     with(listView) {
                         itemsCanFocus = false
@@ -279,12 +284,13 @@ class BlindManActivity : AppCompatActivity() {
             }
 
             R.id.background -> {
-                a = ArrayAdapter(this, R.layout.dialog_singlechoice_item)
-                a.addAll(*resources.getStringArray(R.array.items_background))
                 b.setTitle(R.string.title_background)
                 b.setSingleChoiceItems(
-                    a, bmView.background
-                ) { dialog: DialogInterface, which: Int ->
+                    ArrayAdapter(
+                        this, R.layout.dialog_singlechoice_item,
+                        resources.getStringArray(R.array.items_background)
+                    ), bmView.background
+                ) { dialog, which ->
                     dialog.dismiss()
                     bmView.background = which
                     bmView.invalidate()
@@ -295,10 +301,13 @@ class BlindManActivity : AppCompatActivity() {
             // Custom layout version of a multi choice dialog with
             // same font size and appearance as all other list dialogs
             R.id.sound -> {
-                a = ArrayAdapter(this, R.layout.dialog_multichoice_item)
-                a.addAll(*resources.getStringArray(R.array.items_effects))
                 b.setTitle(R.string.title_sound)
-                b.setAdapter(a, null)
+                b.setAdapter(
+                    ArrayAdapter(
+                        this, R.layout.dialog_multichoice_item,
+                        resources.getStringArray(R.array.items_effects)
+                    ), null
+                )
                 b.setPositiveButton(R.string.title_close, null)
                 return b.create().apply {
                     with(listView) {
