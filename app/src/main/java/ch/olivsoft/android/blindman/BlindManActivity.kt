@@ -18,7 +18,6 @@ import androidx.core.content.edit
 import androidx.core.view.MenuProvider
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import ch.olivsoft.android.blindman.BlindManView.Companion.ALLOWED_LIVES
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -244,13 +243,13 @@ class BlindManActivity : AppCompatActivity() {
                 b.setSingleChoiceItems(
                     ArrayAdapter(
                         this, R.layout.dialog_singlechoice_item,
-                        ALLOWED_LIVES.map {
+                        BlindManView.ALLOWED_LIVES.map {
                             if (it == 0) "∞" else it.toString()
                         }
-                    ), ALLOWED_LIVES.indexOf(bmView.lives)
+                    ), BlindManView.ALLOWED_LIVES.indexOf(bmView.lives)
                 ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.lives = ALLOWED_LIVES[which]
+                    bmView.lives = BlindManView.ALLOWED_LIVES[which]
                 }
                 return b.create()
             }
