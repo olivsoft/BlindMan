@@ -7,7 +7,6 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Checkable
 import android.widget.ListView
@@ -267,7 +266,7 @@ class BlindManActivity : AppCompatActivity() {
                 return b.create().apply {
                     with(listView) {
                         itemsCanFocus = false
-                        onItemClickListener = OnItemClickListener { _, _, position, _ ->
+                        setOnItemClickListener { _, _, position, _ ->
                             if (position == ColoredPart.entries.size) {
                                 // Reset colors
                                 ColoredPart.resetAll()
@@ -310,7 +309,7 @@ class BlindManActivity : AppCompatActivity() {
                 b.setPositiveButton(R.string.title_close, null)
                 return b.create().apply {
                     with(listView) {
-                        // Set initial states and listener. Both explicit here.
+                        // Set initial states and click listener. Both explicit here.
                         // The OnShowListener is THE way to set initial states.
                         choiceMode = ListView.CHOICE_MODE_MULTIPLE
                         itemsCanFocus = false
@@ -319,7 +318,7 @@ class BlindManActivity : AppCompatActivity() {
                             setItemChecked(1, bmView.isSoundEffectsEnabled)
                             setItemChecked(2, mPlayer.isMusicEnabled)
                         }
-                        onItemClickListener = OnItemClickListener { _, view, position, _ ->
+                        setOnItemClickListener { _, view, position, _ ->
                             val c = view as Checkable
                             when (position) {
                                 0 -> bmView.isHapticFeedbackEnabled = c.isChecked
