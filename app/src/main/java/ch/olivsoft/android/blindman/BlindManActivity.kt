@@ -313,7 +313,7 @@ class BlindManActivity : AppCompatActivity() {
                         // The OnShowListener is THE way to set initial states.
                         choiceMode = ListView.CHOICE_MODE_MULTIPLE
                         itemsCanFocus = false
-                        setOnShowListener { _ ->
+                        setOnShowListener {
                             setItemChecked(0, bmView.isHapticFeedbackEnabled)
                             setItemChecked(1, bmView.isSoundEffectsEnabled)
                             setItemChecked(2, mPlayer.isMusicEnabled)
