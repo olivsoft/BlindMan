@@ -37,6 +37,13 @@ class BlindManActivity : AppCompatActivity() {
         private const val PREF_MUSIC = "PREF_MUSIC"
         private const val PREF_COL_ = "PREF_COL_"
         private const val PREF_BACKGROUND = "PREF_BACKGROUND"
+
+        // Test devices are older and current phones
+        private val testDeviceIds = listOf(
+            "98DDF74ECDE599B008274ED3B5C5DCA5",
+            "54A8240637407DBE6671033FDA2C7FCA",
+            "B6B9CB212805EAF05227298CC384418C"
+        )
     }
 
     // View and Music Player
@@ -47,17 +54,12 @@ class BlindManActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Configure ad banner. Test devices are older and current phones.
-        val testDeviceIds = listOf(
-            "98DDF74ECDE599B008274ED3B5C5DCA5",
-            "54A8240637407DBE6671033FDA2C7FCA",
-            "B6B9CB212805EAF05227298CC384418C"
-        )
+        // Ad view configuration
         MobileAds.setRequestConfiguration(
             RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         )
 
-        // Assign bindings, load toolbar, content view and ad view
+        // Layout, bindings, initializations
         with(MainBinding.inflate(layoutInflater)) {
             bmView = gameView
             bmView.textView = textView
@@ -66,7 +68,7 @@ class BlindManActivity : AppCompatActivity() {
             adView.loadAd(AdRequest.Builder().build())
         }
 
-        // Create music player (needed in preferences)
+        // Music player
         mPlayer = MusicPlayer(
             this, R.raw.nervous_cubase, true,
             object : Player.Listener {
@@ -77,8 +79,8 @@ class BlindManActivity : AppCompatActivity() {
                 }
             })
 
-        // Assign saved preference values to their variables.
-        // Use default values from their declarations if available.
+        // Saved preference values (or initially their default values)
+        // are loaded here and saved again in onPause
         val p = getPreferences(MODE_PRIVATE)
         with(bmView) {
             level = p.getInt(PREF_LEVEL, level)
@@ -92,10 +94,10 @@ class BlindManActivity : AppCompatActivity() {
         ColoredPart.getAllFromPreferences(p, PREF_COL_)
         Log.d(LOG_TAG, "Preferences loaded")
 
-        // Set volume control
+        // Volume control
         setVolumeControlStream()
 
-        // Add menu
+        // Menu
         addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_main, menu)
@@ -110,7 +112,7 @@ class BlindManActivity : AppCompatActivity() {
             }
         })
 
-        // Show help dialog at very first execution
+        // The help dialog is shown at the very first execution
         if (p.getBoolean(PREF_FIRST, true))
             showDialogFragment(R.id.help)
     }
@@ -152,7 +154,7 @@ class BlindManActivity : AppCompatActivity() {
         mPlayer.stop()
     }
 
-    // Keys are treated here
+    // Keys
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (event.action != KeyEvent.ACTION_DOWN)
             return false
@@ -184,15 +186,12 @@ class BlindManActivity : AppCompatActivity() {
         BlindManDialogFragment.newInstance(id).show(supportFragmentManager, "dialog")
     }
 
-    // This is the relevant dialog creation method. It is called through the dialog fragment.
+    // Fill the fragment with the chosen dialog
     fun createDialog(id: Int): AppCompatDialog {
-        // First we treat the color picker
+        // First case: Return the color picker dialog directly.
         if (id < ColoredPart.entries.size) {
             val title = resources.getStringArray(R.array.items_colors)[id]
             val cp = ColoredPart.entries[id]
-
-            // We can embed our nice color picker view into a regular dialog.
-            // For that we use the provided factory method.
             return ColorPickerView.createDialog(
                 this, title, cp.color
             ) { dialog, which ->
@@ -203,11 +202,14 @@ class BlindManActivity : AppCompatActivity() {
             }
         }
 
-        // Now we treat all the cases which can easily be built as an AlertDialog.
-        // We use custom ArrayAdapter layouts for all list choice types.
+        // In all other cases, dialogs are built as an AlertDialog.
+        // Custom ArrayAdapter layouts are used for all list choice types
+        // because the native layouts have design inconsistencies.
         val b = AlertDialog.Builder(this)
+        var d: AlertDialog? = null
 
         when (id) {
+            // Single choice dialogs
             R.id.level -> {
                 b.setTitle(R.string.title_level)
                 b.setSingleChoiceItems(
@@ -219,7 +221,6 @@ class BlindManActivity : AppCompatActivity() {
                     dialog.dismiss()
                     bmView.newGame(which + 1)
                 }
-                return b.create()
             }
 
             R.id.size -> {
@@ -234,7 +235,6 @@ class BlindManActivity : AppCompatActivity() {
                     bmView.initField(which + 1)
                     bmView.newGame(0)
                 }
-                return b.create()
             }
 
             R.id.lives -> {
@@ -250,12 +250,25 @@ class BlindManActivity : AppCompatActivity() {
                     dialog.dismiss()
                     bmView.lives = BlindManView.ALLOWED_LIVES[which]
                 }
-                return b.create()
             }
 
+            R.id.background -> {
+                b.setTitle(R.string.title_background)
+                b.setSingleChoiceItems(
+                    ArrayAdapter(
+                        this, R.layout.dialog_singlechoice_item,
+                        resources.getStringArray(R.array.items_background)
+                    ), bmView.background
+                ) { dialog, which ->
+                    dialog.dismiss()
+                    bmView.background = which
+                    bmView.invalidate()
+                }
+            }
+
+            // List item dialog
             R.id.colors -> {
                 b.setTitle(R.string.title_colors)
-                b.setPositiveButton(R.string.title_close, null)
                 // Avoid dismissing the dialog when a list item is clicked
                 b.setAdapter(
                     ArrayAdapter(
@@ -263,7 +276,8 @@ class BlindManActivity : AppCompatActivity() {
                         resources.getStringArray(R.array.items_colors)
                     ), null
                 )
-                return b.create().apply {
+                b.setPositiveButton(R.string.title_close, null)
+                d = b.create().apply {
                     with(listView) {
                         itemsCanFocus = false
                         setOnItemClickListener { _, _, position, _ ->
@@ -281,23 +295,7 @@ class BlindManActivity : AppCompatActivity() {
                 }
             }
 
-            R.id.background -> {
-                b.setTitle(R.string.title_background)
-                b.setSingleChoiceItems(
-                    ArrayAdapter(
-                        this, R.layout.dialog_singlechoice_item,
-                        resources.getStringArray(R.array.items_background)
-                    ), bmView.background
-                ) { dialog, which ->
-                    dialog.dismiss()
-                    bmView.background = which
-                    bmView.invalidate()
-                }
-                return b.create()
-            }
-
-            // Custom layout version of a multi choice dialog with
-            // same font size and appearance as all other list dialogs
+            // Multi choice dialog
             R.id.sound -> {
                 b.setTitle(R.string.title_sound)
                 b.setAdapter(
@@ -307,7 +305,7 @@ class BlindManActivity : AppCompatActivity() {
                     ), null
                 )
                 b.setPositiveButton(R.string.title_close, null)
-                return b.create().apply {
+                d = b.create().apply {
                     with(listView) {
                         // Set initial states and click listener. Both explicit here.
                         // The OnShowListener is THE way to set initial states.
@@ -340,22 +338,28 @@ class BlindManActivity : AppCompatActivity() {
                 }
             }
 
-            R.id.about -> return b.setTitle(R.string.title_about)
-                .setMessage(R.string.text_about)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
+            // Message dialogs
+            R.id.about -> {
+                b.setTitle(R.string.title_about)
+                b.setMessage(R.string.text_about)
+                b.setPositiveButton(android.R.string.ok, null)
+            }
 
-            R.id.midi -> return b.setTitle(R.string.title_midi)
-                .setMessage(R.string.text_midi)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
+            R.id.midi -> {
+                b.setTitle(R.string.title_midi)
+                b.setMessage(R.string.text_midi)
+                b.setPositiveButton(android.R.string.ok, null)
+            }
 
-            // Includes help
-            else -> return b.setTitle(R.string.title_help)
-                .setMessage(R.string.text_help)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
+            else -> {
+                // "else" simply means help
+                b.setTitle(R.string.title_help)
+                b.setMessage(R.string.text_help)
+                b.setPositiveButton(android.R.string.ok, null)
+            }
         }
+        // Return the dialog
+        return d ?: b.create()
     }
 
     // Set the right channel for volume control
