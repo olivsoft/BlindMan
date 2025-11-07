@@ -3,6 +3,7 @@ package ch.olivsoft.android.blindman
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -391,7 +392,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
             // Start dragging immediately
             dragStarter.cancelTimer()
-            dragHandler.resetPosition(e)
+            dragHandler.setReferencePosition(e)
             dragHandler.startDragMode()
             Effect.GRAB.makeEffect(this@BlindManView)
         }
@@ -405,7 +406,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                     && !dragHandler.isDragModeActive
                     && e.action == MotionEvent.ACTION_MOVE
             if (doStart) {
-                dragHandler.resetPosition(e)
+                dragHandler.setReferencePosition(e)
                 startTimer()
                 Log.d(LOG_TAG, "DragStarter started")
             }
@@ -426,8 +427,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         var isDragModeActive: Boolean = false
 
         // Private variables
-        private var oldX = 0f
-        private var oldY = 0f
+        private var refP = PointF(0f, 0f)
 
         // Override
         override fun onTimerElapsed() {
@@ -436,9 +436,8 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
 
         // Public methods
-        fun resetPosition(e: MotionEvent) {
-            oldX = e.x
-            oldY = e.y
+        fun setReferencePosition(e: MotionEvent) {
+            refP.set(e.x, e.y)
         }
 
         fun startDragMode() {
@@ -456,7 +455,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             // Check if we have to cancel the timer and reset the drag position
             if (isTimerRunning) {
                 cancelTimer()
-                resetPosition(e)
+                setReferencePosition(e)
             }
 
             when (e.action) {
@@ -468,13 +467,12 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    val dX = e.x - oldX
-                    val dY = e.y - oldY
+                    val dX = e.x - refP.x
+                    val dY = e.y - refP.y
                     // Motion amplification gives a good user experience
                     if (hypot(dX, dY) > 0.65f * oSize) {
                         makeMove(dX, dY)
-                        oldX += dX
-                        oldY += dY
+                        setReferencePosition(e)
                     }
                     return true
                 }
