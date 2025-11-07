@@ -30,15 +30,16 @@ abstract class SimpleCountDownTimer(millis: Long) : CountDownTimer(millis, milli
         cancel()
     }
 
-    // This must be overridden
+    // This must be implemented by the extending class
     abstract fun onTimerElapsed()
 
-    override fun onFinish() {
+    // Replaced by onTimerElapsed
+    final override fun onFinish() {
         isTimerRunning = false
         onTimerElapsed()
     }
 
-    // Get rid of this method
-    override fun onTick(millisUntilFinished: Long) {
+    // Not applicable
+    final override fun onTick(millisUntilFinished: Long) {
     }
 }
