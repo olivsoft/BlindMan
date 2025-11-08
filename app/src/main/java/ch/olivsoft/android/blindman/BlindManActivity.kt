@@ -64,7 +64,7 @@ class BlindManActivity : AppCompatActivity() {
             bmView = gameView
             bmView.textView = textView
             setContentView(root)
-            setSupportActionBar(toolbar)
+            setSupportActionBar(toolBar)
             adView.loadAd(AdRequest.Builder().build())
         }
 
