@@ -15,7 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
  *
  * In the constructor, an [androidx.media3.common.Player.Listener]
  * can be passed that is called back in case of an error.
- * If this is not required set the listener argument to null.
+ * If this is not required, set the listener argument to null.
  *
  * @author Oliver Fritz, OlivSoft
  */

@@ -47,6 +47,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             // Reset in case something went completely wrong
             field = if (ALLOWED_LIVES.contains(value)) value else ALLOWED_LIVES[2]
             if (gameState == GameState.PLAY) {
+                @Suppress("EmptyRange")
                 if (field in 1..hits) newGame(0)
                 else invalidate()
             }

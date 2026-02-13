@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -10,8 +9,8 @@ android {
         applicationId = "ch.olivsoft.android.blindman"
         minSdk = 23
         targetSdk = 36
-        versionCode = 32
-        versionName = "1.32"
+        versionCode = 34
+        versionName = "1.34"
     }
     buildTypes {
         release {
@@ -30,13 +29,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    kotlin {
-        jvmToolchain(11)
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }
 
 dependencies {
@@ -44,4 +36,5 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
 }

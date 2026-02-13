@@ -3,7 +3,7 @@ package ch.olivsoft.android.blindman
 import android.os.CountDownTimer
 
 /**
- * Counts down until cancelled or the given time has elapsed.
+ * Counts down until canceled or the given time has elapsed.
  * This timer extends [CountDownTimer] and includes
  * a method to check if it is currently running.
  * It does not call any intermediate ticks.
