@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialog
 import androidx.appcompat.app.AppCompatDialogFragment
-import androidx.core.os.bundleOf
 
 /**
  * Handles the dialogs for Honeycomb and up.
@@ -22,9 +21,9 @@ class BlindManDialogFragment : AppCompatDialogFragment() {
 
         fun newInstance(id: Int): BlindManDialogFragment {
             return BlindManDialogFragment().apply {
-                arguments = bundleOf(
-                    ID to id
-                )
+                arguments = Bundle().apply {
+                    putInt(ID, id)
+                }
             }
         }
     }
