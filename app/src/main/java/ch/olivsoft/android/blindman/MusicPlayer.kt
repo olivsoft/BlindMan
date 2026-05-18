@@ -31,10 +31,8 @@ class MusicPlayer(
         private val LOG_TAG = MusicPlayer::class.simpleName
     }
 
-    // Public variables
-    var isMusicEnabled: Boolean = false
-
     // Private variables
+    private var isMusicEnabled: Boolean = false
     private var player: ExoPlayer? = null
     private var position = 0L
     private val repeat = if (looping) ExoPlayer.REPEAT_MODE_ONE else ExoPlayer.REPEAT_MODE_OFF

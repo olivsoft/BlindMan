@@ -10,10 +10,15 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
-import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import ch.olivsoft.android.blindman.BlindManViewModel.Companion.GameState
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
@@ -26,34 +31,18 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
     companion object {
         // Constants
-        val ALLOWED_LIVES: List<Int> = listOf(1, 2, 3, 4, 6, 9, 12, 0)
         private val LOG_TAG = BlindManView::class.simpleName
         private const val FULL_ALPHA = 0xFF
-        private val BACKGROUND_ALPHA = intArrayOf(0, 0x40, 0x80)
-        private val OBSTACLE_ROWS = intArrayOf(8, 11, 15)
         private const val DRAG_START_DELAY = 200L
-        private const val DRAG_END_DELAY = 300L
+        private const val DRAG_END_DELAY = 100L
     }
 
-    // Variables visible to main activity
-    lateinit var textView: TextView
-    var size: Int = 1
-    var level: Int = 1
-    var background: Int = 1
+    // View model and dependent variables
+    // which will be initialized later
+    private lateinit var bmViewModel: BlindManViewModel
+    private var size = 0
 
-    // 3 lives is the default
-    var lives = ALLOWED_LIVES[2]
-        set(value) {
-            // Reset in case something went completely wrong
-            field = if (ALLOWED_LIVES.contains(value)) value else ALLOWED_LIVES[2]
-            if (gameState == GameState.PLAY) {
-                @Suppress("EmptyRange")
-                if (field in 1..hits) newGame(0)
-                else invalidate()
-            }
-        }
-
-    // Private internal variables
+    // Variables
     private var hits = 0
     private var viewWidth = 0
     private var viewHeight = 0
@@ -62,10 +51,10 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     private var offWidth = 0f
     private var offHeight = 0f
     private var oSize = 0
-    private lateinit var player: Rect
-    private lateinit var goal: Rect
-    private lateinit var border: Rect
-    private lateinit var obstacles: HashSet<Obstacle>
+    private var player = Rect()
+    private var goal = Rect()
+    private var border = Rect()
+    private var obstacles = HashSet<Obstacle>(100)
     private val random = Random.Default
 
     // Game motion
@@ -81,17 +70,63 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     // Animation
     private var swapColors = false
 
-    // Game state
-    private enum class GameState {
-        IDLE, SHOW, PLAY, HINT
-    }
-
     private var gameState = GameState.IDLE
 
     // Constructor
     init {
-        // Effects need some additional initialization
-        Effect.loadDynamicElements(context, this)
+        // Focus for keyboard input
+        isFocusable = true
+        isFocusableInTouchMode = true
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            defaultFocusHighlightEnabled = false
+        }
+        isClickable = true
+    }
+
+    // Further initialization with additional safety for preview
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        // ViewModel and Effect initialization
+        if (isInEditMode) {
+            bmViewModel = BlindManViewModel()
+        } else {
+            // Safer way to find the ViewModelStoreOwner
+            val owner = findViewTreeViewModelStoreOwner() ?: (context as ViewModelStoreOwner)
+            bmViewModel = ViewModelProvider(owner)[BlindManViewModel::class]
+            // Effects need some additional initialization
+            Effect.loadDynamicElements(context, this)
+        }
+
+        // Lifecycle owner
+        val owner = findViewTreeLifecycleOwner() ?: return
+
+        // Observe LiveData. All are called at first run.
+        // Therefore, we include some protection.
+        bmViewModel.isHapticFeedbackEnabledData.observe(owner) {
+            isHapticFeedbackEnabled = it
+        }
+        bmViewModel.isSoundEffectsEnabledData.observe(owner) {
+            isSoundEffectsEnabled = it
+        }
+        bmViewModel.invalidateCounterData.observe(owner) {
+            if (it > 0) invalidate()
+        }
+        bmViewModel.livesData.observe(owner) {
+            if (gameState == GameState.PLAY) {
+                if ((it > 0) && (hits >= it)) newGame()
+                else invalidate()
+            }
+        }
+        bmViewModel.sizeData.observe(owner) {
+            size = it
+            if (viewWidth * viewHeight > 0)
+                initField(it)
+        }
+        bmViewModel.levelData.observe(owner) {
+            if (oSize > 0)
+                newGame()
+        }
     }
 
     // This is called by the layout mechanism
@@ -100,17 +135,18 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         // Store width and height
         viewWidth = w
         viewHeight = h
-        if (!this.isInEditMode)
+        if (w * h > 0)
             initField(0)
     }
 
     // Here, size-dependent members are set
-    fun initField(newSize: Int) {
+    private fun initField(newSize: Int) {
         if (newSize > 0)
-            size = min(newSize, OBSTACLE_ROWS.size)
+            size = min(newSize, BlindManViewModel.OBSTACLE_ROWS.size)
 
         // Obstacle and field sizes
-        oSize = max(viewWidth, viewHeight) / (2 * OBSTACLE_ROWS[size - 1] + 7)
+        oSize = max(viewWidth, viewHeight) /
+                (2 * BlindManViewModel.OBSTACLE_ROWS[size - 1] + 7)
         fieldWidth = viewWidth - viewWidth % oSize
         fieldHeight = viewHeight - viewHeight % oSize
 
@@ -119,25 +155,27 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         offHeight = (viewHeight - fieldHeight) / 2f
 
         // Allocate size-dependent objects
-        border = Rect(0, 0, fieldWidth, fieldHeight)
+        border.set(0, 0, fieldWidth, fieldHeight)
         border.inset(oSize / 2, oSize / 2)
-        goal = Rect(
+        goal.set(
             fieldWidth - 3 * oSize, fieldHeight - 3 * oSize,
             fieldWidth - oSize, fieldHeight - oSize
         )
-        player = Rect(oSize, oSize, 2 * oSize, 2 * oSize)
-        obstacles = HashSet(fieldWidth * fieldHeight / (oSize * oSize) / 2)
+        player.set(oSize, oSize, 2 * oSize, 2 * oSize)
 
         // Set the game state to idle and put a message onto the text view
         gameState = GameState.IDLE
-        textView.setText(R.string.mess_show)
+        bmViewModel.messageText = resources.getString(R.string.mess_show)
         Log.d(LOG_TAG, "Field initialized")
+
+        // Start a new game
+        newGame()
     }
 
-    fun newGame(newLevel: Int) {
-        // Check who called
-        if (newLevel > 0)
-            level = newLevel
+    private fun newGame() {
+        // Extra protection for compose preview
+        if (oSize <= 0)
+            return
 
         // Player goes (back) to initial position, hits are cleared, obstacles recreated.
         player.offsetTo(oSize, oSize)
@@ -147,14 +185,14 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         // Determine the orientation and count the available space for obstacles.
         // Last obstacle line is 5 units before goal-side end of canvas.
         // Across fieldWidth reserves 1 unit for each border.
-        val o = (fieldHeight > fieldWidth)
-        val lastAcross = (if (o) fieldHeight else fieldWidth) / oSize - 5
-        val widthAcross = (if (o) fieldWidth else fieldHeight) / oSize - 2
+        val portrait = (fieldHeight > fieldWidth)
+        val lastAcross = (if (portrait) fieldHeight else fieldWidth) / oSize - 5
+        val widthAcross = (if (portrait) fieldWidth else fieldHeight) / oSize - 2
 
         // The number of obstacles per line is based on the level.
         // A HashSet eliminates duplicates. Every second line
         // across contains randomly placed obstacles.
-        val numObs = (0.3 * widthAcross * level).toInt()
+        val numObs = (0.3 * widthAcross * bmViewModel.level).toInt()
         val obsLine = HashSet<Int>(numObs)
         var iLine = 3
         while (iLine <= lastAcross) {
@@ -164,29 +202,28 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 obsLine.add(1 + random.nextInt(widthAcross))
             }
             // For the easiest level some more border obstacles are needed
-            if (level == 1) {
+            if (bmViewModel.level == 1) {
                 if (random.nextFloat() < 0.2) obsLine.add(1)
                 if (random.nextFloat() >= 0.8) obsLine.add(widthAcross)
             }
             // Now, the real obstacles are created
             for (i in obsLine) {
-                val obstacle = Obstacle(if (o) i else iLine, if (o) iLine else i, oSize)
-                obstacles.add(obstacle)
+                val ix = if (portrait) i else iLine
+                val iy = if (portrait) iLine else i
+                obstacles.add(Obstacle(ix, iy, oSize))
             }
             iLine += 2
         }
 
         // Now we are in show state
         gameState = GameState.SHOW
-        textView.setText(R.string.mess_start)
+        bmViewModel.messageText = resources.getString(R.string.mess_start)
         invalidate()
     }
 
     // No time-consuming stuff here
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (this.isInEditMode)
-            return
 
         // Translate used space into center
         canvas.translate(offWidth, offHeight)
@@ -194,7 +231,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         with(drawingPaint) {
             // Field background
             color = ColoredPart.FIELD.color
-            alpha = BACKGROUND_ALPHA[background]
+            alpha = BlindManViewModel.BACKGROUND_ALPHA[bmViewModel.background]
             style = Paint.Style.FILL
             canvas.drawRect(border, this)
 
@@ -219,12 +256,12 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 style = Paint.Style.STROKE
                 strokeWidth = 2 * w
             }
-            if (lives == 0)
+            if (bmViewModel.lives == 0)
                 canvas.drawOval(drawingRect, this)
             else
                 canvas.drawArc(
                     drawingRect, 0f,
-                    360 - 360f / lives * hits,
+                    360 - 360f / bmViewModel.lives * hits,
                     true, this
                 )
         }
@@ -234,7 +271,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
     }
 
     // Move logic
-    fun makeMove(x: Float, y: Float) {
+    private fun makeMove(x: Float, y: Float) {
         if (gameState != GameState.PLAY)
             return
 
@@ -262,16 +299,15 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 it.setHit()
                 hits++
                 invalidate()
-                if (lives == 0 || hits < lives) {
+                if (bmViewModel.lives == 0 || hits < bmViewModel.lives) {
                     // Go on
-                    textView.setText(R.string.mess_hits)
-                    textView.append(" $hits")
+                    bmViewModel.messageText = resources.getString(R.string.mess_hits) + " $hits"
                     Effect.HIT.makeEffect(this)
                 } else {
                     // Game over
                     dragHandler.stopDragMode()
                     gameState = GameState.IDLE
-                    textView.setText(R.string.mess_over)
+                    bmViewModel.messageText = resources.getString(R.string.mess_over)
                     Effect.OVER.makeEffect(this)
                 }
             }
@@ -287,19 +323,19 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         if (Rect.intersects(player, goal)) {
             dragHandler.stopDragMode()
             gameState = GameState.IDLE
-            textView.append(". " + resources.getText(R.string.mess_goal))
+            bmViewModel.messageText += ". " + resources.getText(R.string.mess_goal)
             Effect.GOAL.makeEffect(this)
         }
     }
 
     // Touch event handling including required override
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // First we consider the play state
+        // We start with the play state
         if (gameState == GameState.PLAY) {
             // First we check for a placed or lifted finger
             // and stop the drag starter if it was running
-            if (event.action == MotionEvent.ACTION_UP
-                || event.action == MotionEvent.ACTION_DOWN
+            if (event.action == MotionEvent.ACTION_UP ||
+                event.action == MotionEvent.ACTION_DOWN
             )
                 dragStarter.cancelTimer()
 
@@ -309,9 +345,9 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
             // motion event that may lead to a drag start.
             // Here we exceptionally use (non-forcing!) boolean operators
             // instead of if-sequences because of better readability.
-            return (dragHandler.isDragModeActive && dragHandler.doDrag(event))
-                    || gestureDetector.onTouchEvent(event)
-                    || dragStarter.startTimer(event)
+            return (dragHandler.doDrag(event) ||
+                    gestureDetector.onTouchEvent(event) ||
+                    dragStarter.startTimer(event))
         }
 
         // In all other states we only look at a down event
@@ -320,15 +356,14 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
 
         when (gameState) {
             GameState.IDLE -> {
-                newGame(0)
+                newGame()
                 return true
             }
 
             GameState.SHOW -> {
                 obstacles.forEach { it.setHidden() }
                 gameState = GameState.PLAY
-                textView.setText(R.string.mess_hits)
-                textView.append(" 0")
+                bmViewModel.messageText = resources.getString(R.string.mess_hits) + " 0"
                 invalidate()
                 // Start to move
                 return gestureDetector.onTouchEvent(event)
@@ -453,6 +488,10 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         }
 
         fun doDrag(e: MotionEvent): Boolean {
+            // Make sure we are in the right mode
+            if (!isDragModeActive)
+                return false
+
             // Check if we have to cancel the timer and reset the drag position
             if (isTimerRunning) {
                 cancelTimer()
@@ -508,5 +547,51 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
         // Restore colors and redraw again
         swapColors = false
         invalidate()
+    }
+
+    // Key events
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.action != KeyEvent.ACTION_DOWN)
+            return false
+
+        when (gameState) {
+            GameState.IDLE -> newGame()
+
+            GameState.SHOW -> {
+                obstacles.forEach { it.setHidden() }
+                gameState = GameState.PLAY
+                bmViewModel.messageText = resources.getString(R.string.mess_hits) + " 0"
+                invalidate()
+            }
+
+            GameState.HINT -> {
+                obstacles.forEach { it.setVisibleIfHit() }
+                gameState = GameState.PLAY
+                invalidate()
+            }
+
+            else -> {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_RIGHT,
+                    KeyEvent.KEYCODE_NUMPAD_6,
+                    KeyEvent.KEYCODE_SOFT_RIGHT -> makeMove(1f, 0f)
+
+                    KeyEvent.KEYCODE_DPAD_LEFT,
+                    KeyEvent.KEYCODE_NUMPAD_4,
+                    KeyEvent.KEYCODE_SOFT_LEFT -> makeMove(-1f, 0f)
+
+                    KeyEvent.KEYCODE_DPAD_UP,
+                    KeyEvent.KEYCODE_NUMPAD_8,
+                    KeyEvent.KEYCODE_PAGE_UP -> makeMove(0f, -1f)
+
+                    KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.KEYCODE_NUMPAD_2,
+                    KeyEvent.KEYCODE_PAGE_DOWN -> makeMove(0f, 1f)
+
+                    else -> return super.onKeyDown(keyCode, event)
+                }
+            }
+        }
+        return true
     }
 }

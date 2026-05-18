@@ -16,8 +16,9 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatDialog
-import ch.olivsoft.android.blindman.databinding.ColorpickerBinding
 import kotlin.math.atan2
 import kotlin.math.hypot
 import kotlin.math.max
@@ -97,16 +98,32 @@ class ColorPickerView(context: Context?, attrs: AttributeSet?) :
                 override fun onCreate(savedInstanceState: Bundle?) {
                     super.onCreate(savedInstanceState)
                     setTitle(dialogTitle)
-                    with(ColorpickerBinding.inflate(layoutInflater)) {
-                        setContentView(root)
-                        view = colorPickerView.apply {
-                            selectedColor =
-                                savedInstanceState?.getInt(INITIAL_COLOR) ?: initialColor
-                            setOnClickListener(colorListener)
-                            // The view is NOT clickable, only the central "OK" is
-                            isClickable = false
+                    // Layout without using binding to an XML resource
+                    view = ColorPickerView(context, null).apply {
+                        contentDescription = resources.getString(R.string.title_colors)
+                        layoutParams = ViewGroup.MarginLayoutParams (
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                        ).apply {
+                            // Margins want pixels (?!), we want 20 dp!
+                            val mpx = (20 * resources.displayMetrics.density).toInt()
+                            setMargins(mpx, mpx, mpx, mpx)
                         }
+                        selectedColor =
+                            savedInstanceState?.getInt(INITIAL_COLOR) ?: initialColor
+                        setOnClickListener(colorListener)
+                        // The view is NOT clickable, only the central "OK" is
+                        isClickable = false
                     }
+                    // For safety, we wrap this into a FrameLayout. Although
+                    // setting view as the content view seems to work as well.
+                    setContentView(FrameLayout(context).apply {
+                        layoutParams = FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        addView(view)
+                    })
                 }
 
                 // Preserve the color state

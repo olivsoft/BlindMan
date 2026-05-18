@@ -64,3 +64,4 @@ fastlane/readme.md
 
 # hprof
 *.hprof
+/gradle/gradle-daemon-jvm.properties

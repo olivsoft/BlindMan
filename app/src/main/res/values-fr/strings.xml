@@ -23,7 +23,7 @@
     <string name="text_help">Tapez sur l\'écran pour créer les obstacles.
             Regardez-les bien, mémorisez-les!
         \n\nTapez de nouveau pour cacher les obstacles. Puis, bougez le joueur vers le but et 
-            touchez aussi peu d\'obstacles que possible. Pour bouger le joueur vous pouvez utiliser
+            touchez aussi peu d\'obstacles que possible. Pour déplacer le joueur, vous pouvez utiliser
             des gestes, ou vous appuyez et maintenez sur l\'écran pour le glisser.
         \n\nPour montrer les obstacles pendant le jeu, tapez vite deux fois sur l\'écran.
             Attention: Si vous tournez votre appareil un nouveau jeu va commencer.
@@ -33,6 +33,7 @@
         \n\nIcon par signito (signito.ch)
         \n\nLe robot Android (par Google) a été modifié en accord avec les
             conditions de la Creative Commons 3.0 Attribution Licence.
+        \n\nVersion
     </string>
     <string name="title_midi">Musique</string>
     <string name="text_midi">Malheureusement, il n\'est pas possible de jouer de la musique

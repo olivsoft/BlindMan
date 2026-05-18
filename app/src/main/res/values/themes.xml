@@ -9,11 +9,9 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
-        <!-- Dialog themes -->
+        <!-- Dialog themes. "android:dialogTheme" removed for Compose. -->
         <item name="dialogTheme">@style/BlindmanDialogTheme</item>
-        <item name="android:dialogTheme">@style/BlindmanDialogTheme</item>
         <item name="alertDialogTheme">@style/BlindmanDialogTheme</item>
-        <item name="android:alertDialogTheme">@style/BlindmanDialogTheme</item>
     </style>
 
     <style name="BlindmanDialogTheme" parent="Theme.Material3.Dark.Dialog">

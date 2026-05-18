@@ -26,7 +26,7 @@ enum class Effect(
         private val LOG_TAG = Effect::class.simpleName
         private val soundPool = SoundPool.Builder().setMaxStreams(3).build()
 
-        fun loadDynamicElements(context: Context?, listener: Animation.AnimationListener) {
+        fun loadDynamicElements(context: Context?, listener: Animation.AnimationListener?) {
             // Load sound and animations according to flags
             entries.forEach {
                 with(it) {
@@ -34,7 +34,8 @@ enum class Effect(
                         soundID = soundPool.load(context, rawSoundID, 1)
                         Log.d(LOG_TAG, "$name sound loaded")
                     }
-                    if (hasAnimation) {
+                    // A null listener means we use Compose animations
+                    if (listener != null && hasAnimation) {
                         // Alpha animation with 3 dim-down-then-brighten-up phases
                         alphaAnimation = AlphaAnimation(1.0f, 0.7f).apply {
                             duration = 50
@@ -59,8 +60,13 @@ enum class Effect(
                 startAnimation(alphaAnimation)
             if (isHapticFeedbackEnabled && hapticFeedback >= 0)
                 performHapticFeedback(hapticFeedback)
-            if (isSoundEffectsEnabled && soundID >= 0)
-                soundPool.play(soundID, 1.0f, 1.0f, 0, 0, 1.0f)
+            if (isSoundEffectsEnabled)
+                makeSoundEffect()
         }
+    }
+
+    fun makeSoundEffect() {
+        if (soundID >= 0)
+            soundPool.play(soundID, 1.0f, 1.0f, 0, 0, 1.0f)
     }
 }

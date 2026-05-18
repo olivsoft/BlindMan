@@ -33,7 +33,8 @@
         \n\nIcon von signito (signito.ch)
         \n\nDer Android-Roboter (Original von Google) wurde im Einklang
             mit den Bedingungen der Creative Commons 3.0 Attribution Licence modifiziert.
-    </string>        
+        \n\nVersion
+    </string>
     
     <string name="title_midi">Hintergrund-Musik</string>
     <string name="text_midi">Leider kann auf diesem Gerät keine Hintergrundmusik gespielt werden.</string>

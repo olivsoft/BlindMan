@@ -3,9 +3,13 @@
     <string name="app_name" translatable="false">BlindMan</string>
     <string name="text_placeholder" translatable="false">Welcome to BlindMan</string>
     <string name="ad_unit_id" translatable="false">ca-app-pub-9610917927263970/5517310848</string>
+    <string name="ad_unit_test_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="ad_unit_manifest_id" translatable="false">ca-app-pub-9610917927263970~5517310848</string>
+    <string name="ad_unit_manifest_test_id" translatable="false">ca-app-pub-3940256099942544~6300978111</string>
     <string name="desc_view" tools:ignore="MissingTranslation">Game Field View</string>
     <string name="desc_text" tools:ignore="MissingTranslation">Info</string>
     <string name="desc_ad" tools:ignore="MissingTranslation">Advertisement</string>
+    <string name="empty" translatable="false" tools:ignore="MissingTranslation">""</string>
 
     <string name="title_level" tools:ignore="MissingTranslation">Level</string>
     <string name="title_size" tools:ignore="MissingTranslation">Size</string>
@@ -38,6 +42,7 @@
         \n\nIcon by signito (signito.ch)
         \n\nThe Android robot is modified from work created and shared by Google and used 
             according to terms described in the Creative Commons 3.0 Attribution License.
+        \n\nVersion
     </string>
     <string name="title_midi" tools:ignore="MissingTranslation">Music Player</string>
     <string name="text_midi" tools:ignore="MissingTranslation">Sorry,

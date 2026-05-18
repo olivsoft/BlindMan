@@ -3,26 +3,36 @@ package ch.olivsoft.android.blindman
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Checkable
 import android.widget.ListView
+import android.widget.PopupMenu
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.edit
 import androidx.core.view.MenuProvider
+import androidx.core.view.forEach
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import ch.olivsoft.android.blindman.databinding.MainBinding
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 
-class BlindManActivity : AppCompatActivity() {
+@Suppress("KotlinConstantConditions")
+class BlindManActivity : AppCompatActivity(), MenuProvider {
 
     companion object {
         // Constants
@@ -46,75 +56,106 @@ class BlindManActivity : AppCompatActivity() {
         )
     }
 
-    // View and Music Player
-    private lateinit var bmView: BlindManView
+    // View model
+    private val bmViewModel: BlindManViewModel by viewModels()
+
+    // Music player
     private lateinit var mPlayer: MusicPlayer
+    private var adView : AdView? = null
 
     // Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Compatibility
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                Color.Black.toArgb()
+            )
+        )
         super.onCreate(savedInstanceState)
 
-        // Ad view configuration
-        MobileAds.setRequestConfiguration(
-            RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-        )
-
-        // Layout, bindings, initializations
-        with(MainBinding.inflate(layoutInflater)) {
-            bmView = gameView
-            bmView.textView = textView
-            setContentView(root)
-            setSupportActionBar(toolBar)
-            adView.loadAd(AdRequest.Builder().build())
-        }
-
-        // Music player
+        // The music player is initialized here because context
+        // and resources are not safe to use before onCreate
         mPlayer = MusicPlayer(
             this, R.raw.nervous_cubase, true,
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     Log.e(LOG_TAG, "MusicPlayer error", error)
                     mPlayer.toggle(false)
+                    bmViewModel.isMusicEnabled = false
                     showDialogFragment(R.id.midi)
                 }
-            })
+            }
+        )
 
         // Saved preference values (or initially their default values)
         // are loaded here and saved again in onPause
         val p = getPreferences(MODE_PRIVATE)
-        with(bmView) {
+        with(bmViewModel) {
             level = p.getInt(PREF_LEVEL, level)
             size = p.getInt(PREF_SIZE, size)
             background = p.getInt(PREF_BACKGROUND, background)
             lives = p.getInt(PREF_LIVES, lives)
             isHapticFeedbackEnabled = p.getBoolean(PREF_HAPTICS, true)
             isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
+            isMusicEnabled = p.getBoolean(PREF_MUSIC, isMusicEnabled)
+            isMusicEnabledData.observe(this@BlindManActivity) {
+                mPlayer.toggle(it)
+            }
         }
-        mPlayer.isMusicEnabled = p.getBoolean(PREF_MUSIC, mPlayer.isMusicEnabled)
         ColoredPart.getAllFromPreferences(p, PREF_COL_)
+        // Show the help dialog at the first run only
+        val showHelp = p.getBoolean(PREF_FIRST, true).also {
+            if (it) p.edit { putBoolean(PREF_FIRST, false) }
+        }
         Log.d(LOG_TAG, "Preferences loaded")
 
-        // Volume control
+        // Volume control. Must be after loading preferences.
         setVolumeControlStream()
 
-        // Menu
-        addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_main, menu)
-            }
+        // This is needed because of test devices
+        MobileAds.setRequestConfiguration(
+            RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+        )
+        MobileAds.initialize(this)
 
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when (menuItem.itemId) {
-                    R.id.quit -> finish()
-                    else -> showDialogFragment(menuItem.itemId)
+        // Layout, bindings, initializations
+        if (BuildConfig.USE_COMPOSE) {
+            Effect.loadDynamicElements(this, null)
+            val menuItems = mutableMapOf<MenuItem, (() -> Unit)?>()
+            with(PopupMenu(this@BlindManActivity, null).menu) {
+                menuInflater.inflate(R.menu.menu_main, this)
+                forEach {
+                    if (it.isVisible)
+                        menuItems[it] = { onMenuItemSelected(it) }
                 }
-                return true
             }
-        })
-
-        // The help dialog is shown at the very first execution
-        if (p.getBoolean(PREF_FIRST, true))
-            showDialogFragment(R.id.help)
+            setContent {
+                BlindManTheme {
+                    BlindManLayout(
+                        modifier = Modifier,
+                        menuItems = menuItems,
+                        onAdViewCreated = {
+                            adView = it
+                        },
+                        onLayoutCompleted = {
+                            if (showHelp) activeDialogId = R.id.help
+                        }
+                    )
+                }
+            }
+        } else {
+            addMenuProvider(this)
+            with(MainBinding.inflate(layoutInflater)) {
+                bmViewModel.messageTextData.observe(this@BlindManActivity) {
+                    textView.text = it
+                }
+                setContentView(root)
+                setSupportActionBar(toolBar)
+                adView.loadAd(AdRequest.Builder().build())
+                this@BlindManActivity.adView = adView
+                if (showHelp) showDialogFragment(R.id.help)
+            }
+        }
     }
 
     override fun onStart() {
@@ -124,27 +165,28 @@ class BlindManActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        adView?.pause()
         mPlayer.pause()
 
-        // This is the recommended place to save persistent
-        // settings (not onStop)
+        // This is the recommended place to save
+        // persistent settings (not onStop)
         getPreferences(MODE_PRIVATE).edit {
-            with(bmView) {
+            with(bmViewModel) {
                 putInt(PREF_LEVEL, level)
                 putInt(PREF_SIZE, size)
                 putInt(PREF_BACKGROUND, background)
                 putInt(PREF_LIVES, lives)
                 putBoolean(PREF_HAPTICS, isHapticFeedbackEnabled)
                 putBoolean(PREF_SOUND, isSoundEffectsEnabled)
+                putBoolean(PREF_MUSIC, isMusicEnabled)
             }
-            putBoolean(PREF_MUSIC, mPlayer.isMusicEnabled)
             ColoredPart.putAllToPreferences(this, PREF_COL_)
-            putBoolean(PREF_FIRST, false)
         }
     }
 
     override fun onResume() {
         super.onResume()
+        adView?.resume()
         mPlayer.resume()
         setVolumeControlStream()
     }
@@ -154,29 +196,26 @@ class BlindManActivity : AppCompatActivity() {
         mPlayer.stop()
     }
 
-    // Keys
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action != KeyEvent.ACTION_DOWN)
-            return false
+    override fun onDestroy() {
+        super.onDestroy()
+        adView?.destroy()
+        adView = null
+    }
 
-        when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_NUMPAD_6,
-            KeyEvent.KEYCODE_SOFT_RIGHT -> bmView.makeMove(1f, 0f)
+    // Menu provider and click handling
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_main, menu)
+    }
 
-            KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_NUMPAD_4,
-            KeyEvent.KEYCODE_SOFT_LEFT -> bmView.makeMove(-1f, 0f)
-
-            KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_NUMPAD_8,
-            KeyEvent.KEYCODE_PAGE_UP -> bmView.makeMove(0f, -1f)
-
-            KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_NUMPAD_2,
-            KeyEvent.KEYCODE_PAGE_DOWN -> bmView.makeMove(0f, 1f)
-
-            else -> return super.onKeyDown(keyCode, event)
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (val id = menuItem.itemId) {
+            R.id.quit -> finish()
+            else -> {
+                if (BuildConfig.USE_COMPOSE)
+                    activeDialogId = id
+                else
+                    showDialogFragment(id)
+            }
         }
         return true
     }
@@ -197,7 +236,7 @@ class BlindManActivity : AppCompatActivity() {
             ) { dialog, which ->
                 dialog.dismiss()
                 cp.color = which
-                bmView.invalidate()
+                bmViewModel.invalidateCounter++
                 showDialogFragment(R.id.colors)
             }
         }
@@ -216,10 +255,10 @@ class BlindManActivity : AppCompatActivity() {
                     ArrayAdapter(
                         this, R.layout.dialog_singlechoice_item,
                         resources.getStringArray(R.array.items_level)
-                    ), bmView.level - 1
+                    ), bmViewModel.level - 1
                 ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.newGame(which + 1)
+                    bmViewModel.level = which + 1
                 }
             }
 
@@ -229,11 +268,10 @@ class BlindManActivity : AppCompatActivity() {
                     ArrayAdapter(
                         this, R.layout.dialog_singlechoice_item,
                         resources.getStringArray(R.array.items_size)
-                    ), bmView.size - 1
+                    ), bmViewModel.size - 1
                 ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.initField(which + 1)
-                    bmView.newGame(0)
+                    bmViewModel.size = which + 1
                 }
             }
 
@@ -242,13 +280,13 @@ class BlindManActivity : AppCompatActivity() {
                 b.setSingleChoiceItems(
                     ArrayAdapter(
                         this, R.layout.dialog_singlechoice_item,
-                        BlindManView.ALLOWED_LIVES.map {
+                        BlindManViewModel.ALLOWED_LIVES.map {
                             if (it == 0) "∞" else it.toString()
                         }
-                    ), BlindManView.ALLOWED_LIVES.indexOf(bmView.lives)
+                    ), BlindManViewModel.ALLOWED_LIVES.indexOf(bmViewModel.lives)
                 ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.lives = BlindManView.ALLOWED_LIVES[which]
+                    bmViewModel.lives = BlindManViewModel.ALLOWED_LIVES[which]
                 }
             }
 
@@ -258,11 +296,11 @@ class BlindManActivity : AppCompatActivity() {
                     ArrayAdapter(
                         this, R.layout.dialog_singlechoice_item,
                         resources.getStringArray(R.array.items_background)
-                    ), bmView.background
+                    ), bmViewModel.background
                 ) { dialog, which ->
                     dialog.dismiss()
-                    bmView.background = which
-                    bmView.invalidate()
+                    bmViewModel.background = which
+                    bmViewModel.invalidateCounter++
                 }
             }
 
@@ -284,7 +322,7 @@ class BlindManActivity : AppCompatActivity() {
                             if (position == ColoredPart.entries.size) {
                                 // Reset colors
                                 ColoredPart.resetAll()
-                                bmView.invalidate()
+                                bmViewModel.invalidateCounter++
                             } else {
                                 // Call the color picker dialog
                                 dismiss()
@@ -312,22 +350,22 @@ class BlindManActivity : AppCompatActivity() {
                         choiceMode = ListView.CHOICE_MODE_MULTIPLE
                         itemsCanFocus = false
                         setOnShowListener {
-                            setItemChecked(0, bmView.isHapticFeedbackEnabled)
-                            setItemChecked(1, bmView.isSoundEffectsEnabled)
-                            setItemChecked(2, mPlayer.isMusicEnabled)
+                            setItemChecked(0, bmViewModel.isHapticFeedbackEnabled)
+                            setItemChecked(1, bmViewModel.isSoundEffectsEnabled)
+                            setItemChecked(2, bmViewModel.isMusicEnabled)
                         }
                         setOnItemClickListener { _, view, position, _ ->
                             val c = view as Checkable
                             when (position) {
-                                0 -> bmView.isHapticFeedbackEnabled = c.isChecked
+                                0 -> bmViewModel.isHapticFeedbackEnabled = c.isChecked
 
                                 1 -> {
-                                    bmView.isSoundEffectsEnabled = c.isChecked
+                                    bmViewModel.isSoundEffectsEnabled = c.isChecked
                                     setVolumeControlStream()
                                 }
 
                                 2 -> {
-                                    mPlayer.toggle(c.isChecked)
+                                    bmViewModel.isMusicEnabled = c.isChecked
                                     setVolumeControlStream()
                                 }
 
@@ -341,7 +379,10 @@ class BlindManActivity : AppCompatActivity() {
             // Message dialogs
             R.id.about -> {
                 b.setTitle(R.string.title_about)
-                b.setMessage(R.string.text_about)
+                b.setMessage(
+                    resources.getString(R.string.text_about) +
+                            " ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})"
+                )
                 b.setPositiveButton(android.R.string.ok, null)
             }
 
@@ -363,9 +404,9 @@ class BlindManActivity : AppCompatActivity() {
     }
 
     // Set the right channel for volume control
-    private fun setVolumeControlStream() {
+    fun setVolumeControlStream() {
         volumeControlStream =
-            if (mPlayer.isMusicEnabled || bmView.isSoundEffectsEnabled)
+            if (bmViewModel.isMusicEnabled || bmViewModel.isSoundEffectsEnabled)
                 AudioManager.STREAM_MUSIC
             else
                 AudioManager.USE_DEFAULT_STREAM_TYPE
