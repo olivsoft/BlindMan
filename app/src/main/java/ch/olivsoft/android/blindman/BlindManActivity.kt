@@ -1,6 +1,7 @@
 package ch.olivsoft.android.blindman
 
 import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -18,8 +19,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.edit
 import androidx.core.view.MenuProvider
 import androidx.core.view.forEach
@@ -61,15 +60,22 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
 
     // Music player
     private lateinit var mPlayer: MusicPlayer
-    private var adView : AdView? = null
+    private var adView: AdView? = null
 
     // Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         // Compatibility
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                Color.Black.toArgb()
+        val v34up = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        val darkBarColor =
+            if (v34up) resources.getColor(
+                android.R.color.system_surface_dark,
+                resources.newTheme()
             )
+            else 0x211F26
+        val darkBarStyle = SystemBarStyle.dark(scrim = darkBarColor)
+        enableEdgeToEdge(
+            statusBarStyle = darkBarStyle,
+            navigationBarStyle = darkBarStyle
         )
         super.onCreate(savedInstanceState)
 
