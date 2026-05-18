@@ -9,8 +9,8 @@ android {
     defaultConfig {
         applicationId = "ch.olivsoft.android.blindman"
         minSdk = 23
-        versionCode = 37
-        versionName = "1.37"
+        versionCode = 38
+        versionName = "1.38"
     }
     buildTypes {
         debug {

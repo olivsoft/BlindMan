@@ -87,7 +87,7 @@ class BlindManViewModel : ViewModel() {
             return isSoundEffectsEnabledData.value!!
         }
 
-    var isMusicEnabledData = MutableLiveData(true)
+    var isMusicEnabledData = MutableLiveData(false)
     var isMusicEnabled: Boolean = isMusicEnabledData.value!!
         set(value) {
             field = value
