@@ -30,12 +30,15 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.geometry.times
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -48,8 +51,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,11 +71,17 @@ private const val LOG_TAG = "BlindManGameField"
 
 // Graphics to Compose functions
 private fun Rect.toOffset(): Offset {
-    return IntOffset(left, top).toOffset()
+    return Offset(
+        left.toFloat(),
+        top.toFloat()
+    )
 }
 
 private fun Rect.toSize(): Size {
-    return IntSize(width(), height()).toSize()
+    return Size(
+        width().toFloat(),
+        height().toFloat()
+    )
 }
 
 // Game field
@@ -323,8 +332,8 @@ fun BlindManGameField(
     }
 
     // Key events
-    fun handleKey(key: Key, type: KeyEventType): Boolean {
-        if (type != KeyEventType.KeyDown)
+    fun handleKey(keyEvent: KeyEvent): Boolean {
+        if (keyEvent.type != KeyEventType.KeyDown)
             return false
 
         when (gameState) {
@@ -334,7 +343,7 @@ fun BlindManGameField(
             GameState.IDLE -> newGame()
 
             else -> {
-                when (key) {
+                when (keyEvent.key) {
                     Key.DirectionRight,
                     Key.NumPadDirectionRight,
                     Key.NumPad6 -> makeMove(oSize, 0)
@@ -358,30 +367,31 @@ fun BlindManGameField(
         return true
     }
 
-    // Resize and/or start a new game if any of these change
+    // Full field and game setup for initial start and relevant changes
     LaunchedEffect(canvasSize, level, size) {
-        if (canvasSize == IntSize.Zero ||
-            !initField() || !newGame()
+        if (canvasSize == IntSize.Zero
+            || !initField()
+            || !newGame()
         )
-            Log.d(LOG_TAG, "Launched effect incomplete")
+            Log.d(LOG_TAG, "Launch incomplete")
     }
 
-    // Start new game if triggered
+    // New game if asked for
     LaunchedEffect(newGameCounter) {
         if (newGameCounter > 0)
             newGame()
     }
 
-    // Start new game if needed from lives change
+    // New game if lives reduced
     LaunchedEffect(lives) {
-        if (gameState == GameState.PLAY &&
-            (lives > 0) &&
-            (hits >= lives)
+        if (gameState == GameState.PLAY
+            && lives > 0
+            && hits >= lives
         )
             newGame()
     }
 
-    // Redraw when colors change
+    // Redraw if called for
     LaunchedEffect(invalidateCounter) {
         if (invalidateCounter > 0) {
             fieldColor = ColoredPart.FIELD.color
@@ -391,7 +401,7 @@ fun BlindManGameField(
         }
     }
 
-    // Reuest focus for key events
+    // Request focus for key events
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -401,7 +411,7 @@ fun BlindManGameField(
             .fillMaxSize()
             .onSizeChanged {
                 if (it != IntSize.Zero) {
-                    Log.d(LOG_TAG, "Canvas size changed")
+                    Log.d(LOG_TAG, "Canvas size: $it")
                     canvasSize = it
                 }
             }
@@ -410,8 +420,7 @@ fun BlindManGameField(
             .focusable()
             .onKeyEvent {
                 Log.d(LOG_TAG, "${it.key} / ${it.type}")
-                handleKey(it.key, it.type)
-                true
+                handleKey(it)
             }
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -441,22 +450,23 @@ fun BlindManGameField(
                 )
             }
             .pointerInput(Unit) {
-                var pRef = Offset.Zero
+                // Local variables ar doing perfectly fine here
+                var d = Offset.Zero
                 val dMinSquared = 0.65f * 0.65f * oSize * oSize
                 detectDragGestures(
                     onDragStart = {
-                        pRef = it
+                        d = Offset.Zero
                         doFill = false
                     },
                     onDragEnd = { doFill = true },
                     onDragCancel = { doFill = true }
-                ) { change, _ ->
+                ) { _, dragAmount ->
                     // Only relevant during play
                     if (gameState != GameState.PLAY)
                         return@detectDragGestures
 
                     // Wait until drag goes far enough
-                    val d = change.position - pRef
+                    d += dragAmount
                     if (d.getDistanceSquared() < dMinSquared)
                         return@detectDragGestures
 
@@ -466,8 +476,8 @@ fun BlindManGameField(
                     else
                         makeMove(0, d.y.sign.toInt() * oSize)
 
-                    // Reset reference position to current one
-                    pRef = change.position
+                    // Reset drag measurement
+                    d = Offset.Zero
                 }
             }
     ) {
@@ -476,8 +486,8 @@ fun BlindManGameField(
             return@Canvas
 
         translate(fieldOffset.x, fieldOffset.y) {
-            val alphaMultiplier = crashAlpha.value
-            val backgroundCurrent =
+            val alpha = crashAlpha.value
+            val backgroundAlpha =
                 BlindManViewModel.BACKGROUND_ALPHA[background] / 256f
             val fieldColorCurrent = Color(fieldColor)
             val playerColorCurrent = Color(playerColor)
@@ -487,7 +497,7 @@ fun BlindManGameField(
             // Field
             drawRect(
                 color = fieldColorCurrent,
-                alpha = backgroundCurrent * alphaMultiplier,
+                alpha = backgroundAlpha * alpha,
                 size = border.toSize(),
                 topLeft = border.toOffset()
             )
@@ -495,7 +505,7 @@ fun BlindManGameField(
             // Field border
             drawRect(
                 color = fieldColorCurrent,
-                alpha = alphaMultiplier,
+                alpha = alpha,
                 size = border.toSize(),
                 style = Stroke(width = 0.5f * oSize),
                 topLeft = border.toOffset()
@@ -507,7 +517,7 @@ fun BlindManGameField(
                 color =
                     if (swapColors) playerColorCurrent
                     else goalColorCurrent,
-                alpha = alphaMultiplier,
+                alpha = alpha,
                 size = gs,
                 topLeft = goal.toOffset(),
                 cornerRadius = CornerRadius(0.075f * gs.width)
@@ -524,44 +534,61 @@ fun BlindManGameField(
             }
 
             // Player
+            val color =
+                if (swapColors) goalColorCurrent
+                else playerColorCurrent
             val dr = if (doFill) 0f else 0.1f * oSize
-            val osf = oSize - 2 * dr
-            drawArc(
-                color =
-                    if (swapColors) goalColorCurrent
-                    else playerColorCurrent,
-                alpha = alphaMultiplier,
-                style = if (doFill) Fill else Stroke(2 * dr),
-                topLeft = player.toOffset() + Offset(dr, dr),
-                size = Size(osf, osf),
-                startAngle = 0f,
-                sweepAngle = if (lives == 0) 360f else 360 - 360f / lives * hits,
-                useCenter = true,
-            )
+            val pSize = oSize - 2 * dr
+            val style = if (doFill) Fill else Stroke(2 * dr)
+            if (lives == 0 || hits == 0) {
+                drawCircle(
+                    color = color,
+                    alpha = alpha,
+                    style = style,
+                    center = Offset(
+                        player.exactCenterX(),
+                        player.exactCenterY()
+                    ),
+                    radius = pSize / 2
+                )
+            } else {
+                // Division is safe here because lives != 0
+                val sweepAngle = 360 - 360f / lives * hits
+                drawArc(
+                    color = color,
+                    alpha = alpha,
+                    style = style,
+                    topLeft = player.toOffset() + Offset(dr, dr),
+                    size = Size(pSize, pSize),
+                    startAngle = 0f,
+                    sweepAngle = sweepAngle,
+                    useCenter = true
+                )
+            }
 
             // Inspection...
             if (iMode) {
                 val text = buildString {
-                    appendLine("Size: ${canvasSize.width}x${canvasSize.height}")
+                    appendLine("Field: $canvasSize")
                     appendLine("Obstacles: ${obstacles.size}")
-                    append("oSize: $oSize")
+                    append("Obstacle size: $oSize")
                 }
                 val textStyle = TextStyle(
-                    fontSize = (0.8f * oSize).toSp()
+                    fontSize = oSize.toSp(),
+                    color = Color.Black
                 )
                 val textLayoutResult = textMeasurer.measure(text, textStyle)
-                val textOffset = Offset(
-                    2.5f * oSize,
-                    0.8f * oSize
-                )
+                val backgroundSize = 1.1f * textLayoutResult.size.toSize()
+                // NOTE: "center" does not change with translate!
+                val c = center - fieldOffset
                 drawRect(
-                    size = textLayoutResult.size.toSize(),
+                    size = backgroundSize,
                     color = Color.White,
-                    topLeft = textOffset
+                    topLeft = c - backgroundSize.center
                 )
                 drawText(
                     textLayoutResult = textLayoutResult,
-                    topLeft = textOffset,
+                    topLeft = c - textLayoutResult.size.center.toOffset()
                 )
             }
         }
@@ -571,6 +598,9 @@ fun BlindManGameField(
 @Preview
 @Composable
 fun GameFieldPreview() {
+    val bmViewModel: BlindManViewModel = viewModel()
+    bmViewModel.size = 2
+    bmViewModel.level = 2
     BlindManTheme {
         // This is needed for applying the color scheme.
         // Canvas alone does not do this as it is transparent.

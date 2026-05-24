@@ -99,11 +99,11 @@ private fun BlindManAdView(
     modifier: Modifier = Modifier,
     onAdViewCreated: (AdView) -> Unit
 ) {
+    val adSize = AdSize.BANNER
     val adId =
         if (BuildConfig.DEBUG) stringResource(R.string.ad_unit_test_id)
         else stringResource(R.string.ad_unit_id)
     val adRequest = AdRequest.Builder().build()
-    val adSize = AdSize.BANNER
     AndroidView(
         factory = {
             AdView(it).apply {
