@@ -48,19 +48,21 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(platform(libs.androidx.compose.bom))
 
     implementation(libs.play.services.ads)
     implementation(libs.material)
-    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.class1)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.runtime.livedata)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.work.runtime.ktx)
+    @Suppress("AvoidDuplicateDependencies")
     debugImplementation(libs.androidx.ui.tooling)
+    @Suppress("AvoidDuplicateDependencies")
     "debug_xmlImplementation"(libs.androidx.ui.tooling)
 }

@@ -18,7 +18,7 @@ class BlindManViewModel : ViewModel() {
     }
 
     // Live Data
-    var sizeData = MutableLiveData(1)
+    val sizeData = MutableLiveData(1)
     var size: Int = sizeData.value!!
         set(value) {
             field = value
@@ -28,7 +28,7 @@ class BlindManViewModel : ViewModel() {
             return sizeData.value!!
         }
 
-    var levelData = MutableLiveData(1)
+    val levelData = MutableLiveData(1)
     var level: Int = levelData.value!!
         set(value) {
             field = value
@@ -38,7 +38,7 @@ class BlindManViewModel : ViewModel() {
             return levelData.value!!
         }
 
-    var backgroundData = MutableLiveData(1)
+    val backgroundData = MutableLiveData(1)
     var background: Int = backgroundData.value!!
         set(value) {
             field = value
@@ -48,7 +48,7 @@ class BlindManViewModel : ViewModel() {
             return backgroundData.value!!
         }
 
-    var livesData = MutableLiveData(3)
+    val livesData = MutableLiveData(3)
     var lives: Int = livesData.value!!
         set(value) {
             // Reset in case something went completely wrong
@@ -60,14 +60,14 @@ class BlindManViewModel : ViewModel() {
             return livesData.value!!
         }
 
-    var invalidateCounterData = MutableLiveData(0)
+    val invalidateCounterData = MutableLiveData(0)
     var invalidateCounter: Int = invalidateCounterData.value!!
         set(value) {
             field = value
             invalidateCounterData.value = value
         }
 
-    var isHapticFeedbackEnabledData = MutableLiveData(true)
+    val isHapticFeedbackEnabledData = MutableLiveData(true)
     var isHapticFeedbackEnabled: Boolean = isHapticFeedbackEnabledData.value!!
         set(value) {
             field = value
@@ -77,7 +77,7 @@ class BlindManViewModel : ViewModel() {
             return isHapticFeedbackEnabledData.value!!
         }
 
-    var isSoundEffectsEnabledData = MutableLiveData(true)
+    val isSoundEffectsEnabledData = MutableLiveData(true)
     var isSoundEffectsEnabled: Boolean = isSoundEffectsEnabledData.value!!
         set(value) {
             field = value
@@ -87,7 +87,7 @@ class BlindManViewModel : ViewModel() {
             return isSoundEffectsEnabledData.value!!
         }
 
-    var isMusicEnabledData = MutableLiveData(false)
+    val isMusicEnabledData = MutableLiveData(false)
     var isMusicEnabled: Boolean = isMusicEnabledData.value!!
         set(value) {
             field = value
@@ -97,7 +97,7 @@ class BlindManViewModel : ViewModel() {
             return isMusicEnabledData.value!!
         }
 
-    var messageTextData = MutableLiveData("")
+    val messageTextData = MutableLiveData("")
     var messageText: String = messageTextData.value!!
         set(value) {
             field = value

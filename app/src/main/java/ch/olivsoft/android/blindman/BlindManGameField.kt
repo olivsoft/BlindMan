@@ -1,7 +1,6 @@
 package ch.olivsoft.android.blindman
 
 import android.content.Context
-import android.graphics.Rect
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
@@ -37,6 +36,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -46,14 +46,17 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.toOffset
+import androidx.compose.ui.unit.toRect
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ch.olivsoft.android.blindman.BlindManViewModel.Companion.GameState
@@ -65,24 +68,10 @@ import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.sign
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 // Constants
 private const val LOG_TAG = "BlindManGameField"
-
-// Graphics to Compose functions
-private fun Rect.toOffset(): Offset {
-    return Offset(
-        left.toFloat(),
-        top.toFloat()
-    )
-}
-
-private fun Rect.toSize(): Size {
-    return Size(
-        width().toFloat(),
-        height().toFloat()
-    )
-}
 
 // Game field
 @Composable
@@ -93,6 +82,7 @@ fun BlindManGameField(
     val random = Random.Default
     val iMode = LocalInspectionMode.current
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     // Painting
     val obstacles = remember { mutableStateListOf<Obstacle>() }
@@ -102,9 +92,9 @@ fun BlindManGameField(
     var fieldHeight by remember { mutableIntStateOf(0) }
     var fieldOffset by remember { mutableStateOf(Offset.Zero) }
     var oSize by remember { mutableIntStateOf(0) }
-    var player by remember { mutableStateOf(Rect()) }
-    var goal by remember { mutableStateOf(Rect()) }
-    var border by remember { mutableStateOf(Rect()) }
+    var player by remember { mutableStateOf(IntRect.Zero) }
+    var goal by remember { mutableStateOf(IntRect.Zero) }
+    var border by remember { mutableStateOf(IntRect.Zero) }
     var doFill by remember { mutableStateOf(true) }
     var firstTap by remember { mutableStateOf(true) }
 
@@ -135,7 +125,7 @@ fun BlindManGameField(
     // New game trigger (not from view model)
     var newGameCounter by remember { mutableIntStateOf(0) }
 
-    // For the text in preview mode
+    // Text in preview mode
     val textMeasurer = rememberTextMeasurer()
 
     // Key events
@@ -178,21 +168,13 @@ fun BlindManGameField(
             (canvasSize.height - fieldHeight) / 2f
         )
 
-        border = Rect(
-            0, 0,
-            fieldWidth, fieldHeight
-        )
-        border.inset(oSize / 2, oSize / 2)
-        goal = Rect(
+        border = IntRect(0, 0, fieldWidth, fieldHeight)
+            .deflate(oSize / 2)
+        goal = IntRect(
             fieldWidth - 3 * oSize, fieldHeight - 3 * oSize,
             fieldWidth - oSize, fieldHeight - oSize
         )
-        player = Rect(
-            oSize, oSize,
-            2 * oSize, 2 * oSize
-        )
 
-        setMessage(context, R.string.mess_start)
         Log.d(LOG_TAG, "Field initialized")
         return true
     }
@@ -207,7 +189,7 @@ fun BlindManGameField(
 
         // New game: player goes (back) to initial position,
         // hits are cleared, obstacles recreated.
-        player.offsetTo(oSize, oSize)
+        player = IntRect(oSize, oSize, 2 * oSize, 2 * oSize)
         hits = 0
 
         // Determine the orientation and count the available space for obstacles.
@@ -262,29 +244,38 @@ fun BlindManGameField(
 
     // Move function
     fun makeMove(dx: Int, dy: Int) {
-        // Move copy of the player
-        val pp = Rect(player)
-        pp.offset(dx, dy)
+        // Move a copy of the player
+        val pp = player.translate(dx, dy)
 
         // Stop at border
-        if (!border.contains(pp)) {
+        if (!border.contains(pp.topLeft) || !border.contains(pp.bottomRight))
             return
-        }
 
-        // Obstacles
-        val oh = obstacles.find { it.intersects(pp) }
+        // Check if an obstacle was hit and what that means
+        val oh = obstacles.find { it.overlaps(pp) }
         oh?.apply {
             if (!isHit()) {
                 setHit()
                 hits++
                 setHitsMessage(context)
-                if ((lives > 0) && (hits >= lives)) {
+                if (bmViewModel.isHapticFeedbackEnabled)
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                // This is ok because hits >= 1
+                if (lives !in 1..hits) {
+                    // Simple hit
+                    coroutineScope.launch {
+                        if (bmViewModel.isSoundEffectsEnabled)
+                            Effect.HIT.makeSoundEffect()
+                    }
+                } else {
+                    // Crash
                     gameState = GameState.IDLE
                     setMessage(context, R.string.mess_over)
-                    // Start crash animation
                     coroutineScope.launch {
                         if (bmViewModel.isSoundEffectsEnabled)
                             Effect.OVER.makeSoundEffect()
+                        if (bmViewModel.isHapticFeedbackEnabled)
+                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                         val durationMs = 100
                         crashAlpha.animateTo(
                             targetValue = 0.7f,
@@ -304,17 +295,15 @@ fun BlindManGameField(
                             )
                         )
                     }
-                } else if (bmViewModel.isSoundEffectsEnabled)
-                    coroutineScope.launch {
-                        Effect.HIT.makeSoundEffect()
-                    }
+                }
             }
+            // No move after all
             return
         }
 
         // Make move and if lucky reach the goal!
-        player = Rect(pp)
-        if (Rect.intersects(player, goal)) {
+        player = pp.copy()
+        if (player.overlaps(goal)) {
             gameState = GameState.IDLE
             setHitsMessage(context = context, true)
             doFill = true
@@ -325,7 +314,7 @@ fun BlindManGameField(
                 // Even number please...
                 repeat(10) {
                     swapColors = !swapColors
-                    delay(50)
+                    delay(50.milliseconds)
                 }
             }
         }
@@ -457,6 +446,8 @@ fun BlindManGameField(
                     onDragStart = {
                         d = Offset.Zero
                         doFill = false
+                        if (bmViewModel.isHapticFeedbackEnabled)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     onDragEnd = { doFill = true },
                     onDragCancel = { doFill = true }
@@ -495,32 +486,31 @@ fun BlindManGameField(
             val obstacleColorCurrent = obstacleColor
 
             // Field
+            val b = border.toRect()
             drawRect(
                 color = fieldColorCurrent,
                 alpha = backgroundAlpha * alpha,
-                size = border.toSize(),
-                topLeft = border.toOffset()
+                size = b.size,
+                topLeft = b.topLeft
             )
-
-            // Field border
             drawRect(
                 color = fieldColorCurrent,
                 alpha = alpha,
-                size = border.toSize(),
                 style = Stroke(width = 0.5f * oSize),
-                topLeft = border.toOffset()
+                size = b.size,
+                topLeft = b.topLeft
             )
 
             // Goal
-            val gs = goal.toSize()
+            val g = goal.toRect()
             drawRoundRect(
                 color =
                     if (swapColors) playerColorCurrent
                     else goalColorCurrent,
                 alpha = alpha,
-                size = gs,
-                topLeft = goal.toOffset(),
-                cornerRadius = CornerRadius(0.075f * gs.width)
+                size = g.size,
+                topLeft = g.topLeft,
+                cornerRadius = CornerRadius(0.075f * g.width)
             )
 
             // Obstacles
@@ -534,6 +524,7 @@ fun BlindManGameField(
             }
 
             // Player
+            val p = player.toRect()
             val color =
                 if (swapColors) goalColorCurrent
                 else playerColorCurrent
@@ -545,21 +536,20 @@ fun BlindManGameField(
                     color = color,
                     alpha = alpha,
                     style = style,
-                    center = Offset(
-                        player.exactCenterX(),
-                        player.exactCenterY()
-                    ),
+                    center = p.center,
                     radius = pSize / 2
                 )
             } else {
                 // Division is safe here because lives != 0
                 val sweepAngle = 360 - 360f / lives * hits
+                val topLeft = p.topLeft + Offset(dr, dr)
+                val size = Size(pSize, pSize)
                 drawArc(
                     color = color,
                     alpha = alpha,
                     style = style,
-                    topLeft = player.toOffset() + Offset(dr, dr),
-                    size = Size(pSize, pSize),
+                    topLeft = topLeft,
+                    size = size,
                     startAngle = 0f,
                     sweepAngle = sweepAngle,
                     useCenter = true

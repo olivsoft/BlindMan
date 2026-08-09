@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val fillFraction = 0.8f
 private val stdPadding = 10.dp
@@ -72,7 +72,7 @@ private fun DialogText(
 @Composable
 private fun ListText(
     modifier: Modifier = Modifier,
-    text: String = "Text",
+    text: String = "List item",
     style: TextStyle = MaterialTheme.typography.bodyLarge,
     color: Color = MaterialTheme.colorScheme.onSurface
 ) {
@@ -85,21 +85,13 @@ private fun ListText(
 }
 
 @Composable
-private fun OKButton(
-    onConfirm: () -> Unit,
-    buttonText: String =
-        LocalResources.current.getString(android.R.string.ok)
-) {
-    TextButton(onClick = onConfirm) { Text(buttonText) }
-}
-
-@Composable
-private fun CancelButton(
+private fun CloseButton(
     onDismiss: () -> Unit,
-    buttonText: String =
-        LocalResources.current.getString(android.R.string.cancel)
+    buttonText: String = stringResource(android.R.string.ok)
 ) {
-    TextButton(onClick = onDismiss) { Text(buttonText) }
+    TextButton(onClick = onDismiss) {
+        Text(buttonText)
+    }
 }
 
 // Dialog templates. List dialogs get larger text style.
@@ -107,17 +99,16 @@ private fun CancelButton(
 private fun OKDialog(
     title: String = "Dialog Title",
     text: String = "Dialog Text",
-    buttonText: String =
-        LocalResources.current.getString(android.R.string.ok),
-    onConfirm: () -> Unit,
+    buttonText: String = stringResource(android.R.string.ok),
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
-        onDismissRequest = onConfirm,
+        onDismissRequest = onDismiss,
         title = { TitleText(title = title) },
         text = { DialogText(text = text) },
         confirmButton = {
-            OKButton(
-                onConfirm = onConfirm,
+            CloseButton(
+                onDismiss = onDismiss,
                 buttonText = buttonText
             )
         }
@@ -127,8 +118,7 @@ private fun OKDialog(
 @Composable
 private fun ListSelectionDialog(
     title: String = "List Dialog Title",
-    buttonText: String =
-        LocalResources.current.getString(android.R.string.cancel),
+    buttonText: String = stringResource(android.R.string.cancel),
     options: List<String>,
     onOptionSelected: (String) -> Unit,
     onDismiss: () -> Unit = {}
@@ -136,7 +126,7 @@ private fun ListSelectionDialog(
     AlertDialog(
         title = { TitleText(title = title) },
         confirmButton = {
-            CancelButton(
+            CloseButton(
                 onDismiss = onDismiss,
                 buttonText = buttonText
             )
@@ -161,6 +151,7 @@ private fun ListSelectionDialog(
 @Composable
 private fun RadioSelectionDialog(
     title: String = "Radio Dialog Title",
+    buttonText: String = stringResource(android.R.string.cancel),
     options: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
@@ -171,7 +162,12 @@ private fun RadioSelectionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { TitleText(title = title) },
-        confirmButton = { CancelButton(onDismiss) },
+        confirmButton = {
+            CloseButton(
+                onDismiss = onDismiss,
+                buttonText = buttonText
+            )
+        },
         text = {
             LazyColumn {
                 items(options) {
@@ -182,7 +178,7 @@ private fun RadioSelectionDialog(
                                 onClick = {
                                     radioSelection = it
                                     coroutineScope.launch {
-                                        delay(200)
+                                        delay(200.milliseconds)
                                         onOptionSelected(it)
                                     }
                                 }
@@ -209,21 +205,20 @@ private fun RadioSelectionDialog(
 @Composable
 private fun MultiChoiceDialog(
     title: String = "Multi Choice Dialog",
-    buttonText: String = "Close",
+    buttonText: String = stringResource(R.string.title_close),
     options: List<String>,
     selectedOptions: List<String> = options,
     onOptionChanged: (String, Boolean) -> Unit,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     var selOptions by remember { mutableStateOf(selectedOptions) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { TitleText(title = title) },
         confirmButton = {
-            OKButton(
+            CloseButton(
                 buttonText = buttonText,
-                onConfirm = onConfirm
+                onDismiss = onDismiss
             )
         },
         text = {
@@ -232,7 +227,6 @@ private fun MultiChoiceDialog(
                     val isSelected = selOptions.contains(it)
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth(fillFraction)
                             .selectable(
                                 selected = isSelected,
                                 onClick = {
@@ -251,6 +245,7 @@ private fun MultiChoiceDialog(
                         ListText(
                             text = it,
                             modifier = Modifier
+                                .fillMaxWidth(fillFraction)
                                 .padding(stdPadding)
                         )
                     }
@@ -263,6 +258,7 @@ private fun MultiChoiceDialog(
 @Composable
 private fun ColorPickerDialog(
     title: String = "Color Picker Dialog",
+    buttonText: String = stringResource(android.R.string.cancel),
     currentColor: Color = Color.Blue,
     onColorSelected: (color: Color) -> Unit,
     onDismiss: () -> Unit,
@@ -278,7 +274,12 @@ private fun ColorPickerDialog(
                 onColorSelected = onColorSelected
             )
         },
-        confirmButton = { CancelButton(onDismiss = onDismiss) }
+        confirmButton = {
+            CloseButton(
+                onDismiss = onDismiss,
+                buttonText = buttonText
+            )
+        }
     )
 }
 
@@ -367,7 +368,7 @@ fun BlindManDialogs() {
             )
         }
 
-        in 0..<ColoredPart.entries.size -> {
+        in ColoredPart.entries.indices -> {
             val cp = ColoredPart.entries[activeDialogId]
             ColorPickerDialog(
                 title = stringArrayResource(R.array.items_colors)[activeDialogId],
@@ -414,7 +415,6 @@ fun BlindManDialogs() {
                         options[2] -> bmViewModel.isMusicEnabled = selected
                     }
                 },
-                onConfirm = closeDialog,
                 onDismiss = closeDialog
             )
         }
@@ -422,14 +422,14 @@ fun BlindManDialogs() {
         R.id.help -> OKDialog(
             title = stringResource(R.string.title_help),
             text = stringResource(R.string.text_help),
-            onConfirm = closeDialog
+            onDismiss = closeDialog
         )
 
         R.id.about -> OKDialog(
             title = stringResource(R.string.title_about),
             text = stringResource(R.string.text_about) +
                     " ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})",
-            onConfirm = closeDialog
+            onDismiss = closeDialog
         )
 
         else -> {}

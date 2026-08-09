@@ -30,7 +30,6 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 
-@Suppress("KotlinConstantConditions")
 class BlindManActivity : AppCompatActivity(), MenuProvider {
 
     companion object {

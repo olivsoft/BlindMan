@@ -5,6 +5,8 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.PaintDrawable
 import android.graphics.drawable.shapes.Shape
+import androidx.compose.ui.graphics.toComposeIntRect
+import androidx.compose.ui.unit.IntRect
 
 class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
     // We implement all necessary methods in order to relieve
@@ -12,6 +14,7 @@ class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
 
     private var hit = false
     private var hidden = false
+    private val composeRect: IntRect
 
     init {
         // The allocated shape in a PaintDrawable is
@@ -19,6 +22,7 @@ class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
         setBounds(ix * size, iy * size, (ix + 1) * size, (iy + 1) * size)
         setCornerRadius(0.1f * size)
         paint.isAntiAlias = true
+        composeRect = bounds.toComposeIntRect()
     }
 
     // Just for safety reasons. This should not be used.
@@ -48,9 +52,13 @@ class Obstacle(ix: Int, iy: Int, size: Int) : PaintDrawable() {
         hidden = false
     }
 
-    // Convenience method for intersection check
+    // Convenience methods for intersection checks
     fun intersects(r: Rect): Boolean {
         return Rect.intersects(bounds, r)
+    }
+
+    fun overlaps(r: IntRect): Boolean {
+        return composeRect.overlaps(r)
     }
 
     // Draw only visible obstacles, and in the right color
