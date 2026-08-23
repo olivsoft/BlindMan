@@ -27,6 +27,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +40,6 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -75,18 +75,18 @@ private fun TopBar(
                     -TopAppBarDefaults.TopAppBarExpandedHeight
                 )
             ) {
-                menuItems.keys.forEach {
+                menuItems.forEach {
                     DropdownMenuItem(
                         text = {
                             Text(
-                                it.title.toString(),
+                                it.key.title.toString(),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         },
                         onClick = {
                             showDropDownMenu = false
-                            menuItems[it]!!.invoke()
-                        },
+                            it.value?.invoke()
+                        }
                     )
                 }
             }
@@ -100,9 +100,10 @@ private fun BlindManAdView(
     onAdViewCreated: (AdView) -> Unit
 ) {
     val adSize = AdSize.BANNER
-    val adId =
-        if (BuildConfig.DEBUG) stringResource(R.string.ad_unit_test_id)
-        else stringResource(R.string.ad_unit_id)
+    val adId = stringResource(
+        if (BuildConfig.DEBUG) R.string.ad_unit_test_id
+        else R.string.ad_unit_id
+    )
     val adRequest = AdRequest.Builder().build()
     AndroidView(
         factory = {
@@ -131,16 +132,10 @@ fun BlindManLayout(
     modifier: Modifier,
     menuItems: MutableMap<MenuItem, (() -> Unit)?> = mutableMapOf(),
     onAdViewCreated: (AdView) -> Unit = {},
-    onLayoutCompleted: () -> Unit = {},
-    windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(
-        LocalWindowInfo.current.containerDpSize
-    ),
+    onLayoutCompleted: () -> Unit = {}
 ) {
-    var msg by remember { mutableStateOf("") }
     val bmViewModel: BlindManViewModel = viewModel()
-    bmViewModel.messageTextData.observe(LocalLifecycleOwner.current) {
-        msg = it
-    }
+    val msg by bmViewModel.messageTextData.observeAsState("")
 
     LaunchedEffect(Unit) {
         Log.d(LOG_TAG, "Layout completed")
@@ -162,6 +157,9 @@ fun BlindManLayout(
             verticalArrangement = Arrangement.Center
         ) {
             // Size classes
+            val windowSizeClass = WindowSizeClass.calculateFromSize(
+                LocalWindowInfo.current.containerDpSize
+            )
             when (windowSizeClass.widthSizeClass) {
                 WindowWidthSizeClass.Compact -> {
                     // Message text
@@ -190,8 +188,7 @@ fun BlindManLayout(
                                 .padding(start = 20.dp),
                         )
                         BlindManAdView(
-                            modifier = Modifier
-                                .padding(end = 20.dp),
+                            modifier = Modifier.padding(end = 20.dp),
                             onAdViewCreated = onAdViewCreated
                         )
                     }

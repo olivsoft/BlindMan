@@ -57,7 +57,7 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
     // View model
     private val bmViewModel: BlindManViewModel by viewModels()
 
-    // Music player
+    // Music player and adview
     private lateinit var mPlayer: MusicPlayer
     private var adView: AdView? = null
 
@@ -117,10 +117,10 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
         // Volume control. Must be after loading preferences.
         setVolumeControlStream()
 
-        // This is needed because of test devices
-        MobileAds.setRequestConfiguration(
+        // Mobile ads with test devices
+        val requestConfiguration =
             RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-        )
+        MobileAds.setRequestConfiguration(requestConfiguration)
         MobileAds.initialize(this)
 
         // Layout, bindings, initializations
@@ -139,12 +139,8 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
                     BlindManLayout(
                         modifier = Modifier,
                         menuItems = menuItems,
-                        onAdViewCreated = {
-                            adView = it
-                        },
-                        onLayoutCompleted = {
-                            if (showHelp) activeDialogId = R.id.help
-                        }
+                        onAdViewCreated = { adView = it },
+                        onLayoutCompleted = { if (showHelp) activeDialogId = R.id.help }
                     )
                 }
             }

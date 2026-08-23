@@ -21,13 +21,13 @@
     <string name="mess_hits">Touches:</string>
     
     <string name="text_help">Tapez sur l\'écran pour créer les obstacles.
-            Regardez-les bien, mémorisez-les!
+            Regardez-les bien, mémorisez-les !
         \n\nTapez de nouveau pour cacher les obstacles. Puis, bougez le joueur vers le but et 
             touchez aussi peu d\'obstacles que possible. Pour déplacer le joueur, vous pouvez utiliser
             des gestes, ou vous appuyez et maintenez sur l\'écran pour le glisser.
         \n\nPour montrer les obstacles pendant le jeu, tapez vite deux fois sur l\'écran.
-            Attention: Si vous tournez votre appareil un nouveau jeu va commencer.
-        \n\nRéjouissez-vous!
+            Attention : Si vous tournez votre appareil un nouveau jeu va commencer.
+        \n\nRéjouissez-vous !
     </string>
     <string name="text_about">&#169; Oliver Fritz (olivsoft.ch)
         \n\nIcon par signito (signito.ch)
