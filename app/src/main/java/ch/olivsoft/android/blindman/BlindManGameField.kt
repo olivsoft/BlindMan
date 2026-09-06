@@ -91,7 +91,7 @@ fun BlindManGameField(
     var fieldWidth by remember { mutableIntStateOf(0) }
     var fieldHeight by remember { mutableIntStateOf(0) }
     var fieldOffset by remember { mutableStateOf(Offset.Zero) }
-    var obstacleSize by remember { mutableIntStateOf(0) }
+    var fieldUnit by remember { mutableIntStateOf(0) }
     var player by remember { mutableStateOf(IntRect.Zero) }
     var goal by remember { mutableStateOf(IntRect.Zero) }
     var border by remember { mutableStateOf(IntRect.Zero) }
@@ -119,8 +119,7 @@ fun BlindManGameField(
     var obstacleColor by remember { mutableIntStateOf(ColoredPart.OBSTACLE.color) }
 
     // Canvas
-    val cSize = if (iMode) IntSize(400, 800) else IntSize.Zero
-    var canvasSize by remember { mutableStateOf(cSize) }
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
     // New game trigger (not from view model)
     var newGameCounter by remember { mutableIntStateOf(0) }
@@ -151,14 +150,14 @@ fun BlindManGameField(
 
         // Check for allowed sizes
         val safeSize = OBSTACLE_ROWS[size.coerceIn(1, OBSTACLE_ROWS.size) - 1]
-        obstacleSize = max(canvasSize.width, canvasSize.height) / (2 * safeSize + 7)
-        if (obstacleSize <= 0) {
-            Log.e("GameField", "Calculation error: oSize is 0")
+        fieldUnit = max(canvasSize.width, canvasSize.height) / (2 * safeSize + 7)
+        if (fieldUnit <= 0) {
+            Log.e("GameField", "Calculation error: field unit is 0")
             return false
         }
 
-        fieldWidth = canvasSize.width - canvasSize.width % obstacleSize
-        fieldHeight = canvasSize.height - canvasSize.height % obstacleSize
+        fieldWidth = canvasSize.width - canvasSize.width % fieldUnit
+        fieldHeight = canvasSize.height - canvasSize.height % fieldUnit
         if (fieldWidth * fieldHeight <= 0) {
             Log.e("GameField", "Calculation error: field size is 0")
             return false
@@ -169,10 +168,10 @@ fun BlindManGameField(
         )
 
         border = IntRect(0, 0, fieldWidth, fieldHeight)
-            .deflate(obstacleSize / 2)
+            .deflate(fieldUnit / 2)
         goal = IntRect(
-            fieldWidth - 3 * obstacleSize, fieldHeight - 3 * obstacleSize,
-            fieldWidth - obstacleSize, fieldHeight - obstacleSize
+            fieldWidth - 3 * fieldUnit, fieldHeight - 3 * fieldUnit,
+            fieldWidth - fieldUnit, fieldHeight - fieldUnit
         )
 
         Log.d(LOG_TAG, "Field initialized")
@@ -190,8 +189,8 @@ fun BlindManGameField(
         // New game: player goes (back) to initial position,
         // hits are cleared, obstacles recreated.
         player = IntRect(
-            obstacleSize, obstacleSize,
-            2 * obstacleSize, 2 * obstacleSize
+            fieldUnit, fieldUnit,
+            2 * fieldUnit, 2 * fieldUnit
         )
         hits = 0
 
@@ -199,8 +198,8 @@ fun BlindManGameField(
         // Last obstacle line is 5 units before goal-side end of canvas.
         // Across fieldWidth reserves 1 unit for each border.
         val orientation = (fieldHeight > fieldWidth)
-        val lastAcross = (if (orientation) fieldHeight else fieldWidth) / obstacleSize - 5
-        val widthAcross = (if (orientation) fieldWidth else fieldHeight) / obstacleSize - 2
+        val lastAcross = (if (orientation) fieldHeight else fieldWidth) / fieldUnit - 5
+        val widthAcross = (if (orientation) fieldWidth else fieldHeight) / fieldUnit - 2
         if (widthAcross < 1 || lastAcross <= 3) {
             Log.e("GameField", "Calculation error: Obstacles have no space")
             return false
@@ -229,7 +228,7 @@ fun BlindManGameField(
                     Obstacle(
                         if (orientation) i else iLine,
                         if (orientation) iLine else i,
-                        obstacleSize
+                        fieldUnit
                     )
                 )
             }
@@ -246,7 +245,10 @@ fun BlindManGameField(
     // Move function
     fun makeMove(dx: Int, dy: Int) {
         // Move a copy of the player
-        val pp = player.translate(dx, dy)
+        val pp = player.translate(
+            dx * fieldUnit,
+            dy * fieldUnit
+        )
 
         // Stop at border
         if (!border.contains(pp.topLeft) || !border.contains(pp.bottomRight))
@@ -277,24 +279,26 @@ fun BlindManGameField(
                             Effect.OVER.makeSoundEffect()
                         if (bmViewModel.isHapticFeedbackEnabled)
                             haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                        val durationMs = 100
-                        crashAlpha.animateTo(
-                            targetValue = 0.7f,
-                            animationSpec = repeatable(
-                                // Odd number, return to 1f follow below
-                                iterations = 5,
-                                animation = tween(
+                        crashAlpha.run {
+                            val durationMs = 100
+                            animateTo(
+                                targetValue = 0.7f,
+                                animationSpec = repeatable(
+                                    // Odd number, return to 1f follows below
+                                    iterations = 5,
+                                    animation = tween(
+                                        durationMillis = durationMs
+                                    ),
+                                    repeatMode = RepeatMode.Reverse
+                                )
+                            )
+                            animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(
                                     durationMillis = durationMs
-                                ),
-                                repeatMode = RepeatMode.Reverse
+                                )
                             )
-                        )
-                        crashAlpha.animateTo(
-                            targetValue = 1f,
-                            animationSpec = tween(
-                                durationMillis = durationMs
-                            )
-                        )
+                        }
                     }
                 }
             }
@@ -336,19 +340,19 @@ fun BlindManGameField(
                 when (keyEvent.key) {
                     Key.DirectionRight,
                     Key.NumPadDirectionRight,
-                    Key.NumPad6 -> makeMove(obstacleSize, 0)
+                    Key.NumPad6 -> makeMove(1, 0)
 
                     Key.DirectionLeft,
                     Key.NumPadDirectionLeft,
-                    Key.NumPad4 -> makeMove(-obstacleSize, 0)
+                    Key.NumPad4 -> makeMove(-1, 0)
 
                     Key.DirectionUp,
                     Key.NumPadDirectionUp,
-                    Key.NumPad8 -> makeMove(0, -obstacleSize)
+                    Key.NumPad8 -> makeMove(0, -1)
 
                     Key.DirectionDown,
                     Key.NumPadDirectionDown,
-                    Key.NumPad2 -> makeMove(0, obstacleSize)
+                    Key.NumPad2 -> makeMove(0, 1)
 
                     else -> return false
                 }
@@ -440,7 +444,7 @@ fun BlindManGameField(
             .pointerInput(Unit) {
                 // Local variables are doing perfectly fine here
                 var d = Offset.Zero
-                val dMinSquared = 0.65f * 0.65f * obstacleSize * obstacleSize
+                val dMinSquared = 0.65f * 0.65f * fieldUnit * fieldUnit
                 detectDragGestures(
                     onDragStart = {
                         d = Offset.Zero
@@ -462,9 +466,9 @@ fun BlindManGameField(
 
                     // Move!
                     if (d.x.absoluteValue > d.y.absoluteValue)
-                        makeMove(d.x.sign.toInt() * obstacleSize, 0)
+                        makeMove(d.x.sign.toInt(), 0)
                     else
-                        makeMove(0, d.y.sign.toInt() * obstacleSize)
+                        makeMove(0, d.y.sign.toInt())
 
                     // Reset drag measurement
                     d = Offset.Zero
@@ -472,7 +476,7 @@ fun BlindManGameField(
             }
     ) {
         // onDraw
-        if (canvasSize == IntSize.Zero || obstacleSize <= 0)
+        if (canvasSize == IntSize.Zero || fieldUnit <= 0)
             return@Canvas
 
         translate(fieldOffset.x, fieldOffset.y) {
@@ -482,7 +486,6 @@ fun BlindManGameField(
             val fieldColorCurrent = Color(fieldColor)
             val playerColorCurrent = Color(playerColor)
             val goalColorCurrent = Color(goalColor)
-            val obstacleColorCurrent = obstacleColor
 
             // Field
             val b = border.toRect()
@@ -495,7 +498,7 @@ fun BlindManGameField(
             drawRect(
                 color = fieldColorCurrent,
                 alpha = alpha,
-                style = Stroke(width = 0.5f * obstacleSize),
+                style = Stroke(width = 0.5f * fieldUnit),
                 size = b.size,
                 topLeft = b.topLeft
             )
@@ -518,8 +521,7 @@ fun BlindManGameField(
                     GameState.SHOW, GameState.HINT -> o.setVisible()
                     GameState.PLAY, GameState.IDLE -> o.setVisibleIfHit()
                 }
-                o.paint.color = obstacleColorCurrent
-                o.draw(drawContext.canvas.nativeCanvas)
+                o.draw(drawContext.canvas.nativeCanvas, obstacleColor)
             }
 
             // Player
@@ -527,8 +529,8 @@ fun BlindManGameField(
             val color =
                 if (swapColors) goalColorCurrent
                 else playerColorCurrent
-            val dr = if (fillPlayer) 0f else 0.1f * obstacleSize
-            val pSize = obstacleSize - 2 * dr
+            val dr = if (fillPlayer) 0f else 0.1f * fieldUnit
+            val pSize = fieldUnit - 2 * dr
             val style = if (fillPlayer) Fill else Stroke(2 * dr)
             if (lives == 0 || hits == 0) {
                 drawCircle(
@@ -560,10 +562,10 @@ fun BlindManGameField(
                 val text = buildString {
                     appendLine("Field: $canvasSize")
                     appendLine("Obstacles: ${obstacles.size}")
-                    append("Obstacle size: $obstacleSize")
+                    append("Field unit: $fieldUnit")
                 }
                 val textStyle = TextStyle(
-                    fontSize = obstacleSize.toSp(),
+                    fontSize = fieldUnit.toSp(),
                     color = Color.Black
                 )
                 val textLayoutResult = textMeasurer.measure(text, textStyle)

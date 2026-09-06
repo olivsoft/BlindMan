@@ -9,8 +9,8 @@ android {
     defaultConfig {
         applicationId = "ch.olivsoft.android.blindman"
         minSdk = 23
-        versionCode = 38
-        versionName = "1.38"
+        versionCode = 39
+        versionName = "1.39"
     }
     buildTypes {
         debug {
@@ -55,14 +55,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.class1)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.work.runtime.ktx)
-    @Suppress("AvoidDuplicateDependencies")
     debugImplementation(libs.androidx.ui.tooling)
-    @Suppress("AvoidDuplicateDependencies")
-    "debug_xmlImplementation"(libs.androidx.ui.tooling)
 }

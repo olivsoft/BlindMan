@@ -5,13 +5,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,18 +25,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.toOffset
 import kotlin.math.PI
 import kotlin.math.atan2
-import kotlin.math.max
 import kotlin.math.min
 
 // Constants
 private const val LOG_TAG = "Color Picker"
-private const val MIN_R = 100f
 private const val OK = "OK"
 private val COLORS = listOf(
     Color.Red, Color.Magenta, Color.Blue, Color.Cyan,
@@ -52,47 +47,39 @@ fun ColorPicker(
     currentColor: Color = Color.Cyan,
     onColorSelected: (Color) -> Unit = {}
 ) {
-    // Constants
-    val iMode = LocalInspectionMode.current
-    val cSize = if (iMode) IntSize(1080, 1920) else IntSize.Zero
-
     // Variables
-    var canvasSize by remember { mutableStateOf(cSize) }
-    var circleRadius by remember { mutableFloatStateOf(0f) }
-    var centerRadius by remember { mutableFloatStateOf(0f) }
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    val circleRadius = remember(canvasSize) {
+        min(canvasSize.width, canvasSize.height) / 2.2f
+    }
+    val centerRadius = remember(circleRadius) {
+        circleRadius / 3
+    }
+
     var trackingCenter by remember { mutableStateOf(false) }
     var highlightCenter by remember { mutableStateOf(false) }
     var currColor by remember { mutableStateOf(currentColor) }
     val textMeasurer = rememberTextMeasurer()
+    val iMode = LocalInspectionMode.current
 
     // Helper for Colors
     fun getColorFromAngle(x: Float, y: Float): Color {
         // The "angle" (x, y) is projected to (-0.5..0.5],
         // then (-0.5..0] is moved to (0.5..1].
         // So, f interpolates the full circle.
-        var f = atan2(y, x) / 2f / PI.toFloat()
+        var f = atan2(y, x) / (2f * PI.toFloat())
         if (f < 0)
             f += 1f
 
-        // Stretch to array length and extract integer (i) and fractional (f) part
-        f *= COLORS.size - 1
+        // Stretch to color circle array and
+        // extract integer (i) and fractional (f) part
+        f *= COLORS.lastIndex
         val i = f.toInt()
         f -= i
 
-        // Interpolate between adjacent colors
+        // Interpolate between adjacent colors.
+        // Ignore the color space differences (Oklab vs sRGB).
         return lerp(COLORS[i], COLORS[i + 1], f)
-    }
-
-    LaunchedEffect(true) {
-        if (canvasSize == IntSize.Zero)
-            return@LaunchedEffect
-
-        // This is the moment to set size dependent properties
-        val s = min(canvasSize.width, canvasSize.height)
-        circleRadius = max(MIN_R, s / 2.2f)
-        centerRadius = circleRadius / 3
-
-        Log.d(LOG_TAG, "Radius is $circleRadius")
     }
 
     Canvas(
@@ -103,36 +90,22 @@ fun ColorPicker(
                 if (it != IntSize.Zero)
                     canvasSize = it
             }
-            .pointerInput(true) {
+            .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragStart = {
-                        Log.d(LOG_TAG, "Drag started")
-                    },
                     onDragEnd = {
                         trackingCenter = false
                         highlightCenter = false
-                        Log.d(LOG_TAG, "Drag ended")
                     }
                 ) { change, _ ->
                     val o = change.position - size.center.toOffset()
                     val r = o.getDistance()
-                    if (r >= 2 * centerRadius) {
+                    if (r >= 2 * centerRadius)
                         currColor = getColorFromAngle(o.x, o.y)
-                    }
                     trackingCenter = trackingCenter && (r <= 2 * centerRadius)
                     highlightCenter = highlightCenter && (r <= centerRadius)
                 }
             }
-            .pointerInput(true) {
-                detectTapGestures(
-                    onTap = {
-                        trackingCenter = false
-                        highlightCenter = false
-                        Log.d(LOG_TAG, "Tap")
-                    }
-                )
-            }
-            .pointerInput(true) {
+            .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     var o = down.position - size.center.toOffset()
@@ -142,7 +115,6 @@ fun ColorPicker(
                         highlightCenter = true
                     } else if (r >= 2 * centerRadius) {
                         currColor = getColorFromAngle(o.x, o.y)
-                        Log.d(LOG_TAG, "Down at color $currColor")
                     }
                     val up = waitForUpOrCancellation() ?: return@awaitEachGesture
                     o = up.position - size.center.toOffset()
@@ -160,19 +132,17 @@ fun ColorPicker(
 
         // Color gradient circle
         drawCircle(
-            brush = Brush.sweepGradient(
-                colors = COLORS,
-            ),
+            brush = Brush.sweepGradient(COLORS),
             radius = circleRadius - centerRadius / 2f,
-            style = Stroke(centerRadius),
+            style = Stroke(centerRadius)
         )
 
         // Central circle
         drawCircle(
             radius = centerRadius,
-            color = currColor,
+            color = currColor
         )
-        if (trackingCenter) {
+        if (trackingCenter || iMode) {
             // This is just for adding a little ring around the OK button
             // which shows if we touch still in the center. It is dimmed
             // when we move out of the center.
@@ -206,7 +176,7 @@ fun ColorPicker(
     }
 }
 
-@PreviewScreenSizes
+@Preview
 @Composable
 fun ColorPickerPreview() {
     ColorPicker()

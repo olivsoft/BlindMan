@@ -266,7 +266,7 @@ class BlindManView(context: Context?, attrs: AttributeSet?) :
                 )
         }
 
-        // Obstacles have their own onDraw method
+        // Obstacles have their own draw methods
         obstacles.forEach { it.draw(canvas) }
     }
 

@@ -105,6 +105,8 @@ private fun BlindManAdView(
         else R.string.ad_unit_id
     )
     val adRequest = AdRequest.Builder().build()
+    // AdView must be placed in an Android view. The update argument is not
+    // needed here (static ad). Lifecycle events are handled in the main activity.
     AndroidView(
         factory = {
             AdView(it).apply {
@@ -117,12 +119,7 @@ private fun BlindManAdView(
         },
         modifier = modifier
             .height(adSize.height.dp)
-            .width(adSize.width.dp),
-        update = {
-            // Somewhat unclear what to do here
-            //it.loadAd(adRequest)
-            Log.d(LOG_TAG, "Ad view updated")
-        }
+            .width(adSize.width.dp)
     )
 }
 
