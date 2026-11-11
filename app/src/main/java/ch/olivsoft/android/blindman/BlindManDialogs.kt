@@ -100,7 +100,7 @@ private fun OKDialog(
     title: String = "Dialog Title",
     text: String = "Dialog Text",
     buttonText: String = stringResource(android.R.string.ok),
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -305,7 +305,7 @@ fun BlindManDialogs() {
                     closeDialog.invoke()
                     bmViewModel.level = options.indexOf(it) + 1
                 },
-                onDismiss = closeDialog,
+                onDismiss = closeDialog
             )
         }
 
@@ -319,7 +319,7 @@ fun BlindManDialogs() {
                     closeDialog.invoke()
                     bmViewModel.size = options.indexOf(it) + 1
                 },
-                onDismiss = closeDialog,
+                onDismiss = closeDialog
             )
         }
 
@@ -392,7 +392,7 @@ fun BlindManDialogs() {
                     closeDialog.invoke()
                     bmViewModel.background = options.indexOf(it)
                 },
-                onDismiss = closeDialog,
+                onDismiss = closeDialog
             )
         }
 

@@ -8,7 +8,7 @@ android {
     compileSdk = 37
     defaultConfig {
         applicationId = "ch.olivsoft.android.blindman"
-        minSdk = 23
+        minSdk = 24
         versionCode = 39
         versionName = "1.39"
     }
@@ -43,6 +43,15 @@ android {
         viewBinding = true
         compose = true
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi"
+        )
     }
 }
 

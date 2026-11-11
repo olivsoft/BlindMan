@@ -29,6 +29,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.material.color.MaterialColors
 
 class BlindManActivity : AppCompatActivity(), MenuProvider {
 
@@ -63,20 +64,25 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
 
     // Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Compatibility
+        super.onCreate(savedInstanceState)
+
+        // Edge to edge with backward compatibility
         val v34up = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
         val darkBarColor =
             if (v34up) resources.getColor(
                 android.R.color.system_surface_dark,
                 resources.newTheme()
             )
-            else 0x211F26
+            else MaterialColors.getColor(
+                this,
+                com.google.android.material.R.attr.colorSurfaceContainer,
+                0x211F26 // colorSurfaceContainer from BlindmanDialogTheme
+            )
         val darkBarStyle = SystemBarStyle.dark(scrim = darkBarColor)
         enableEdgeToEdge(
             statusBarStyle = darkBarStyle,
             navigationBarStyle = darkBarStyle
         )
-        super.onCreate(savedInstanceState)
 
         // The music player is initialized here because context
         // and resources are not safe to use before onCreate
