@@ -90,9 +90,8 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
             this, R.raw.nervous_cubase, true,
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
-                    Log.e(LOG_TAG, "MusicPlayer error", error)
-                    mPlayer.toggle(false)
                     bmViewModel.isMusicEnabled = false
+                    Log.e(LOG_TAG, "MusicPlayer error", error)
                     showDialogFragment(R.id.midi)
                 }
             }
@@ -110,7 +109,7 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
             isSoundEffectsEnabled = p.getBoolean(PREF_SOUND, true)
             isMusicEnabled = p.getBoolean(PREF_MUSIC, isMusicEnabled)
             isMusicEnabledData.observe(this@BlindManActivity) {
-                mPlayer.toggle(it)
+                mPlayer.musicEnabled = it
             }
         }
         ColoredPart.getAllFromPreferences(p, PREF_COL_)
@@ -119,9 +118,6 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
             if (it) p.edit { putBoolean(PREF_FIRST, false) }
         }
         Log.d(LOG_TAG, "Preferences loaded")
-
-        // Volume control. Must be after loading preferences.
-        setVolumeControlStream()
 
         // Mobile ads with test devices
         val requestConfiguration =
@@ -165,15 +161,10 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        mPlayer.start()
-    }
-
     override fun onPause() {
         super.onPause()
-        adView?.pause()
         mPlayer.pause()
+        adView?.pause()
 
         // This is the recommended place to save
         // persistent settings (not onStop)
@@ -191,11 +182,13 @@ class BlindManActivity : AppCompatActivity(), MenuProvider {
         }
     }
 
+    // onStart is redundant because onResume is
+    // always called after it, even the first time
     override fun onResume() {
         super.onResume()
-        adView?.resume()
-        mPlayer.resume()
         setVolumeControlStream()
+        mPlayer.play()
+        adView?.resume()
     }
 
     override fun onStop() {

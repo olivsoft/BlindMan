@@ -14,7 +14,7 @@ import androidx.media3.exoplayer.ExoPlayer
  * playing and gap-less looping of a simple music resource.
  *
  * In the constructor, an [androidx.media3.common.Player.Listener]
- * can be passed that is called back in case of an error.
+ * can be passed that is called in case of an error.
  * If this is not required, set the listener argument to null.
  *
  * @author Oliver Fritz, OlivSoft
@@ -27,81 +27,72 @@ class MusicPlayer(
 ) {
 
     companion object {
-        // Constants
         private val LOG_TAG = MusicPlayer::class.simpleName
     }
 
     // Private variables
-    private var isMusicEnabled: Boolean = false
     private var player: ExoPlayer? = null
     private var position = 0L
     private val repeat = if (looping) ExoPlayer.REPEAT_MODE_ONE else ExoPlayer.REPEAT_MODE_OFF
-    private val music = MediaItem.fromUri(context.resources.run {
-        Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(getResourcePackageName(resId))
-            .appendPath(getResourceTypeName(resId))
-            .appendPath(getResourceEntryName(resId))
-            .build()
-    })
+    private val music = MediaItem.fromUri(
+        context.resources.run {
+            Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(getResourcePackageName(resId))
+                .appendPath(getResourceTypeName(resId))
+                .appendPath(getResourceEntryName(resId))
+                .build()
+        }
+    )
 
     // Convenience method for error and exception handling
     private fun stopOnError(message: String, e: Exception) {
-        // Switch music off all together and inform user with the
-        // already defined onError callback (with fairly useless arguments).
+        // Stop and release the player and pass the exception to the listener
+        stop()
         Log.e(LOG_TAG, message, e)
-        toggle(false)
         listener?.onPlayerError(e as PlaybackException)
     }
 
-    // The magic toggle function
-    fun toggle(enableMusic: Boolean) {
-        // We only do something if we really change something
-        if (enableMusic == isMusicEnabled)
-            return
-        isMusicEnabled = enableMusic
-        if (isMusicEnabled) start()
-        else stop()
-    }
-
-    // Quasi-overridden and enriched methods for encapsulated MediaPlayer
-    fun start() {
-        if (!isMusicEnabled)
-            return
-        // For starting, we always recreate a player.
-        // When stopping, we always release the player again.
-        try {
-            player = ExoPlayer.Builder(context).build().apply {
-                setMediaItem(music)
-                repeatMode = repeat
-                listener?.let { addListener(it) }
-                prepare()
-                play()
+    // The magic toggle function implemented as a property
+    var musicEnabled = false
+        set(value) {
+            // No action if no change
+            if (value != field) {
+                field = value
+                if (field) play() else stop()
             }
+        }
+
+    // Quasi-overridden and enriched methods for the encapsulated ExoPlayer
+    fun play() {
+        if (!musicEnabled || player?.playWhenReady == true)
+            return
+        try {
+            if (player == null) {
+                player = ExoPlayer.Builder(context).build().apply {
+                    setMediaItem(music)
+                    repeatMode = repeat
+                    listener?.let { addListener(it) }
+                    prepare()
+                }
+            }
+            player!!.seekTo(position)
+            player!!.play()
+            Log.d(LOG_TAG, "Player started")
         } catch (e: Exception) {
-            stopOnError("Exception thrown in start", e)
+            stopOnError("Exception thrown in play", e)
         }
     }
 
     fun pause() {
-        if (!isMusicEnabled || player == null)
+        if (!musicEnabled || player == null || player?.playWhenReady == false)
             return
         try {
-            position = player!!.currentPosition
             player!!.pause()
+            position = player!!.currentPosition
+            Log.d(LOG_TAG, "Player paused")
         } catch (e: Exception) {
             stopOnError("Exception thrown in pause", e)
-        }
-    }
-
-    fun resume() {
-        if (!isMusicEnabled || player == null)
-            return
-        try {
-            player!!.seekTo(position)
-            player!!.play()
-        } catch (e: Exception) {
-            stopOnError("Exception thrown in resume", e)
         }
     }
 
@@ -115,6 +106,7 @@ class MusicPlayer(
         try {
             player!!.stop()
             player!!.release()
+            Log.d(LOG_TAG, "Player stopped and released")
         } catch (e: Exception) {
             // We conclude that the player was already stopped and/or released
             Log.e(LOG_TAG, "Exception thrown in stop", e)

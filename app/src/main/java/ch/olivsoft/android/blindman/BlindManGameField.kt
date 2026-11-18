@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -92,6 +93,7 @@ fun BlindManGameField(
     var fieldHeight by remember { mutableIntStateOf(0) }
     var fieldOffset by remember { mutableStateOf(Offset.Zero) }
     var fieldUnit by remember { mutableIntStateOf(0) }
+    var dragThresholdSquared by remember { mutableFloatStateOf(0f) }
     var player by remember { mutableStateOf(IntRect.Zero) }
     var goal by remember { mutableStateOf(IntRect.Zero) }
     var border by remember { mutableStateOf(IntRect.Zero) }
@@ -155,6 +157,7 @@ fun BlindManGameField(
             Log.e("GameField", "Calculation error: field unit is 0")
             return false
         }
+        dragThresholdSquared = 0.65f * 0.65f * fieldUnit * fieldUnit
 
         fieldWidth = canvasSize.width - canvasSize.width % fieldUnit
         fieldHeight = canvasSize.height - canvasSize.height % fieldUnit
@@ -442,9 +445,8 @@ fun BlindManGameField(
                 )
             }
             .pointerInput(Unit) {
-                // Local variables are doing perfectly fine here
+                // A local variable is doing perfectly fine here
                 var d = Offset.Zero
-                val dMinSquared = 0.65f * 0.65f * fieldUnit * fieldUnit
                 detectDragGestures(
                     onDragStart = {
                         d = Offset.Zero
@@ -461,7 +463,7 @@ fun BlindManGameField(
 
                     // Wait until drag goes far enough
                     d += dragAmount
-                    if (d.getDistanceSquared() < dMinSquared)
+                    if (d.getDistanceSquared() < dragThresholdSquared)
                         return@detectDragGestures
 
                     // Move!

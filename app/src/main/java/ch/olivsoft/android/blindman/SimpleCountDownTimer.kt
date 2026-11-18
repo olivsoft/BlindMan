@@ -11,7 +11,8 @@ import android.os.CountDownTimer
  *
  * @author Oliver Fritz, OlivSoft
  */
-abstract class SimpleCountDownTimer(millis: Long) : CountDownTimer(millis, millis) {
+abstract class SimpleCountDownTimer(millis: Long) :
+    CountDownTimer(millis, millis) {
 
     var isTimerRunning = false
 
